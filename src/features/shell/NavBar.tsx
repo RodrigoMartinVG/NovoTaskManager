@@ -28,6 +28,7 @@ export function NavBar() {
   const filters = useUIStore((state) => state.filters)
   const anioChanged = useUIStore((state) => state.anioChanged)
   const periodoToggled = useUIStore((state) => state.periodoToggled)
+  const settingsOpened = useUIStore((state) => state.settingsOpened)
   const importTasksOpened = useUIStore((state) => state.importTasksOpened)
   const taskEditOpened = useUIStore((state) => state.taskEditOpened)
   const materias = usePlannerStore((state) => state.data.materias)
@@ -151,7 +152,7 @@ export function NavBar() {
         <button type="button" className={styles.button} onClick={() => window.alert('Ayuda placeholder')}>
           ?
         </button>
-        <button type="button" className={styles.button} onClick={() => window.alert('Configuración placeholder')}>
+        <button type="button" className={styles.button} onClick={() => settingsOpened('materias')}>
           ⚙
         </button>
       </div>

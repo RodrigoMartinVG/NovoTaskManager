@@ -9,6 +9,7 @@ import { SchemaHint } from './SchemaHint'
 import { usePomoTimer } from '../pomodoro/usePomoTimer'
 import { PomoContextPopup } from '../pomodoro/PomoContextPopup'
 import { PomoWidget } from '../pomodoro/PomoWidget'
+import { SettingsModal } from '../settings/SettingsModal'
 import { useUIStore } from '../../store/useUIStore'
 import { usePomoStore } from '../../store/usePomoStore'
 import styles from './AppShell.module.css'
@@ -22,6 +23,7 @@ export function AppShell({ children }: AppShellProps) {
   usePomoTimer()
   const selectedTaskId = useUIStore((state) => state.selectedTaskId)
   const editingTask = useUIStore((state) => state.editingTask)
+  const settingsOpen = useUIStore((state) => state.settingsOpen)
   const importTasksOpen = useUIStore((state) => state.importTasksOpen)
   const confirm = useUIStore((state) => state.confirm)
   const contextMateria = usePomoStore((state) => state.contextMateria)
@@ -37,6 +39,7 @@ export function AppShell({ children }: AppShellProps) {
       <SchemaHint />
       {selectedTaskId && <TaskModal />}
       {editingTask !== null && <FormModal />}
+      {settingsOpen && <SettingsModal initialTab={settingsOpen} />}
       {importTasksOpen && <ImportTasksModal />}
       {contextMateria && <PomoContextPopup />}
       {pomoSession && <PomoWidget />}
