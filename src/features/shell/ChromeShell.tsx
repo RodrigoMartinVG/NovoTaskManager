@@ -50,9 +50,18 @@ export function ChromeShell() {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={handleMouseLeave}
       >
-        <div className={styles.peekBar} onClick={handlePeekClick}>
+        <div
+          className={styles.peekBar}
+          onClick={handlePeekClick}
+        >
           <div className={styles.peekTitle}>{headerLabel}</div>
-          <button type="button" className={styles.pinButton} onClick={togglePin}>
+          <button
+            type="button"
+            className={styles.pinButton}
+            onClick={togglePin}
+            aria-pressed={isPinned}
+            aria-label={isPinned ? 'Desfijar barra superior' : 'Fijar barra superior'}
+          >
             {isPinned ? 'Unpin' : 'Pin'}
           </button>
         </div>

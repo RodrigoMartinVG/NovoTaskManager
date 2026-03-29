@@ -1,5 +1,6 @@
 .chromeShellSlot {
   width: 100%;
+  transition: transform 0.24s ease;
 }
 
 .chromeShellSticky {
@@ -26,6 +27,10 @@
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.03em;
+}
+
+.collapsed .peekTitle {
+  animation: chromePeekSlide 3.2s ease-in-out infinite;
 }
 
 .pinButton {
@@ -70,17 +75,38 @@
   max-height: 420px;
   overflow: visible;
   box-shadow: var(--shadow);
-  transition: max-height 0.24s ease;
+  transition: max-height 0.24s ease, transform 0.24s ease;
 }
 
 .collapsed {
   max-height: 56px;
   overflow: hidden;
   box-shadow: none;
-  transition: max-height 0.24s ease;
+  transition: max-height 0.24s ease, transform 0.24s ease;
 }
 
 .chromeShellSlot,
 .chromeShellSticky {
   overflow: visible;
+}
+
+@keyframes chromePeekSlide {
+  0% {
+    transform: translateX(0);
+  }
+  35% {
+    transform: translateX(0);
+  }
+  45% {
+    transform: translateX(0.14rem);
+  }
+  55% {
+    transform: translateX(-0.08rem);
+  }
+  65% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }

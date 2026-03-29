@@ -28,17 +28,18 @@ export function BacklogList({ tasks, materiasById, tiposById, alertas, onSelectT
   const ordered = sortBacklogTasks(tasks)
 
   return (
-    <div className={styles.list}>
+    <ul className={styles.list} role="list" aria-label="Lista de tareas backlog">
       {ordered.map((task) => (
-        <BacklogRow
-          key={task.id}
-          task={task}
-          materia={materiasById[task.materiaId]}
-          tipo={tiposById[task.tipo]}
-          alertas={alertas}
-          onSelect={onSelectTask}
-        />
+        <li key={task.id} role="listitem">
+          <BacklogRow
+            task={task}
+            materia={materiasById[task.materiaId]}
+            tipo={tiposById[task.tipo]}
+            alertas={alertas}
+            onSelect={onSelectTask}
+          />
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }

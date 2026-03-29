@@ -37,7 +37,12 @@ export function BacklogRow({ task, materia, tipo, alertas, onSelect }: BacklogRo
             : styles.urgNormal
 
   return (
-    <button type="button" className={`${styles.row} ${estadoClass}`} onClick={() => onSelect(task.id)}>
+    <button
+      type="button"
+      className={`${styles.row} ${estadoClass}`}
+      onClick={() => onSelect(task.id)}
+      aria-label={`Abrir tarea ${task.titulo}`}
+    >
       <span className={styles.materiaBar} style={{ backgroundColor: materia?.color ?? 'var(--accent)' }} />
       <span className={styles.tipoIcon}>{tipo?.icon ?? '•'}</span>
       <div className={styles.main}>
@@ -62,7 +67,7 @@ export function BacklogRow({ task, materia, tipo, alertas, onSelect }: BacklogRo
         <span>{task.fechaLimite ? formatDate(task.fechaLimite) : 'Sin fecha'}</span>
         {until !== null && <small>{until < 0 ? 'Vencida' : `${until} días`}</small>}
       </div>
-      {task.link_vc && <span className={styles.video}>📹</span>}
+      {task.link_vc && <span className={styles.video} aria-label="Tiene videollamada">📹</span>}
     </button>
   )
 }

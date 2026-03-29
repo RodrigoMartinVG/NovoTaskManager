@@ -68,7 +68,12 @@ export function SlotEditPopover({
                   </svg>
                   <span>{materia.nombre}</span>
                 </span>
-                <button type="button" className={styles.iconButton} onClick={() => onRemoveMateria(materia.id)}>
+                <button
+                  type="button"
+                  className={styles.iconButton}
+                  onClick={() => onRemoveMateria(materia.id)}
+                  aria-label={`Quitar ${materia.nombre} del slot`}
+                >
                   ×
                 </button>
               </div>

@@ -9,9 +9,11 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:visual": "playwright test tests/visual/regression.spec.ts",
+    "test:a11y": "playwright test tests/a11y/accessibility.spec.ts",
     "lint": "eslint . --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
-    "validate": "npm run lint && npm run typecheck"
+    "validate": "npm run lint && npm run typecheck && npm run test"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -19,6 +21,7 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/react": "^18.3.4",
@@ -26,6 +29,7 @@
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
     "@vitejs/plugin-react": "^6.0.1",
+    "axe-playwright": "^2.2.2",
     "eslint": "^8.57.0",
     "eslint-plugin-react": "^7.34.0",
     "eslint-plugin-react-hooks": "^4.6.0",

@@ -154,10 +154,15 @@ export function NavBar() {
         </button>
         <SyncStatusIndicator />
         <DriveDropdown />
-        <button type="button" className={styles.button} onClick={helpOpened}>
+        <button type="button" className={styles.button} onClick={helpOpened} aria-label="Abrir guia de ayuda">
           ?
         </button>
-        <button type="button" className={styles.button} onClick={() => settingsOpened('materias')}>
+        <button
+          type="button"
+          className={styles.button}
+          onClick={() => settingsOpened('materias')}
+          aria-label="Abrir configuracion"
+        >
           ⚙
         </button>
       </div>

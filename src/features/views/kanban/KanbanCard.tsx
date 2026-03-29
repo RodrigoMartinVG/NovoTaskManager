@@ -10,6 +10,7 @@ interface KanbanCardProps {
   alertas?: AlertasConfig | undefined
   onSelect: (id: string) => void
   onDragStart: (id: string) => void
+  onKeyboardMove: (id: string) => void
 }
 
 function progress(items: Tarea['items']): { done: number; total: number; percent: number } {
@@ -19,7 +20,15 @@ function progress(items: Tarea['items']): { done: number; total: number; percent
   return { done, total, percent: Math.round((done / total) * 100) }
 }
 
-export function KanbanCard({ task, materia, tipo, alertas, onSelect, onDragStart }: KanbanCardProps) {
+export function KanbanCard({
+  task,
+  materia,
+  tipo,
+  alertas,
+  onSelect,
+  onDragStart,
+  onKeyboardMove,
+}: KanbanCardProps) {
   const alertColor = alertas ? getAlertColor(task, alertas) : null
   const until = task.fechaLimite ? daysUntil(task.fechaLimite) : null
   const checklist = progress(task.items)
@@ -46,8 +55,12 @@ export function KanbanCard({ task, materia, tipo, alertas, onSelect, onDragStart
       onClick={() => onSelect(task.id)}
       role="button"
       tabIndex={0}
+      aria-label={`Tarea ${task.titulo}. Presiona Enter o Espacio para mover de columna.`}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') onSelect(task.id)
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onKeyboardMove(task.id)
+        }
       }}
     >
       <div className={styles.colorBar} style={{ backgroundColor: materia?.color ?? 'var(--accent)' }} />
@@ -61,7 +74,7 @@ export function KanbanCard({ task, materia, tipo, alertas, onSelect, onDragStart
               {tipo.label}
             </span>
           )}
-          {task.link_vc && <span className={styles.video}>📹</span>}
+          {task.link_vc && <span className={styles.video} aria-label="Tiene videollamada">📹</span>}
         </div>
         {checklist.total > 0 && (
           <div className={styles.progressWrap}>

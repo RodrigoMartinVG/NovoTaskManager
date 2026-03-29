@@ -29,6 +29,12 @@ function sortColumnTasks(tasks: Tarea[]): Tarea[] {
   })
 }
 
+function nextEstado(estado: TareaEstado): TareaEstado {
+  if (estado === 'pendiente') return 'en_progreso'
+  if (estado === 'en_progreso') return 'completado'
+  return 'pendiente'
+}
+
 export function KanbanBoard() {
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const [overColumn, setOverColumn] = useState<TareaEstado | null>(null)
@@ -67,6 +73,14 @@ export function KanbanBoard() {
     setOverColumn(null)
   }
 
+  function handleKeyboardMove(taskId: string) {
+    const task = data.tareas.find((item) => item.id === taskId)
+    if (!task) {
+      return
+    }
+    tareaEstadoCambiado(task.id, nextEstado(task.estado))
+  }
+
   return (
     <div className={styles.board}>
       {COLUMNS.map(({ estado, label }) => {
@@ -91,6 +105,7 @@ export function KanbanBoard() {
                 alertas={data.alertas}
                 onSelect={taskSelected}
                 onDragStart={handleDragStart}
+                onKeyboardMove={handleKeyboardMove}
               />
             ))}
           </KanbanColumn>

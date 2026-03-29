@@ -39,9 +39,9 @@
 }
 
 .buttonActive {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--bg1);
+  background: var(--bg1);
+  border-color: var(--text0);
+  color: var(--text0);
 }
 
 .smallButton {

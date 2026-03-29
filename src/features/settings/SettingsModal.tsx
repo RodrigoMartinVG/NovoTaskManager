@@ -131,7 +131,12 @@ export function SettingsModal({ initialTab }: SettingsModalProps) {
                   </div>
                 </div>
                 <div className={styles.rowActions}>
-                  <button type="button" className={styles.actionButton} onClick={() => setEditingMateriaId(materia.id)}>
+                  <button
+                    type="button"
+                    className={styles.actionButton}
+                    onClick={() => setEditingMateriaId(materia.id)}
+                    aria-label={`Editar materia ${materia.nombre}`}
+                  >
                     ✎
                   </button>
                   <button
@@ -139,6 +144,7 @@ export function SettingsModal({ initialTab }: SettingsModalProps) {
                     className={styles.actionButton}
                     onClick={() => deleteMateria(materia.id)}
                     disabled={disableDelete}
+                    aria-label={`Eliminar materia ${materia.nombre}`}
                     title={disableDelete ? 'Tiene tareas asociadas' : 'Eliminar materia'}
                   >
                     ✕
@@ -187,7 +193,12 @@ export function SettingsModal({ initialTab }: SettingsModalProps) {
                   <p className={styles.rowMeta}>{`${taskCount}t`}</p>
                 </div>
                 <div className={styles.rowActions}>
-                  <button type="button" className={styles.actionButton} onClick={() => setEditingTipoId(tipo.id)}>
+                  <button
+                    type="button"
+                    className={styles.actionButton}
+                    onClick={() => setEditingTipoId(tipo.id)}
+                    aria-label={`Editar tipo ${tipo.label}`}
+                  >
                     ✎
                   </button>
                   <button
@@ -195,6 +206,7 @@ export function SettingsModal({ initialTab }: SettingsModalProps) {
                     className={styles.actionButton}
                     onClick={() => deleteTipo(tipo.id)}
                     disabled={disableDelete}
+                    aria-label={`Eliminar tipo ${tipo.label}`}
                     title={disableDelete ? 'Tiene tareas asociadas' : 'Eliminar tipo'}
                   >
                     ✕

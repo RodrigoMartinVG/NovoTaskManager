@@ -82,7 +82,7 @@
 .progressBar span {
   display: block;
   height: 100%;
-  transition: width 0.25s ease;
+  transition: width 0.4s ease;
 }
 
 .columns {

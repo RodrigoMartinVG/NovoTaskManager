@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+import { useEffect, useId, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { useFocusTrap } from '../hooks/useFocusTrap'
 import styles from './Modal.module.css'
@@ -13,6 +13,7 @@ type ModalProps = {
 
 export function Modal({ title, icon, onClose, maxWidth = 420, children }: ModalProps) {
   const cardRef = useRef<HTMLDivElement | null>(null)
+  const titleId = useId()
   useFocusTrap(cardRef)
 
   const sizeClassName = useMemo(() => {
@@ -31,6 +32,18 @@ export function Modal({ title, icon, onClose, maxWidth = 420, children }: ModalP
     event.stopPropagation()
   }
 
+  useEffect(() => {
+    const onWindowKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', onWindowKeyDown)
+    return () => {
+      window.removeEventListener('keydown', onWindowKeyDown)
+    }
+  }, [onClose])
+
   return (
     <div
       className={styles.overlay}
@@ -42,12 +55,12 @@ export function Modal({ title, icon, onClose, maxWidth = 420, children }: ModalP
       }}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="modal-title"
+      aria-labelledby={titleId}
     >
       <div ref={cardRef} className={`${styles.card} ${sizeClassName}`} onClick={handleCardClick} tabIndex={-1}>
         <div className={styles.header}>
           {icon && <div className={styles.icon}>{icon}</div>}
-          <h2 id="modal-title" className={styles.title}>
+          <h2 id={titleId} className={styles.title}>
             {title}
           </h2>
           <button type="button" className={styles.closeBtn} onClick={onClose} aria-label="Cerrar">

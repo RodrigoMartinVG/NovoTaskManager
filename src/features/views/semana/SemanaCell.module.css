@@ -46,7 +46,7 @@
 }
 
 .cellMeta {
-  color: var(--text3);
+  color: var(--text2);
   font-size: var(--t-xs);
 }
 
@@ -89,6 +89,7 @@
   padding: 0.35rem 0.6rem;
   font-size: var(--t-xs);
   cursor: grab;
+  transition: all 0.1s ease;
 }
 
 .compact .chip {
@@ -97,6 +98,12 @@
 
 .chip:active {
   cursor: grabbing;
+}
+
+.chip:hover,
+.chip:focus-visible {
+  border-color: var(--accent);
+  color: var(--text0);
 }
 
 .chipDot {
@@ -113,9 +120,14 @@
 
 .emptyHint {
   margin: 0;
-  color: var(--text3);
+  color: var(--text2);
   font-size: var(--t-xs);
   line-height: 1.45;
+}
+
+.current .cellMeta,
+.current .emptyHint {
+  color: var(--text0);
 }
 
 .compact .emptyHint {
