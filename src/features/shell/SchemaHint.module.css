@@ -1,0 +1,30 @@
+.hint {
+  position: fixed;
+  right: var(--sp-4);
+  bottom: var(--sp-4);
+  z-index: 1200;
+  max-width: min(42rem, calc(100vw - 2rem));
+}
+
+.toggle {
+  background: var(--surface);
+  color: var(--text1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--t-xs);
+}
+
+.pre {
+  margin-top: var(--sp-2);
+  background: var(--bg2);
+  color: var(--text0);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--sp-3);
+  max-height: 16rem;
+  overflow: auto;
+  font-size: var(--t-xxs);
+  line-height: 1.5;
+  box-shadow: var(--shadow);
+}

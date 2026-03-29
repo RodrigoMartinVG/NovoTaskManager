@@ -11,7 +11,7 @@ interface UIStore {
   weekLayout: GridLayout
 
   selectedTaskId: string | null
-  editingTask: Tarea | null
+  editingTask: Partial<Tarea> | null
   settingsOpen: false | string
   importTasksOpen: boolean
   resetModalOpen: boolean
@@ -31,7 +31,7 @@ interface UIStore {
   weekLayoutChanged(layout: GridLayout): void
 
   taskSelected(id: string | null): void
-  taskEditOpened(task: Tarea | null): void
+  taskEditOpened(task: Partial<Tarea> | null): void
   taskEditClosed(): void
   settingsOpened(tab?: string): void
   settingsClosed(): void

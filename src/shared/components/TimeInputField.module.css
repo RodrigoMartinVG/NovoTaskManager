@@ -1,0 +1,26 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+
+.select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text0);
+  padding: 0.55rem 0.65rem;
+  font-size: 0.95rem;
+  appearance: auto;
+}
+
+.select:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.separator {
+  color: var(--text2);
+  font-weight: 600;
+  user-select: none;
+}

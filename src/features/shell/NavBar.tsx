@@ -28,6 +28,8 @@ export function NavBar() {
   const filters = useUIStore((state) => state.filters)
   const anioChanged = useUIStore((state) => state.anioChanged)
   const periodoToggled = useUIStore((state) => state.periodoToggled)
+  const importTasksOpened = useUIStore((state) => state.importTasksOpened)
+  const taskEditOpened = useUIStore((state) => state.taskEditOpened)
   const materias = usePlannerStore((state) => state.data.materias)
   const [themeOpen, setThemeOpen] = useState(false)
   const [theme, setTheme] = useState(PlannerService.getTheme())
@@ -140,6 +142,12 @@ export function NavBar() {
           )}
         </div>
 
+        <button type="button" className={styles.button} onClick={() => taskEditOpened({})}>
+          + Nueva tarea
+        </button>
+        <button type="button" className={styles.button} onClick={importTasksOpened}>
+          Importar tareas
+        </button>
         <button type="button" className={styles.button} onClick={() => window.alert('Ayuda placeholder')}>
           ?
         </button>
