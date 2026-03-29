@@ -21,8 +21,8 @@ export function formatDate(dateStr: string): string {
   })
 }
 
-export function localISONow(): string {
-  const now = new Date()
+export function localISONow(inputDate?: Date): string {
+  const now = inputDate ?? new Date()
   const year = now.getFullYear()
   const month = `${now.getMonth() + 1}`.padStart(2, '0')
   const day = `${now.getDate()}`.padStart(2, '0')

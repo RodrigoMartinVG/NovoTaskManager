@@ -1,0 +1,80 @@
+.widget {
+  position: fixed;
+  right: var(--sp-4);
+  bottom: calc(var(--sp-4) + 3.25rem);
+  z-index: 1600;
+  min-width: 16rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow);
+  padding: var(--sp-3);
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.subject {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--text1);
+}
+
+.dot {
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: 50%;
+}
+
+.taskLabel {
+  margin: 0;
+  color: var(--text2);
+  font-size: var(--t-xs);
+}
+
+.timer {
+  margin: 0;
+  font-size: var(--t-2xl);
+  letter-spacing: 0.08em;
+  color: var(--text0);
+}
+
+.actions {
+  display: flex;
+  gap: var(--sp-2);
+}
+
+.stopBtn,
+.cancelBtn {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--t-xs);
+}
+
+.stopBtn {
+  background: var(--ok-bg);
+  border-color: var(--ok-accent);
+  color: var(--ok-accent);
+}
+
+.cancelBtn {
+  background: var(--warn-bg);
+  border-color: var(--warn-accent);
+  color: var(--warn-accent);
+}
+
+@media (max-width: 720px) {
+  .widget {
+    right: var(--sp-2);
+    left: var(--sp-2);
+    min-width: auto;
+    bottom: calc(var(--sp-4) + 3rem);
+  }
+}

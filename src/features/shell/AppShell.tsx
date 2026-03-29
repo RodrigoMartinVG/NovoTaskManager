@@ -6,7 +6,11 @@ import { TaskModal } from '../tasks/TaskModal'
 import { FormModal } from '../tasks/FormModal'
 import { ImportTasksModal } from '../tasks/ImportTasksModal'
 import { SchemaHint } from './SchemaHint'
+import { usePomoTimer } from '../pomodoro/usePomoTimer'
+import { PomoContextPopup } from '../pomodoro/PomoContextPopup'
+import { PomoWidget } from '../pomodoro/PomoWidget'
 import { useUIStore } from '../../store/useUIStore'
+import { usePomoStore } from '../../store/usePomoStore'
 import styles from './AppShell.module.css'
 
 interface AppShellProps {
@@ -15,10 +19,13 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   useDriveAutoSave()
+  usePomoTimer()
   const selectedTaskId = useUIStore((state) => state.selectedTaskId)
   const editingTask = useUIStore((state) => state.editingTask)
   const importTasksOpen = useUIStore((state) => state.importTasksOpen)
   const confirm = useUIStore((state) => state.confirm)
+  const contextMateria = usePomoStore((state) => state.contextMateria)
+  const pomoSession = usePomoStore((state) => state.session)
 
   return (
     <div className={styles.appShell}>
@@ -31,6 +38,8 @@ export function AppShell({ children }: AppShellProps) {
       {selectedTaskId && <TaskModal />}
       {editingTask !== null && <FormModal />}
       {importTasksOpen && <ImportTasksModal />}
+      {contextMateria && <PomoContextPopup />}
+      {pomoSession && <PomoWidget />}
       {confirm && <ConfirmModal />}
     </div>
   )

@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { PomoSession, MateriaContext } from './types'
 import type { Sesion } from '@domains/planner/types'
+import { localISONow } from '../utils/dateUtils'
 
 interface PomoStore {
   session: PomoSession | null
@@ -8,7 +9,7 @@ interface PomoStore {
   elapsedSeconds: number
 
   pomoStarted(session: PomoSession): void
-  pomoStopped(): Sesion | null
+  pomoStopped(): Omit<Sesion, 'id'> | null
   pomoCancelled(): void
   contextOpened(materia: MateriaContext): void
   contextClosed(): void
@@ -24,16 +25,18 @@ export const usePomoStore = create<PomoStore>()((set, get) => ({
 
   pomoStopped: () => {
     const session = get().session
+    const elapsedSeconds = get().elapsedSeconds
     if (!session) {
       return null
     }
 
-    const result: Sesion = {
-      id: `ses_${Math.random().toString(36).slice(2, 11)}`,
+    const minutos = elapsedSeconds > 0 ? Math.max(1, Math.round(elapsedSeconds / 60)) : 0
+    const inicioDate = new Date(Date.now() - elapsedSeconds * 1000)
+    const result: Omit<Sesion, 'id'> = {
       materiaId: session.materiaId,
       tareaId: session.tareaId,
-      inicio: session.iniciadoEn,
-      minutos: session.minutos,
+      inicio: localISONow(inicioDate),
+      minutos,
       origen: 'timer',
       titulo: session.titulo,
     }

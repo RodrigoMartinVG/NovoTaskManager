@@ -7,7 +7,8 @@ import type { Tarea } from '../../domains/planner/types'
 import styles from './ImportTasksModal.module.css'
 
 function stripTaskId(task: Tarea): Omit<Tarea, 'id'> {
-  const { id: _id, ...rest } = task
+  const { id, ...rest } = task
+  void id
   return rest
 }
 

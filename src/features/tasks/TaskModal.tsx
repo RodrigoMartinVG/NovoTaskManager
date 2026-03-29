@@ -14,12 +14,6 @@ function priorityLabel(priority: 'alta' | 'media' | 'baja'): string {
   return 'Baja'
 }
 
-function estadoLabel(estado: 'pendiente' | 'en_progreso' | 'completado'): string {
-  if (estado === 'pendiente') return 'Pendiente'
-  if (estado === 'en_progreso') return 'En progreso'
-  return 'Completado'
-}
-
 function formatSessionDate(value: string): string {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) {
