@@ -10,6 +10,9 @@ import { usePomoTimer } from '../pomodoro/usePomoTimer'
 import { PomoContextPopup } from '../pomodoro/PomoContextPopup'
 import { PomoWidget } from '../pomodoro/PomoWidget'
 import { SettingsModal } from '../settings/SettingsModal'
+import { ResetModal } from '../settings/ResetModal'
+import { HorasEditorModal } from '../settings/HorasEditorModal'
+import { ManualSessionModal } from '../settings/ManualSessionModal'
 import { useUIStore } from '../../store/useUIStore'
 import { usePomoStore } from '../../store/usePomoStore'
 import styles from './AppShell.module.css'
@@ -25,6 +28,9 @@ export function AppShell({ children }: AppShellProps) {
   const editingTask = useUIStore((state) => state.editingTask)
   const settingsOpen = useUIStore((state) => state.settingsOpen)
   const importTasksOpen = useUIStore((state) => state.importTasksOpen)
+  const resetModalOpen = useUIStore((state) => state.resetModalOpen)
+  const editObjetivoMateriaId = useUIStore((state) => state.editObjetivoMateriaId)
+  const manualSessionMateriaId = useUIStore((state) => state.manualSessionMateriaId)
   const confirm = useUIStore((state) => state.confirm)
   const contextMateria = usePomoStore((state) => state.contextMateria)
   const pomoSession = usePomoStore((state) => state.session)
@@ -41,6 +47,9 @@ export function AppShell({ children }: AppShellProps) {
       {editingTask !== null && <FormModal />}
       {settingsOpen && <SettingsModal initialTab={settingsOpen} />}
       {importTasksOpen && <ImportTasksModal />}
+      {resetModalOpen && <ResetModal />}
+      {editObjetivoMateriaId && <HorasEditorModal />}
+      {manualSessionMateriaId && <ManualSessionModal />}
       {contextMateria && <PomoContextPopup />}
       {pomoSession && <PomoWidget />}
       {confirm && <ConfirmModal />}

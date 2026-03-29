@@ -33,6 +33,7 @@ interface PlannerStore {
   materiasActualizadas(materias: Materia[]): void
   tiposActualizados(tipos: TipoTarea[]): void
   sesionAgregada(sesion: Omit<Sesion, 'id'>): void
+  sesionAgregadaConTarea(sesion: Omit<Sesion, 'id'>, tarea: Omit<Tarea, 'id'>): void
   sesionActualizada(id: string, patch: Partial<Sesion>): void
   sesionEliminada(id: string): void
 }
@@ -162,6 +163,19 @@ export const usePlannerStore = create<PlannerStore>()((set, get) => ({
   sesionAgregada: (sesion) => {
     const next = plannerReducer(get().data, { type: 'ADD_SESION_WITH_TASK', payload: sesion })
     set(saveState(next))
+  },
+
+  sesionAgregadaConTarea: (sesion, tarea) => {
+    const newTaskId = generateId('tar')
+    const withTask = plannerReducer(get().data, {
+      type: 'ADD_TAREA',
+      payload: { ...tarea, id: newTaskId },
+    })
+    const withSession = plannerReducer(withTask, {
+      type: 'ADD_SESION_WITH_TASK',
+      payload: { ...sesion, tareaId: newTaskId },
+    })
+    set(saveState(withSession))
   },
 
   sesionActualizada: (id, patch) => {

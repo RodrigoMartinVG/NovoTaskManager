@@ -34,6 +34,7 @@ function normalizeTab(input?: string): SettingsTab {
 
 export function SettingsModal({ initialTab }: SettingsModalProps) {
   const settingsClosed = useUIStore((state) => state.settingsClosed)
+  const resetModalOpened = useUIStore((state) => state.resetModalOpened)
   const data = usePlannerStore((state) => state.data)
   const materiasActualizadas = usePlannerStore((state) => state.materiasActualizadas)
   const tiposActualizados = usePlannerStore((state) => state.tiposActualizados)
@@ -282,6 +283,19 @@ export function SettingsModal({ initialTab }: SettingsModalProps) {
         {activeTab === 'materias' && renderMateriasTab()}
         {activeTab === 'tipos' && renderTiposTab()}
         {(activeTab === 'horarios' || activeTab === 'alertas' || activeTab === 'tema') && renderDeferredTab()}
+
+        <div className={styles.footerActions}>
+          <button
+            type="button"
+            className={styles.resetButton}
+            onClick={() => {
+              settingsClosed()
+              resetModalOpened()
+            }}
+          >
+            Reset de datos
+          </button>
+        </div>
       </div>
     </Modal>
   )

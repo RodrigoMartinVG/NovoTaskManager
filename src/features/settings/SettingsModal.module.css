@@ -108,3 +108,16 @@
   padding: var(--sp-4);
   color: var(--text2);
 }
+
+.footerActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.resetButton {
+  border: 1px solid var(--err-border);
+  background: color-mix(in srgb, var(--err-bg) 80%, transparent);
+  color: var(--err-text);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2) var(--sp-3);
+}
