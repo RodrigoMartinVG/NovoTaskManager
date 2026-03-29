@@ -6,6 +6,7 @@ import styles from './HelpGuide.module.css'
 
 type GuideSectionId =
   | 'inicio'
+  | 'hoy'
   | 'semana'
   | 'tareas'
   | 'pomodoro'
@@ -29,15 +30,38 @@ const sections: GuideSection[] = [
     content: [
       {
         heading: 'Paso 1: Configura tus materias',
-        text: 'Crea o edita materias desde Configuracion para definir nombre, color y objetivos semanales.',
+        text: 'Creá primero tus materias desde Configuración con nombre, color, código, período y objetivos semanales. Todo lo demás depende de esta base.',
       },
       {
         heading: 'Paso 2: Asigna horarios',
-        text: 'En Vista Semana puedes ubicar cada materia por dia y franja para organizar una rutina clara.',
+        text: 'En Vista Semana ubicá cada materia por día y franja. Sin slots definidos, la app no puede decirte qué tocaría estudiar hoy.',
       },
       {
         heading: 'Paso 3: Carga tus tareas',
-        text: 'Usa + Nueva tarea para crear entregas y examenes, luego revisalas en Backlog, Kanban o Calendario.',
+        text: 'Usá + Nueva tarea para crear entregas y exámenes con fecha de inicio y fecha límite. Después seguí esas tareas desde Backlog, Kanban o Calendario.',
+      },
+      {
+        heading: 'Paso 4: Empezá a registrar sesiones',
+        text: 'Cuando empieces a estudiar, usá el Pomodoro o la carga manual. Ahí la app deja de ser una lista linda y pasa a mostrar esfuerzo real.',
+      },
+    ],
+  },
+  {
+    id: 'hoy',
+    icon: '◈',
+    title: 'Vista Hoy',
+    content: [
+      {
+        heading: 'Qué deberías ver acá',
+        text: 'Hoy condensa tu momento actual: franja activa, materias esperadas según la semana y tareas urgentes que merecen foco inmediato.',
+      },
+      {
+        heading: 'Si aparece vacío',
+        text: 'Eso suele significar que todavía no definiste slots en Semana o que no hay tareas relevantes para este tramo del día.',
+      },
+      {
+        heading: 'Uso recomendado',
+        text: 'Tomala como pantalla de arranque: entrá, mirá qué urge, arrancá sesión o saltá a la tarea que conviene atacar ahora.',
       },
     ],
   },
@@ -48,15 +72,15 @@ const sections: GuideSection[] = [
     content: [
       {
         heading: 'Grilla editable',
-        text: 'Cada celda representa un dia y una franja horaria, y muestra las materias activas en ese bloque.',
+        text: 'Cada celda representa un día y una franja. Esa grilla es la base operativa de la Vista Hoy y del ritmo semanal que te muestra la app.',
       },
       {
         heading: 'Layouts horizontal y vertical',
-        text: 'Puedes alternar el layout para ver mejor tus bloques segun tu dispositivo o preferencia.',
+        text: 'Podés alternar el layout para leer mejor la semana según dispositivo o preferencia, sin perder estructura.',
       },
       {
         heading: 'Arrastrar y soltar',
-        text: 'Mueve chips de materias entre celdas para rearmar tu semana sin abrir formularios largos.',
+        text: 'Mové chips entre celdas para rearmar la semana rápido, o entrá al editor del slot cuando necesites ajustar con más precisión.',
       },
     ],
   },
@@ -67,15 +91,15 @@ const sections: GuideSection[] = [
     content: [
       {
         heading: 'Estados y prioridad',
-        text: 'Clasifica tareas como pendiente, en progreso o completada, y usa prioridad para ordenar enfoque.',
+        text: 'Clasificá tareas como pendiente, en progreso o completada. Eso ordena Kanban y también simplifica qué merece atención ahora.',
       },
       {
         heading: 'Fecha inicio vs fecha limite',
-        text: 'La fecha de inicio te avisa cuando deberias comenzar; la fecha limite marca el vencimiento real.',
+        text: 'La fecha de inicio te dice cuándo deberías haber empezado. La fecha límite marca el vencimiento real. Separarlas mejora mucho la priorización.',
       },
       {
         heading: 'Checklist y detalle',
-        text: 'Dentro de cada tarea puedes usar checklist para dividir trabajo en pasos chicos y medibles.',
+        text: 'Dentro de cada tarea podés usar checklist, descripción, hora, link y notas para convertir una entrega grande en pasos chicos y medibles.',
       },
     ],
   },
@@ -86,15 +110,15 @@ const sections: GuideSection[] = [
     content: [
       {
         heading: 'Iniciar una sesion',
-        text: 'Puedes iniciar desde Materias, Hoy o desde el detalle de una tarea para estudiar con contexto.',
+        text: 'Podés iniciar desde Materias, Hoy o desde el detalle de una tarea para estudiar con contexto y dejar registro del esfuerzo real.',
       },
       {
         heading: 'Timer persistente',
-        text: 'El widget sigue contando aunque cambies de vista, para evitar perder continuidad.',
+        text: 'El widget sigue contando aunque cambies de vista, para que no pierdas continuidad mientras navegás por la app.',
       },
       {
         heading: 'Guardado de sesiones',
-        text: 'Al detener la sesion, los minutos quedan registrados en la materia y pueden asociarse a una tarea.',
+        text: 'Al detener la sesión, los minutos quedan registrados en la materia y opcionalmente asociados a una tarea. Eso alimenta progreso y horas semanales.',
       },
     ],
   },
@@ -105,15 +129,15 @@ const sections: GuideSection[] = [
     content: [
       {
         heading: 'Objetivos semanales',
-        text: 'Define horas minimas y maximas por materia para monitorear carga y equilibrio.',
+        text: 'Definí horas mínimas y máximas por materia para monitorear carga, equilibrio y avance semanal.',
       },
       {
         heading: 'Sesiones manuales',
-        text: 'Si estudiaste fuera del timer, puedes cargar la sesion manualmente sin perder historial.',
+        text: 'Si estudiaste fuera del timer, podés cargar la sesión manualmente sin perder historial ni distorsionar tus métricas.',
       },
       {
         heading: 'Barra de progreso',
-        text: 'La barra compara horas registradas contra tu objetivo para mostrar si vas corto, en rango o excedido.',
+        text: 'La barra compara horas registradas contra tu objetivo y muestra si vas corto, en rango o ya te pasaste del máximo esperado.',
       },
     ],
   },
@@ -124,15 +148,15 @@ const sections: GuideSection[] = [
     content: [
       {
         heading: 'Backup local',
-        text: 'Exporta un JSON para guardar una copia local y reimportarla cuando la necesites.',
+        text: 'Exportá un JSON para guardar una copia completa del planner y reimportarla si necesitás recuperar trabajo o moverte de equipo.',
       },
       {
         heading: 'Modo local y modo Drive',
-        text: 'En modo local todo se guarda en tu navegador; en modo Drive ademas sincronizas en la nube.',
+        text: 'En modo local todo vive en este navegador. En modo Drive además podés sincronizar en la nube y continuar desde otro dispositivo.',
       },
       {
         heading: 'Sincronizacion',
-        text: 'Puedes guardar y cargar manualmente, o activar auto-save para enviar cambios con debounce.',
+        text: 'Podés guardar y cargar manualmente, o activar auto-save para que los cambios se suban con debounce sin interrumpir el flujo.',
       },
     ],
   },
@@ -143,15 +167,15 @@ const sections: GuideSection[] = [
     content: [
       {
         heading: 'Materias y tipos',
-        text: 'Gestiona catalogos base para que formularios y vistas usen etiquetas consistentes.',
+        text: 'Gestioná catálogos base para que formularios, badges y vistas usen etiquetas consistentes y útiles.',
       },
       {
         heading: 'Horarios y alertas',
-        text: 'Ajusta franjas y umbrales para que la app se adapte a tu ritmo real de cursada.',
+        text: 'Ajustá franjas y umbrales para que la app se adapte a tu ritmo real de cursada y no a una semana idealizada.',
       },
       {
         heading: 'Tema visual',
-        text: 'Cambia tema desde NavBar o Configuracion y el estilo se aplica de inmediato.',
+        text: 'Cambiá tema desde la barra o desde Configuración. El estilo se aplica al instante y no altera tus datos.',
       },
     ],
   },
@@ -162,15 +186,15 @@ const sections: GuideSection[] = [
     content: [
       {
         heading: 'Colores de prioridad temporal',
-        text: 'Las alertas resaltan tareas por cercania de inicio o vencimiento para priorizar rapido.',
+        text: 'Las alertas resaltan tareas por cercanía de inicio o vencimiento para decidir más rápido qué atacar primero.',
       },
       {
         heading: 'Umbrales personalizables',
-        text: 'En Configuracion puedes definir cuantos dias antes se activa cada nivel de alerta.',
+        text: 'En Configuración podés definir cuántos días antes se activa cada nivel de alerta según tu forma de estudiar.',
       },
       {
         heading: 'Uso recomendado',
-        text: 'Revisa urgencias en Hoy y Backlog para decidir cada jornada que tarea atacar primero.',
+        text: 'Revisá urgencias en Hoy y Backlog al empezar el día para decidir qué tarea conviene atacar primero y qué puede esperar.',
       },
     ],
   },
@@ -211,7 +235,7 @@ export function HelpGuide() {
         <section className={styles.contentPanel}>
           <header className={styles.contentHeader}>
             <h3>{`${section.icon} ${section.title}`}</h3>
-            <p>Guia practica para usar UAI Planner de forma mas clara y consistente.</p>
+            <p>Guía práctica para usar UAI Planner en el orden que más valor devuelve desde el primer día.</p>
           </header>
 
           <div className={styles.contentBody}>
@@ -224,7 +248,7 @@ export function HelpGuide() {
           </div>
 
           <footer className={styles.footer}>
-            <span>UAI Planner · v2.0</span>
+            <span>{`${section.content.length} temas en esta sección · ${sections.length} secciones en total`}</span>
             <button type="button" className={styles.restartButton} onClick={handleRestartOnboarding}>
               Reiniciar la bienvenida
             </button>

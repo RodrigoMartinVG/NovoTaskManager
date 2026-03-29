@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useUIStore } from '../../store/useUIStore'
 import { PlannerService } from '../../domains/planner/service'
 import { NavBar } from './NavBar'
@@ -22,6 +22,13 @@ export function ChromeShell() {
   const headerLabel = useMemo(() => viewLabels[activeView] ?? activeView, [activeView])
   const expanded = isPinned || isHovered || isOpen
 
+  useEffect(() => {
+    if (!isPinned) {
+      setIsHovered(false)
+      setIsOpen(false)
+    }
+  }, [activeView, isPinned])
+
   const togglePin = () => {
     const next = !isPinned
     PlannerService.setChromePinned(next)
@@ -44,12 +51,10 @@ export function ChromeShell() {
   return (
     <div
       className={`${styles.chromeShellSlot} ${expanded ? styles.expanded : styles.collapsed}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={handleMouseLeave}
     >
-      <div
-        className={styles.chromeShellSticky}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={handleMouseLeave}
-      >
+      <div className={styles.chromeShellSticky}>
         <div
           className={styles.peekBar}
           onClick={handlePeekClick}

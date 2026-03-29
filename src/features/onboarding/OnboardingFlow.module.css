@@ -30,6 +30,11 @@
   color: var(--text0);
 }
 
+.card h1,
+.card h2 {
+  margin: 0;
+}
+
 .stepChips {
   display: flex;
   gap: 0.75rem;
@@ -46,8 +51,9 @@
 }
 
 .stepChipActive {
-  background: var(--accent);
-  color: var(--bg1);
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--text0);
+  border: 1px solid color-mix(in srgb, var(--accent) 48%, transparent);
 }
 
 .stepContent {
@@ -60,6 +66,16 @@
   gap: 1rem;
   grid-template-columns: auto 1fr;
   align-items: center;
+}
+
+.hero h1 {
+  font-size: 2rem;
+  letter-spacing: 0.04em;
+}
+
+.hero p {
+  margin: 0.35rem 0 0;
+  color: var(--text2);
 }
 
 .logo {
@@ -87,10 +103,89 @@
   }
 }
 
+.heroPanel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.9fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+
 .description {
   font-size: 1rem;
   color: var(--text1);
   max-width: 42rem;
+}
+
+.description h2 {
+  font-size: 1.45rem;
+  margin-bottom: 0.65rem;
+  color: var(--text0);
+}
+
+.description p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.previewCard {
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+  padding: 1rem;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.previewHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.previewHeader strong,
+.previewItem strong {
+  display: block;
+  color: var(--text0);
+}
+
+.previewHeader span,
+.previewItem span,
+.previewFooter {
+  color: var(--text2);
+  font-size: 0.92rem;
+}
+
+.previewMetric {
+  border-radius: var(--r-full);
+  padding: 0.4rem 0.7rem;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--text0) !important;
+  white-space: nowrap;
+}
+
+.previewList {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.previewItem {
+  padding: 0.75rem;
+  border-radius: var(--r-lg);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.highlightNote,
+.footerNote {
+  margin: 0;
+  color: var(--text2);
+  line-height: 1.55;
+}
+
+.highlightNote {
+  border-left: 3px solid color-mix(in srgb, var(--accent) 52%, transparent);
+  padding-left: 1rem;
+  color: var(--text1);
 }
 
 .featureGrid {
@@ -147,6 +242,10 @@
   gap: 1rem;
 }
 
+.themeGrid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
 .themeOption,
 .datasetCard {
   display: grid;
@@ -176,12 +275,81 @@
   background: linear-gradient(135deg, var(--accent) 0%, rgba(255, 255, 255, 0.18) 100%);
 }
 
+.themeSwatch[data-theme='theme-2'] {
+  background: linear-gradient(135deg, #78a9ff 0%, #19234e 100%);
+}
+
+.themeSwatch[data-theme='theme-3'] {
+  background: linear-gradient(135deg, #ffffff 0%, #3b82f6 100%);
+}
+
+.themeSwatch[data-theme='theme-4'] {
+  background: linear-gradient(135deg, #fff9f0 0%, #b8863b 100%);
+}
+
+.themeSwatch[data-theme='theme-5'] {
+  background: linear-gradient(135deg, #64d18f 0%, #102d22 100%);
+}
+
 .themeOptionActive .themeSwatch {
   box-shadow: 0 0 0 2px rgba(130, 199, 255, 0.24);
 }
 
 .datasetCard {
   min-height: 120px;
+}
+
+.datasetCard small {
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+.datasetCardRecommended {
+  border-color: color-mix(in srgb, var(--accent) 42%, transparent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg2));
+}
+
+.datasetHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.datasetTag,
+.datasetTagMuted {
+  padding: 0.25rem 0.55rem;
+  border-radius: var(--r-full);
+  font-size: 0.78rem;
+  text-transform: lowercase;
+}
+
+.datasetTag {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: var(--text0);
+}
+
+.datasetTagMuted {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text2);
+}
+
+.recommendationBox {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.recommendationBox strong {
+  color: var(--text0);
+}
+
+.recommendationBox span {
+  color: var(--text1);
+  line-height: 1.55;
 }
 
 .datasetCard strong {
@@ -210,6 +378,10 @@
     gap: 1rem;
   }
 
+  .heroPanel {
+    grid-template-columns: 1fr;
+  }
+
   .featureGrid,
   .themeGrid,
   .datasetGrid {
@@ -218,5 +390,10 @@
 
   .controls {
     justify-content: stretch;
+  }
+
+  .datasetHeader,
+  .previewHeader {
+    flex-direction: column;
   }
 }

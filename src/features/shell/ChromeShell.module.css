@@ -1,13 +1,19 @@
 .chromeShellSlot {
-  width: 100%;
-  transition: transform 0.24s ease;
-}
-
-.chromeShellSticky {
   position: sticky;
   top: 0;
   width: 100%;
   z-index: 1200;
+  display: grid;
+  grid-template-rows: 56px 0fr;
+  overflow: hidden;
+  background: rgba(8, 8, 15, 0.98);
+  border-bottom: 1px solid var(--border);
+  transition: transform 0.24s ease;
+}
+
+.chromeShellSticky {
+  width: 100%;
+  display: contents;
 }
 
 .peekBar {
@@ -18,7 +24,6 @@
   padding: 0 var(--sp-4);
   color: var(--text0);
   background: rgba(16, 18, 35, 0.96);
-  border-bottom: 1px solid var(--border);
   cursor: pointer;
   pointer-events: auto;
 }
@@ -48,9 +53,9 @@
 }
 
 .contentArea {
-  overflow: visible;
+  min-height: 0;
+  overflow: hidden;
   background: rgba(8, 8, 15, 0.98);
-  border-bottom: 1px solid var(--border);
   pointer-events: auto;
 }
 
@@ -72,22 +77,15 @@
 }
 
 .expanded {
-  max-height: 420px;
-  overflow: visible;
+  grid-template-rows: 56px 1fr;
   box-shadow: var(--shadow);
-  transition: max-height 0.24s ease, transform 0.24s ease;
+  transition: grid-template-rows 0.24s ease, transform 0.24s ease;
 }
 
 .collapsed {
-  max-height: 56px;
-  overflow: hidden;
+  grid-template-rows: 56px 0fr;
   box-shadow: none;
-  transition: max-height 0.24s ease, transform 0.24s ease;
-}
-
-.chromeShellSlot,
-.chromeShellSticky {
-  overflow: visible;
+  transition: grid-template-rows 0.24s ease, transform 0.24s ease;
 }
 
 @keyframes chromePeekSlide {
