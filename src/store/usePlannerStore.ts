@@ -19,6 +19,7 @@ interface PlannerStore {
   lastSavedHash: string
   appMode: AppMode
   modeChanged(mode: AppMode): void
+  exportMarked(hash: string): void
 
   dataLoaded(data: PlannerData): void
   tareaAdded(tarea: Omit<Tarea, 'id'>): void
@@ -69,6 +70,9 @@ export const usePlannerStore = create<PlannerStore>()((set, get) => ({
   dataLoaded: (data) => {
     const next = plannerReducer(get().data, { type: 'LOAD_DATA', payload: data })
     set(saveState(next))
+  },
+  exportMarked: (hash) => {
+    set({ lastSavedHash: hash, dirty: false })
   },
   modeChanged: (mode) => {
     PlannerService.setMode(mode)

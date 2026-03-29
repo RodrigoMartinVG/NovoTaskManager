@@ -3,6 +3,8 @@ import { useDriveConnect } from '../drive/useDriveConnect'
 import { useDriveSave } from './useDriveSave'
 import { useDriveLoad } from './useDriveLoad'
 import { useDriveDisconnect } from './useDriveDisconnect'
+import { ExportButton } from '../shell/ExportButton'
+import { ImportBackupButton } from '../shell/ImportBackupButton'
 import { useDriveStore } from '../../store/useDriveStore'
 import styles from './DriveDropdown.module.css'
 
@@ -49,6 +51,8 @@ export function DriveDropdown() {
               >
                 Conectar Google Drive
               </button>
+              <ExportButton />
+              <ImportBackupButton />
             </div>
           ) : (
             <div className={styles.column}>
@@ -70,6 +74,8 @@ export function DriveDropdown() {
               <button type="button" className={styles.actionButton} onClick={loadNow}>
                 Cargar desde Drive
               </button>
+              <ExportButton />
+              <ImportBackupButton />
               <button type="button" className={styles.actionDanger} onClick={disconnectNow}>
                 Desconectar
               </button>
