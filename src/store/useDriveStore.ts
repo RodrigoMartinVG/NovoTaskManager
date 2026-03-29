@@ -14,8 +14,8 @@ interface DriveStore {
 
   driveConnected(email: string): void
   driveDisconnected(): void
-  syncStarted(): void
-  syncSucceeded(): void
+  syncStarted(message?: string): void
+  syncSucceeded(message?: string): void
   syncFailed(message: string): void
   autoSaveToggled(enabled: boolean): void
   conflictDetected(conflict: DriveConflict): void
@@ -42,8 +42,8 @@ export const useDriveStore = create<DriveStore>()((set) => ({
     set({ connected: false, status: 'idle', userEmail: null, conflict: null })
   },
 
-  syncStarted: () => set({ status: 'saving', message: '' }),
-  syncSucceeded: () => set({ status: 'saved', message: '' }),
+  syncStarted: (message) => set({ status: 'saving', message: message ?? '' }),
+  syncSucceeded: (message) => set({ status: 'saved', message: message ?? '' }),
   syncFailed: (message) => set({ status: 'error', message }),
   autoSaveToggled: (enabled) => {
     PlannerService.setAutoSave(enabled)

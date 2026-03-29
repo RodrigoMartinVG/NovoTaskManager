@@ -5,6 +5,8 @@ import { PlannerService } from '../../domains/planner/service'
 import { useClickOutside } from '../../shared/hooks/useClickOutside'
 import { useKeyDown } from '../../shared/hooks/useKeyDown'
 import { ListFilters } from './ListFilters'
+import { DriveDropdown } from '../drive/DriveDropdown'
+import { SyncStatusIndicator } from './SyncStatusIndicator'
 import styles from './NavBar.module.css'
 import type { Periodo, ViewMode } from '../../domains/planner/types'
 
@@ -149,6 +151,8 @@ export function NavBar() {
         <button type="button" className={styles.button} onClick={importTasksOpened}>
           Importar tareas
         </button>
+        <SyncStatusIndicator />
+        <DriveDropdown />
         <button type="button" className={styles.button} onClick={() => window.alert('Ayuda placeholder')}>
           ?
         </button>

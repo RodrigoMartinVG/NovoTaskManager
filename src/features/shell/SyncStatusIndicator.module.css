@@ -1,0 +1,37 @@
+.button {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text1);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0.65rem 0.85rem;
+}
+
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+}
+
+.dotSaved {
+  background: var(--ok-text);
+}
+
+.dotSaving {
+  background: var(--warn-text);
+}
+
+.dotError {
+  background: var(--err-text);
+}
+
+.dotIdle {
+  border: 1px solid var(--border2);
+  background: transparent;
+}
+
+.text {
+  font-size: var(--t-xs);
+}

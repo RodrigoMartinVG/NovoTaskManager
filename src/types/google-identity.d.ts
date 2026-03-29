@@ -31,7 +31,7 @@ declare namespace google {
       }
 
       interface TokenClient {
-        request(params: { scope?: string; prompt?: string; hint?: string }): void
+        requestAccessToken(params: { scope?: string; prompt?: string; hint?: string }): void
       }
 
       interface CodeClient {
@@ -49,7 +49,7 @@ declare namespace google {
       function initTokenClient(config: TokenClientConfig): TokenClient
       function initCodeClient(config: CodeClientConfig): CodeClient
       function prompt(callback?: (notification: OneTapPromptMomentNotification) => void): void
-      function revoke(token: string, callback?: (done: boolean) => void): void
+      function revoke(token: string, callback?: () => void): void
     }
 
     namespace id {
