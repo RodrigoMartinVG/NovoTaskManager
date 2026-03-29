@@ -11,12 +11,27 @@
 
 .card {
   width: 100%;
-  max-width: 420px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-xl);
   box-shadow: var(--shadow);
   overflow: hidden;
+}
+
+.cardSm {
+  max-width: 420px;
+}
+
+.cardMd {
+  max-width: 560px;
+}
+
+.cardLg {
+  max-width: 760px;
+}
+
+.cardXl {
+  max-width: 920px;
 }
 
 .header {

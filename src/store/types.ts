@@ -5,6 +5,7 @@ export interface ConfirmConfig {
   description: string
   confirmLabel: string
   cancelLabel: string
+  tone?: 'danger' | 'warn' | 'info' | undefined
   onConfirm?: () => void
   onCancel?: () => void
 }
