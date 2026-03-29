@@ -2,9 +2,13 @@ import { useMemo, useState } from 'react'
 import { Modal } from '../../shared/components/Modal'
 import { usePlannerStore } from '../../store/usePlannerStore'
 import { useUIStore } from '../../store/useUIStore'
-import type { Materia, TipoTarea } from '../../domains/planner/types'
+import { PlannerService } from '../../domains/planner/service'
+import type { AlertasConfig, Materia, ThemeId, TipoTarea } from '../../domains/planner/types'
 import { MateriaForm } from './MateriaForm'
 import { TipoForm } from './TipoForm'
+import { FranjasEditor } from './FranjasEditor'
+import { AlertasEditor } from './AlertasEditor'
+import { ThemeSettings } from './ThemeSettings'
 import styles from './SettingsModal.module.css'
 
 type SettingsTab = 'materias' | 'tipos' | 'horarios' | 'alertas' | 'tema'
@@ -33,10 +37,12 @@ export function SettingsModal({ initialTab }: SettingsModalProps) {
   const data = usePlannerStore((state) => state.data)
   const materiasActualizadas = usePlannerStore((state) => state.materiasActualizadas)
   const tiposActualizados = usePlannerStore((state) => state.tiposActualizados)
+  const dataLoaded = usePlannerStore((state) => state.dataLoaded)
 
   const [activeTab, setActiveTab] = useState<SettingsTab>(() => normalizeTab(initialTab))
   const [editingMateriaId, setEditingMateriaId] = useState<string | 'new' | null>(null)
   const [editingTipoId, setEditingTipoId] = useState<string | 'new' | null>(null)
+  const [activeTheme, setActiveTheme] = useState<ThemeId>(PlannerService.getTheme())
 
   const usedMateriaIds = useMemo(() => new Set(data.tareas.map((task) => task.materiaId)), [data.tareas])
   const usedTipoIds = useMemo(() => new Set(data.tareas.map((task) => task.tipo)), [data.tareas])
@@ -219,6 +225,37 @@ export function SettingsModal({ initialTab }: SettingsModalProps) {
   }
 
   function renderDeferredTab() {
+    if (activeTab === 'horarios') {
+      return (
+        <section className={styles.panel}>
+          <FranjasEditor materias={data.materias} onMateriasUpdated={materiasActualizadas} />
+        </section>
+      )
+    }
+
+    if (activeTab === 'alertas') {
+      const alertas: AlertasConfig = data.alertas ?? PlannerService.getAlertas()
+      return (
+        <section className={styles.panel}>
+          <AlertasEditor
+            value={alertas}
+            onSave={(next) => {
+              PlannerService.setAlertas(next)
+              dataLoaded({ ...data, alertas: next })
+            }}
+          />
+        </section>
+      )
+    }
+
+    if (activeTab === 'tema') {
+      return (
+        <section className={styles.panel}>
+          <ThemeSettings activeTheme={activeTheme} onThemeChange={setActiveTheme} />
+        </section>
+      )
+    }
+
     return (
       <section className={styles.deferredPanel}>
         <p>Esta seccion se completa en la siguiente fase.</p>

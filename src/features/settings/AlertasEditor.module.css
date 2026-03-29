@@ -1,0 +1,53 @@
+.wrapper {
+  display: grid;
+  gap: var(--sp-3);
+}
+
+.field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.field span,
+.toggleRow span {
+  color: var(--text1);
+  font-size: var(--t-xs);
+}
+
+.field input[type='number'] {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text0);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2);
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.preview {
+  border: 1px dashed var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2);
+  background: var(--bg2);
+  display: grid;
+  gap: 0.2rem;
+}
+
+.preview p {
+  margin: 0;
+  color: var(--text2);
+  font-size: var(--t-xs);
+}
+
+.saveButton {
+  justify-self: flex-start;
+  border: 1px solid var(--info-accent);
+  background: var(--info-bg);
+  color: var(--info-accent);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2) var(--sp-3);
+}

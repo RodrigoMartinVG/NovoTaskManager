@@ -1,0 +1,90 @@
+.wrapper {
+  display: grid;
+  gap: var(--sp-3);
+}
+
+.modeField {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.modeField span {
+  color: var(--text1);
+  font-size: var(--t-xs);
+}
+
+.modeField select {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text0);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2);
+}
+
+.rows {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  padding: var(--sp-2);
+}
+
+.rowLabel {
+  margin: 0;
+  color: var(--text1);
+}
+
+.timeGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.separator {
+  color: var(--text2);
+}
+
+.preview {
+  border: 1px dashed var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2);
+  background: var(--bg2);
+  display: grid;
+  gap: 0.2rem;
+}
+
+.preview p {
+  margin: 0;
+  color: var(--text2);
+  font-size: var(--t-xs);
+}
+
+.error {
+  margin: 0;
+  color: var(--err-accent);
+  font-size: var(--t-xs);
+}
+
+.saveButton {
+  justify-self: flex-start;
+  border: 1px solid var(--info-accent);
+  background: var(--info-bg);
+  color: var(--info-accent);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2) var(--sp-3);
+}
+
+@media (max-width: 860px) {
+  .row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,33 @@
+.wrapper {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.themeButton {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text1);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2) var(--sp-3);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  justify-content: space-between;
+}
+
+.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.dot {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 50%;
+  margin-right: var(--sp-2);
+}
+
+.check {
+  margin-left: auto;
+}
