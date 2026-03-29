@@ -28,6 +28,7 @@ export const LS = {
   DRIVE_FILE_ID: 'uai-planner-drive-fileid',
   LAST_SAVED: 'uai-planner-last-saved',
   GRID_LAYOUT: 'uai-grid-layout',
+  HELP_SHOWN: 'uai-help-shown',
 } as const
 
 function safeRead(key: string): string | null {
@@ -266,5 +267,13 @@ export const PlannerService = {
 
   setGridLayout(v: GridLayout): void {
     safeWrite(LS.GRID_LAYOUT, v)
+  },
+
+  getHelpShown(): boolean {
+    return safeBoolean(LS.HELP_SHOWN, false)
+  },
+
+  setHelpShown(value: boolean): void {
+    safeWrite(LS.HELP_SHOWN, value ? 'true' : 'false')
   },
 }

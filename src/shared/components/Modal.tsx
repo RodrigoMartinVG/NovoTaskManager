@@ -16,6 +16,7 @@ export function Modal({ title, icon, onClose, maxWidth = 420, children }: ModalP
   useFocusTrap(cardRef)
 
   const sizeClassName = useMemo(() => {
+    if (maxWidth >= 1040) return styles.cardXxl
     if (maxWidth >= 900) return styles.cardXl
     if (maxWidth >= 720) return styles.cardLg
     if (maxWidth >= 560) return styles.cardMd

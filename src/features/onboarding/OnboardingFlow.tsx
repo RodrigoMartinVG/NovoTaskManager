@@ -16,7 +16,6 @@ export function OnboardingFlow() {
   const dataLoaded = usePlannerStore((state) => state.dataLoaded)
   const modeChanged = usePlannerStore((state) => state.modeChanged)
   const viewChanged = useUIStore((state) => state.viewChanged)
-  const helpOpened = useUIStore((state) => state.helpOpened)
 
   const existingData = useMemo(() => !isEmptyPlannerData(PlannerService.loadData()), [])
 
@@ -29,7 +28,6 @@ export function OnboardingFlow() {
     modeChanged('local')
     dataLoaded(data)
     viewChanged('hoy')
-    helpOpened()
   }
 
   const handleQuickStart = () => {
@@ -49,7 +47,6 @@ export function OnboardingFlow() {
   const handleExitApp = () => {
     modeChanged('local')
     viewChanged('hoy')
-    helpOpened()
   }
 
   return (

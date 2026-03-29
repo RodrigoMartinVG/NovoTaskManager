@@ -43,7 +43,7 @@
 }
 
 .contentArea {
-  overflow: hidden;
+  overflow: visible;
   background: rgba(8, 8, 15, 0.98);
   border-bottom: 1px solid var(--border);
   pointer-events: auto;
@@ -68,17 +68,19 @@
 
 .expanded {
   max-height: 420px;
+  overflow: visible;
   box-shadow: var(--shadow);
   transition: max-height 0.24s ease;
 }
 
 .collapsed {
   max-height: 56px;
+  overflow: hidden;
   box-shadow: none;
   transition: max-height 0.24s ease;
 }
 
 .chromeShellSlot,
 .chromeShellSticky {
-  overflow: hidden;
+  overflow: visible;
 }

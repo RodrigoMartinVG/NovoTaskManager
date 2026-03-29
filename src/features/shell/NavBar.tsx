@@ -32,6 +32,7 @@ export function NavBar() {
   const periodoToggled = useUIStore((state) => state.periodoToggled)
   const settingsOpened = useUIStore((state) => state.settingsOpened)
   const importTasksOpened = useUIStore((state) => state.importTasksOpened)
+  const helpOpened = useUIStore((state) => state.helpOpened)
   const taskEditOpened = useUIStore((state) => state.taskEditOpened)
   const materias = usePlannerStore((state) => state.data.materias)
   const [themeOpen, setThemeOpen] = useState(false)
@@ -153,7 +154,7 @@ export function NavBar() {
         </button>
         <SyncStatusIndicator />
         <DriveDropdown />
-        <button type="button" className={styles.button} onClick={() => window.alert('Ayuda placeholder')}>
+        <button type="button" className={styles.button} onClick={helpOpened}>
           ?
         </button>
         <button type="button" className={styles.button} onClick={() => settingsOpened('materias')}>

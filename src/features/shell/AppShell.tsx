@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { ChromeShell } from './ChromeShell'
 import { UnsavedToast } from './UnsavedToast'
 import { useDriveAutoSave } from '../drive/useDriveAutoSave'
@@ -14,9 +15,12 @@ import { ResetModal } from '../settings/ResetModal'
 import { HorasEditorModal } from '../settings/HorasEditorModal'
 import { ManualSessionModal } from '../settings/ManualSessionModal'
 import { DriveConflictModal } from '../drive/DriveConflictModal'
+import { HelpGuide } from '../onboarding/HelpGuide'
+import { PlannerService } from '../../domains/planner/service'
 import { useUIStore } from '../../store/useUIStore'
 import { usePomoStore } from '../../store/usePomoStore'
 import { useDriveStore } from '../../store/useDriveStore'
+import { usePlannerStore } from '../../store/usePlannerStore'
 import styles from './AppShell.module.css'
 
 interface AppShellProps {
@@ -33,10 +37,24 @@ export function AppShell({ children }: AppShellProps) {
   const resetModalOpen = useUIStore((state) => state.resetModalOpen)
   const editObjetivoMateriaId = useUIStore((state) => state.editObjetivoMateriaId)
   const manualSessionMateriaId = useUIStore((state) => state.manualSessionMateriaId)
+  const helpOpen = useUIStore((state) => state.helpOpen)
+  const helpOpened = useUIStore((state) => state.helpOpened)
   const confirm = useUIStore((state) => state.confirm)
   const contextMateria = usePomoStore((state) => state.contextMateria)
   const pomoSession = usePomoStore((state) => state.session)
   const driveConflict = useDriveStore((state) => state.conflict)
+  const appMode = usePlannerStore((state) => state.appMode)
+
+  useEffect(() => {
+    if (appMode !== 'local') {
+      return
+    }
+    if (PlannerService.getHelpShown()) {
+      return
+    }
+    helpOpened()
+    PlannerService.setHelpShown(true)
+  }, [appMode, helpOpened])
 
   return (
     <div className={styles.appShell}>
@@ -53,6 +71,7 @@ export function AppShell({ children }: AppShellProps) {
       {resetModalOpen && <ResetModal />}
       {editObjetivoMateriaId && <HorasEditorModal />}
       {manualSessionMateriaId && <ManualSessionModal />}
+      {helpOpen && <HelpGuide />}
       {contextMateria && <PomoContextPopup />}
       {pomoSession && <PomoWidget />}
       {driveConflict && <DriveConflictModal />}
