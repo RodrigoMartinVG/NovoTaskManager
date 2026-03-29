@@ -1,0 +1,36 @@
+.gridWrap {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.headRow {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+
+.dayHeader {
+  text-align: center;
+  color: var(--text3);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+
+@media (max-width: 900px) {
+  .grid,
+  .headRow {
+    min-width: 54rem;
+  }
+
+  .gridWrap {
+    overflow-x: auto;
+    padding-bottom: var(--sp-2);
+  }
+}

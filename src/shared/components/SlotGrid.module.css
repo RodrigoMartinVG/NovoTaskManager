@@ -1,0 +1,54 @@
+.wrapper {
+  display: grid;
+  gap: var(--sp-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: var(--sp-3);
+  background: var(--bg2);
+}
+
+.headerRow,
+.dayRow {
+  display: grid;
+  gap: var(--sp-2);
+  align-items: center;
+}
+
+.corner,
+.dayLabel,
+.headerCell {
+  color: var(--text3);
+  font-size: var(--t-xxs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.headerCell {
+  text-align: center;
+}
+
+.cell {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2);
+  font-size: var(--t-base);
+  color: var(--text2);
+  background: var(--surface);
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.cell:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--text0);
+}
+
+.cell.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--surface-strong);
+}
+
+.cell:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

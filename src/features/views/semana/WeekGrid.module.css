@@ -1,0 +1,136 @@
+.wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  padding: var(--sp-3);
+}
+
+.grid {
+  display: grid;
+  gap: var(--sp-2);
+  min-width: max-content;
+  align-items: stretch;
+}
+
+.gridHorizontalThree {
+  grid-template-columns: minmax(9rem, 10rem) repeat(7, minmax(11rem, 1fr));
+}
+
+.gridHorizontalSix {
+  grid-template-columns: minmax(9rem, 10rem) repeat(7, minmax(11rem, 1fr));
+}
+
+.gridVerticalThree {
+  grid-template-columns: minmax(8rem, 9rem) repeat(3, minmax(11rem, 1fr));
+}
+
+.gridVerticalSix {
+  grid-template-columns: minmax(8rem, 9rem) repeat(6, minmax(11rem, 1fr));
+}
+
+.corner,
+.headerCell,
+.rowHeader {
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg2);
+  color: var(--text1);
+}
+
+.corner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.25rem;
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.headerCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 3.25rem;
+  padding: var(--sp-2);
+  font-size: var(--t-sm);
+  text-align: center;
+}
+
+.headerEmoji {
+  font-size: var(--t-lg);
+}
+
+.rowHeader {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--sp-2);
+  align-items: center;
+  padding: var(--sp-3);
+  min-height: 7.5rem;
+}
+
+.rowBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--r-full);
+  background: color-mix(in srgb, var(--accent) 12%, var(--bg2));
+}
+
+.rowLabel {
+  display: block;
+  color: var(--text0);
+  font-size: var(--t-sm);
+}
+
+.rowMeta {
+  display: block;
+  margin-top: var(--sp-1);
+  color: var(--text3);
+  font-size: var(--t-xs);
+}
+
+.currentHeader {
+  border-color: var(--accent);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+.compact {
+  gap: var(--sp-1);
+}
+
+.compact .corner,
+.compact .headerCell {
+  min-height: 2.35rem;
+  font-size: var(--t-xs);
+}
+
+.compact .rowHeader {
+  min-height: 4.1rem;
+  padding: var(--sp-2);
+}
+
+.compact .rowBadge {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.compact .rowMeta {
+  margin-top: 0;
+}
+
+@media (max-width: 720px) {
+  .wrapper {
+    padding: var(--sp-2);
+  }
+
+  .headerCell,
+  .corner {
+    min-height: 2.8rem;
+  }
+}

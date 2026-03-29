@@ -1,0 +1,41 @@
+.wrap {
+  position: relative;
+}
+
+.trigger {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text1);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--t-xs);
+}
+
+.panel {
+  position: absolute;
+  z-index: 30;
+  right: 0;
+  top: calc(100% + var(--sp-1));
+  min-width: 9rem;
+  padding: var(--sp-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface-strong);
+  display: grid;
+  gap: var(--sp-1);
+}
+
+.option {
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--text2);
+  padding: var(--sp-2);
+  font-size: var(--t-xs);
+}
+
+.option.active {
+  border-color: var(--accent);
+  color: var(--text0);
+}

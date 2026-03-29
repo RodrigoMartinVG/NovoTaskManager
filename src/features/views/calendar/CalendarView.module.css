@@ -1,0 +1,21 @@
+.wrapper {
+  display: grid;
+  gap: var(--sp-4);
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--t-2xl);
+}
+
+.meta {
+  color: var(--text2);
+  font-size: var(--t-xs);
+}

@@ -1,0 +1,32 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.arrow {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  color: var(--text1);
+  font-size: var(--t-lg);
+}
+
+.title {
+  margin: 0;
+  color: var(--text0);
+  font-size: var(--t-xl);
+  text-transform: capitalize;
+}

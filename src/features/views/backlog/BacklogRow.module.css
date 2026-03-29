@@ -1,0 +1,127 @@
+.row {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text0);
+  border-radius: var(--r-md);
+  padding: 0.65rem;
+  display: grid;
+  grid-template-columns: 4px 24px minmax(180px, 1fr) auto auto auto auto auto;
+  gap: 0.6rem;
+  align-items: center;
+  text-align: left;
+}
+
+.row:hover {
+  background: var(--bg2);
+}
+
+.materiaBar {
+  width: 4px;
+  height: 100%;
+  border-radius: 999px;
+}
+
+.tipoIcon {
+  font-size: 0.95rem;
+}
+
+.main {
+  min-width: 0;
+}
+
+.meta {
+  color: var(--text3);
+  font-size: 0.68rem;
+}
+
+.title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.86rem;
+}
+
+.hour {
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0.2rem 0.35rem;
+}
+
+.badge {
+  border-radius: var(--r-sm);
+  font-size: 0.7rem;
+  padding: 0.2rem 0.45rem;
+}
+
+.progressWrap {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 58px;
+}
+
+.progressBar {
+  width: 58px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.progressBar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.progressWrap small {
+  color: var(--text3);
+  font-size: 0.65rem;
+}
+
+.dateInfo {
+  display: grid;
+  justify-items: end;
+  font-size: 0.74rem;
+}
+
+.dateInfo small {
+  color: var(--text3);
+}
+
+.video {
+  font-size: 0.9rem;
+}
+
+.done {
+  opacity: 0.56;
+}
+
+.urgOverdue .dateInfo small {
+  color: #fb7185;
+}
+
+.urgSoon .dateInfo small {
+  color: #facc15;
+}
+
+.urgWarn .dateInfo small {
+  color: #facc15;
+}
+
+.urgNormal .dateInfo small {
+  color: #4ade80;
+}
+
+@media (max-width: 960px) {
+  .row {
+    grid-template-columns: 4px 24px minmax(140px, 1fr) auto;
+  }
+
+  .badge,
+  .progressWrap,
+  .video {
+    display: none;
+  }
+}

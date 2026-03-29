@@ -1,0 +1,24 @@
+.filters {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.control {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 170px;
+}
+
+.control span {
+  color: var(--text2);
+  font-size: 0.78rem;
+}
+
+.control select {
+  background: var(--surface);
+  color: var(--text0);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 0.55rem 0.65rem;
+}

@@ -1,0 +1,79 @@
+.wrapper {
+  display: grid;
+  gap: var(--sp-4);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--t-2xl);
+}
+
+.subtitle {
+  margin: var(--sp-2) 0 0;
+  color: var(--text2);
+  font-size: var(--t-sm);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.meta {
+  color: var(--text2);
+  font-size: var(--t-xs);
+}
+
+.layoutSwitch {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+}
+
+.layoutButton {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text1);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--t-xs);
+}
+
+.layoutButton:hover,
+.layoutButton:focus-visible {
+  border-color: var(--accent);
+  color: var(--text0);
+}
+
+.layoutButtonActive {
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border-color: var(--accent);
+  color: var(--text0);
+}
+
+.empty {
+  margin: 0;
+  border: 1px dashed var(--border2);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  color: var(--text2);
+  padding: var(--sp-6);
+}
+
+@media (max-width: 720px) {
+  .controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

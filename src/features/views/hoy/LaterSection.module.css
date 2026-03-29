@@ -1,0 +1,21 @@
+.section {
+  display: grid;
+  gap: var(--sp-3);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  margin: 0;
+  font-size: var(--t-lg);
+}
+
+.grid {
+  display: grid;
+  gap: var(--sp-3);
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+}

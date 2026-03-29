@@ -1,0 +1,146 @@
+.card {
+  display: flex;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+  cursor: grab;
+  transition: box-shadow 0.15s, transform 0.1s;
+  user-select: none;
+}
+
+.card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
+  transform: translateY(-1px);
+}
+
+.card:active {
+  cursor: grabbing;
+  transform: translateY(0);
+}
+
+.colorBar {
+  width: 4px;
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.body {
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.materiaName {
+  font-size: var(--t-xxs);
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.title {
+  font-size: var(--t-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--text0);
+  line-height: 1.3;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.hour {
+  font-size: var(--t-xs);
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-variant-numeric: tabular-nums;
+}
+
+.badge {
+  font-size: var(--t-xxs);
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--r-sm);
+  font-weight: var(--font-weight-medium);
+}
+
+.video {
+  font-size: var(--t-base);
+}
+
+.progressWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.progressBar {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.progressBar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+.progressWrap small {
+  font-size: var(--t-xxs);
+  color: var(--text3);
+}
+
+.dateInfo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: var(--t-xs);
+  color: var(--text2);
+}
+
+.dateInfo small {
+  font-size: var(--t-xxs);
+}
+
+/* Urgency states */
+.urgOverdue {
+  outline: 1px solid var(--danger);
+  outline-offset: -1px;
+}
+
+.urgOverdue .dateInfo {
+  color: var(--danger);
+}
+
+.urgSoon {
+  outline: 1px solid var(--warning);
+  outline-offset: -1px;
+}
+
+.urgSoon .dateInfo {
+  color: var(--warning);
+}
+
+.urgWarn .dateInfo {
+  color: var(--warning);
+}
+
+.done {
+  opacity: 0.5;
+}
+
+.urgNormal {}
