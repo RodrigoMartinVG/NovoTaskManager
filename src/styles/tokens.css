@@ -1,0 +1,50 @@
+/* ═══ UAI Planner v3.0 — Design Tokens ═══ */
+
+:root {
+  /* ── Spacing (4px base) ── */
+  --space-1: 0.25rem; /* 4px  */
+  --space-2: 0.5rem; /* 8px  */
+  --space-3: 0.75rem; /* 12px */
+  --space-4: 1rem; /* 16px */
+  --space-5: 1.5rem; /* 24px */
+  --space-6: 2rem; /* 32px */
+  --space-8: 3rem; /* 48px */
+  --space-10: 4rem; /* 64px */
+
+  /* ── Typography ── */
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "DM Mono", "Fira Code", "Courier New", monospace;
+
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.8125rem; /* 13px — base */
+  --text-base: 1rem; /* 16px */
+  --text-lg: 1.125rem; /* 18px */
+  --text-xl: 1.25rem; /* 20px */
+  --text-2xl: 1.5rem; /* 24px */
+  --text-3xl: 1.875rem; /* 30px */
+  --text-4xl: 2.25rem; /* 36px */
+  --text-5xl: 3rem; /* 48px */
+
+  /* ── Z-Index Scale ── */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-header: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+  --z-tooltip: 700;
+  --z-pomo-focus: 900;
+
+  /* ── Transitions ── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+
+  /* ── Layout Budgets ── */
+  --header-height: 56px;
+  --modal-max-width: 560px;
+  --content-max-width: 1200px;
+}
