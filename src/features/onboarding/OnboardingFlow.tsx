@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { PlannerService } from '../../domains/planner/service'
 import { createEmptyPlannerData, isEmptyPlannerData, SAMPLE_DATA } from '../../domains/import-export/normalizer'
 import { usePlannerStore } from '../../store/usePlannerStore'
 import { useUIStore } from '../../store/useUIStore'
-import type { ThemeId } from '../../domains/planner/types'
+import type { PlannerData, ThemeId } from '../../domains/planner/types'
 import styles from './OnboardingFlow.module.css'
 
 const themeOptions: ThemeId[] = ['theme-1', 'theme-2', 'theme-3', 'theme-4', 'theme-5']
@@ -20,10 +20,14 @@ const themeLabels: Record<ThemeId, string> = {
 
 export function OnboardingFlow() {
   const [step, setStep] = useState(1)
+  const [celebrating, setCelebrating] = useState(false)
+  const [fadingOut, setFadingOut] = useState(false)
   const [selectedTheme, setSelectedTheme] = useState<ThemeId>(PlannerService.getTheme())
+  const pendingData = useRef<PlannerData | null>(null)
   const dataLoaded = usePlannerStore((state) => state.dataLoaded)
   const modeChanged = usePlannerStore((state) => state.modeChanged)
   const viewChanged = useUIStore((state) => state.viewChanged)
+  const confirmOpened = useUIStore((state) => state.confirmOpened)
 
   const existingData = useMemo(() => !isEmptyPlannerData(PlannerService.loadData()), [])
 
@@ -32,24 +36,47 @@ export function OnboardingFlow() {
     setSelectedTheme(theme)
   }
 
-  const enterApp = (data: ReturnType<typeof createEmptyPlannerData>) => {
-    modeChanged('local')
-    dataLoaded(data)
-    viewChanged('hoy')
-  }
+  const enterApp = useCallback((data: PlannerData) => {
+    pendingData.current = data
+    setCelebrating(true)
+    setTimeout(() => {
+      setFadingOut(true)
+      setTimeout(() => {
+        modeChanged('local')
+        dataLoaded(pendingData.current!)
+        viewChanged('hoy')
+      }, 600)
+    }, 1200)
+  }, [modeChanged, dataLoaded, viewChanged])
 
   const handleQuickStart = () => {
-    if (existingData && !window.confirm('Hay datos existentes en el navegador. Reemplazarlos eliminará el contenido actual. ¿Querés continuar?')) {
+    if (existingData) {
+      confirmOpened({
+        title: 'Reemplazar datos existentes',
+        description: 'Hay datos en tu navegador. Si continuás, el contenido actual se reemplazará por un planner vacío.',
+        confirmLabel: 'Reemplazar y empezar',
+        cancelLabel: 'Cancelar',
+        tone: 'warn',
+        onConfirm: () => enterApp(createEmptyPlannerData()),
+      })
       return
     }
     enterApp(createEmptyPlannerData())
   }
 
   const handleSampleData = () => {
-    if (existingData && !window.confirm('Hay datos existentes en el navegador. Reemplazarlos eliminará el contenido actual. ¿Querés continuar con los datos de ejemplo?')) {
+    if (existingData) {
+      confirmOpened({
+        title: 'Reemplazar datos existentes',
+        description: 'Hay datos en tu navegador. Si continuás, el contenido actual se reemplazará por datos de ejemplo.',
+        confirmLabel: 'Cargar datos de ejemplo',
+        cancelLabel: 'Cancelar',
+        tone: 'warn',
+        onConfirm: () => enterApp(SAMPLE_DATA as PlannerData),
+      })
       return
     }
-    enterApp(SAMPLE_DATA)
+    enterApp(SAMPLE_DATA as PlannerData)
   }
 
   const handleExitApp = () => {
@@ -58,9 +85,17 @@ export function OnboardingFlow() {
   }
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${fadingOut ? styles.fadeOut : ''}`}>
       <div className={styles.background} />
       <div className={styles.card}>
+        {celebrating ? (
+          <div className={styles.celebration}>
+            <div className={styles.logo}>◈</div>
+            <h2>¡Listo! Tu planner está configurado</h2>
+            <p>Preparando tu espacio de estudio…</p>
+          </div>
+        ) : (
+          <>
         <div className={styles.stepChips}>
           {stepLabels.map((label, index) => (
             <span key={label} className={`${styles.stepChip} ${step === index + 1 ? styles.stepChipActive : ''}`}>
@@ -215,6 +250,8 @@ export function OnboardingFlow() {
               )}
             </div>
           </div>
+        )}
+          </>
         )}
       </div>
     </div>

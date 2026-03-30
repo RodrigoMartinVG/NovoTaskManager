@@ -9,5 +9,5 @@
   padding: var(--sp-3) var(--sp-4);
   border-radius: var(--r-xl);
   box-shadow: var(--shadow);
-  z-index: 1500;
+  z-index: var(--z-toast);
 }

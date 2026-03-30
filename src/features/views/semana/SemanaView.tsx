@@ -42,6 +42,7 @@ export function SemanaView() {
   const filters = useUIStore((state) => state.filters)
   const weekLayout = useUIStore((state) => state.weekLayout)
   const weekLayoutChanged = useUIStore((state) => state.weekLayoutChanged)
+  const settingsOpened = useUIStore((state) => state.settingsOpened)
 
   const [dragInfo, setDragInfo] = useState<DragInfo | null>(null)
   const [openCell, setOpenCell] = useState<OpenCell | null>(null)
@@ -164,7 +165,14 @@ export function SemanaView() {
             </button>
           </div>
         </header>
-        <p className={styles.empty}>No hay materias para los filtros actuales.</p>
+        <p className={styles.empty}>
+          {data.materias.length === 0
+            ? <>
+                Agrega tus materias para armar el horario semanal.
+                <button type="button" className={styles.emptyAction} onClick={() => settingsOpened('materias')}>Abrir Configuracion ⚙</button>
+              </>
+            : 'No hay materias para los filtros actuales.'}
+        </p>
       </section>
     )
   }

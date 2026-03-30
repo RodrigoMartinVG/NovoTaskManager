@@ -11,6 +11,7 @@ export function MateriasView() {
   const sesionEliminada = usePlannerStore((state) => state.sesionEliminada)
   const filters = useUIStore((state) => state.filters)
   const confirmOpened = useUIStore((state) => state.confirmOpened)
+  const settingsOpened = useUIStore((state) => state.settingsOpened)
 
   const materiasFiltradas = useMemo(() => {
     const byFilter = selectMateriasFiltradas(data, filters)
@@ -37,7 +38,14 @@ export function MateriasView() {
           <h2 className={styles.title}>Materias</h2>
           <span className={styles.meta}>0 materias</span>
         </header>
-        <p className={styles.empty}>No hay materias para los filtros actuales.</p>
+        <p className={styles.empty}>
+          {data.materias.length === 0
+            ? <>
+                Configura tus materias para empezar a usar el planner.
+                <button type="button" className={styles.emptyAction} onClick={() => settingsOpened('materias')}>Abrir Configuracion ⚙</button>
+              </>
+            : 'No hay materias para los filtros actuales.'}
+        </p>
       </section>
     )
   }

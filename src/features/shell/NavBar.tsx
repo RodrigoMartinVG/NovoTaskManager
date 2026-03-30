@@ -10,21 +10,27 @@ import { SyncStatusIndicator } from './SyncStatusIndicator'
 import styles from './NavBar.module.css'
 import type { Periodo, ViewMode } from '../../domains/planner/types'
 
-const viewOrder: ViewMode[] = ['hoy', 'semana', 'kanban', 'backlog', 'calendar', 'materias']
 const periodos: Periodo[] = ['c1', 'c2', 'anual']
 
-const mapViewLabel: Record<ViewMode, string> = {
-  hoy: 'Hoy',
-  semana: 'Semana',
-  kanban: 'Kanban',
-  backlog: 'Backlog',
-  calendar: 'Calendario',
-  materias: 'Materias',
-}
+const primaryViews: { v: ViewMode; icon: string; label: string }[] = [
+  { v: 'hoy', icon: '◈', label: 'Hoy' },
+  { v: 'semana', icon: '◈', label: 'Semana' },
+  { v: 'materias', icon: '◉', label: 'Materias' },
+]
+
+const secondaryViews: { v: ViewMode; icon: string; label: string }[] = [
+  { v: 'backlog', icon: '≡', label: 'Backlog' },
+  { v: 'kanban', icon: '⬡', label: 'Kanban' },
+  { v: 'calendar', icon: '◷', label: 'Calendario' },
+]
 
 const themes = ['theme-1', 'theme-2', 'theme-3', 'theme-4', 'theme-5'] as const
 
-export function NavBar() {
+interface NavBarProps {
+  expanded?: boolean
+}
+
+export function NavBar({ expanded = false }: NavBarProps) {
   const activeView = useUIStore((state) => state.activeView)
   const viewChanged = useUIStore((state) => state.viewChanged)
   const filters = useUIStore((state) => state.filters)
@@ -56,116 +62,117 @@ export function NavBar() {
     }
   })
 
+  const renderViewGroup = (views: typeof primaryViews) => (
+    <div className={styles.viewGroup}>
+      {views.map(({ v, icon, label }) => (
+        <button
+          key={v}
+          type="button"
+          className={`${styles.nb} ${activeView === v ? styles.nbActive : ''}`}
+          onClick={() => viewChanged(v)}
+          title={label}
+        >
+          <span className={styles.nbIco} aria-hidden="true">{icon}</span>
+          <span className={styles.nbLabel}>{label}</span>
+        </button>
+      ))}
+    </div>
+  )
+
   return (
     <div className={styles.navbar}>
-      <div className={styles.viewButtons}>
-        {viewOrder.map((view) => (
-          <button
-            key={view}
-            type="button"
-            className={`${styles.button} ${activeView === view ? styles.buttonActive : ''}`}
-            onClick={() => viewChanged(view)}
-          >
-            {mapViewLabel[view]}
-          </button>
-        ))}
-      </div>
+      <nav className={styles.nav}>
+        {renderViewGroup(primaryViews)}
+        {renderViewGroup(secondaryViews)}
+      </nav>
 
       <div className={styles.actions}>
-        <div className={styles.controlGroup} ref={periodRef}>
-          <button
-            type="button"
-            className={styles.button}
-            onClick={() => setPeriodOpen((current) => !current)}
-          >
-            Período
-          </button>
-          {periodOpen && (
-            <div className={styles.popover}>
-              <div className={styles.filterGroup}>
-                <button
-                  type="button"
-                  className={`${styles.smallButton} ${filters.anio === 'all' ? styles.buttonActive : ''}`}
-                  onClick={() => anioChanged('all')}
-                >
-                  Todos los años
-                </button>
-                {availableYears.map((year) => (
-                  <button
-                    key={year}
-                    type="button"
-                    className={`${styles.smallButton} ${filters.anio === year ? styles.buttonActive : ''}`}
-                    onClick={() => anioChanged(year)}
-                  >
-                    {year}
-                  </button>
-                ))}
-              </div>
-              <div className={styles.filterGroup}>
-                {periodos.map((periodo) => (
-                  <button
-                    key={periodo}
-                    type="button"
-                    className={`${styles.smallButton} ${filters.periodo === periodo ? styles.buttonActive : ''}`}
-                    onClick={() => periodoToggled(periodo)}
-                  >
-                    {periodo.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className={styles.controlGroup} ref={themeRef}>
-          <button
-            type="button"
-            className={styles.button}
-            onClick={() => setThemeOpen((current) => !current)}
-          >
-            Theme
-          </button>
-          {themeOpen && (
-            <div className={styles.popover}>
-              <div className={styles.filterGroup}>
-                {themes.map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    className={`${styles.smallButton} ${theme === option ? styles.buttonActive : ''}`}
-                    onClick={() => {
-                      PlannerService.setTheme(option)
-                      setTheme(option)
-                    }}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        <button type="button" className={styles.button} onClick={() => taskEditOpened({})}>
-          + Nueva tarea
-        </button>
-        <button type="button" className={styles.button} onClick={importTasksOpened}>
-          Importar tareas
-        </button>
         <SyncStatusIndicator />
         <DriveDropdown />
-        <button type="button" className={styles.button} onClick={helpOpened} aria-label="Abrir guia de ayuda">
+        <button type="button" className={styles.iconBtn} onClick={helpOpened} aria-label="Abrir guía de ayuda" title="Guía de uso">
           ?
         </button>
-        <button
-          type="button"
-          className={styles.button}
-          onClick={() => settingsOpened('materias')}
-          aria-label="Abrir configuracion"
-        >
+        <button type="button" className={styles.iconBtn} onClick={() => settingsOpened('materias')} aria-label="Abrir configuración" title="Configuración">
           ⚙
         </button>
       </div>
+
+      {expanded && (
+        <div className={styles.expandedRow}>
+          <div className={styles.controlGroup} ref={periodRef}>
+            <button type="button" className={styles.chipBtn} onClick={() => setPeriodOpen((c) => !c)}>
+              Período
+            </button>
+            {periodOpen && (
+              <div className={styles.popover}>
+                <div className={styles.filterGroup}>
+                  <button
+                    type="button"
+                    className={`${styles.smallButton} ${filters.anio === 'all' ? styles.btnActive : ''}`}
+                    onClick={() => anioChanged('all')}
+                  >
+                    Todos los años
+                  </button>
+                  {availableYears.map((year) => (
+                    <button
+                      key={year}
+                      type="button"
+                      className={`${styles.smallButton} ${filters.anio === year ? styles.btnActive : ''}`}
+                      onClick={() => anioChanged(year)}
+                    >
+                      {year}
+                    </button>
+                  ))}
+                </div>
+                <div className={styles.filterGroup}>
+                  {periodos.map((periodo) => (
+                    <button
+                      key={periodo}
+                      type="button"
+                      className={`${styles.smallButton} ${filters.periodo === periodo ? styles.btnActive : ''}`}
+                      onClick={() => periodoToggled(periodo)}
+                    >
+                      {periodo.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className={styles.controlGroup} ref={themeRef}>
+            <button type="button" className={styles.chipBtn} onClick={() => setThemeOpen((c) => !c)}>
+              Tema
+            </button>
+            {themeOpen && (
+              <div className={styles.popover}>
+                <div className={styles.filterGroup}>
+                  {themes.map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      className={`${styles.smallButton} ${theme === option ? styles.btnActive : ''}`}
+                      onClick={() => {
+                        PlannerService.setTheme(option)
+                        setTheme(option)
+                      }}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button type="button" className={styles.chipBtn} onClick={() => taskEditOpened({})}>
+            + Nueva tarea
+          </button>
+          <button type="button" className={styles.chipBtn} onClick={importTasksOpened}>
+            Importar
+          </button>
+        </div>
+      )}
 
       {isListView && (
         <div className={styles.listFiltersRow}>

@@ -7,10 +7,16 @@ interface PomoStore {
   session: PomoSession | null
   contextMateria: MateriaContext | null
   elapsedSeconds: number
+  isPaused: boolean
+  pauseSeconds: number
+  focusMode: boolean
 
   pomoStarted(session: PomoSession): void
   pomoStopped(): Omit<Sesion, 'id'> | null
   pomoCancelled(): void
+  pomoPaused(): void
+  pomoResumed(): void
+  focusModeToggled(): void
   contextOpened(materia: MateriaContext): void
   contextClosed(): void
   tickOccurred(): void
@@ -20,8 +26,11 @@ export const usePomoStore = create<PomoStore>()((set, get) => ({
   session: null,
   contextMateria: null,
   elapsedSeconds: 0,
+  isPaused: false,
+  pauseSeconds: 0,
+  focusMode: true,
 
-  pomoStarted: (session) => set({ session, elapsedSeconds: 0 }),
+  pomoStarted: (session) => set({ session, elapsedSeconds: 0, isPaused: false, pauseSeconds: 0, focusMode: true }),
 
   pomoStopped: () => {
     const session = get().session
@@ -41,12 +50,24 @@ export const usePomoStore = create<PomoStore>()((set, get) => ({
       titulo: session.titulo,
     }
 
-    set({ session: null, elapsedSeconds: 0 })
+    set({ session: null, elapsedSeconds: 0, isPaused: false, pauseSeconds: 0, focusMode: false })
     return result
   },
 
-  pomoCancelled: () => set({ session: null, elapsedSeconds: 0 }),
+  pomoCancelled: () => set({ session: null, elapsedSeconds: 0, isPaused: false, pauseSeconds: 0, focusMode: false }),
+
+  pomoPaused: () => set({ isPaused: true }),
+  pomoResumed: () => set({ isPaused: false }),
+  focusModeToggled: () => set((state) => ({ focusMode: !state.focusMode })),
+
   contextOpened: (materia) => set({ contextMateria: materia }),
   contextClosed: () => set({ contextMateria: null }),
-  tickOccurred: () => set((state) => ({ elapsedSeconds: state.elapsedSeconds + 1 })),
+  tickOccurred: () => {
+    const { isPaused } = get()
+    if (isPaused) {
+      set((state) => ({ pauseSeconds: state.pauseSeconds + 1 }))
+    } else {
+      set((state) => ({ elapsedSeconds: state.elapsedSeconds + 1 }))
+    }
+  },
 }))

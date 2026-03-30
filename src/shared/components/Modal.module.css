@@ -6,15 +6,15 @@
   align-items: center;
   justify-content: center;
   padding: var(--sp-4);
-  z-index: 1800;
+  z-index: var(--z-modal);
 }
 
 .card {
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--r-xl);
-  box-shadow: var(--shadow);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 

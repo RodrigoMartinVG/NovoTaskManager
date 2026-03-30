@@ -1,17 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useUIStore } from '../../store/useUIStore'
 import { PlannerService } from '../../domains/planner/service'
 import { NavBar } from './NavBar'
 import styles from './ChromeShell.module.css'
-
-const viewLabels: Record<string, string> = {
-  hoy: 'Hoy',
-  semana: 'Semana',
-  kanban: 'Kanban',
-  backlog: 'Backlog',
-  calendar: 'Calendario',
-  materias: 'Materias',
-}
 
 export function ChromeShell() {
   const activeView = useUIStore((state) => state.activeView)
@@ -19,8 +10,7 @@ export function ChromeShell() {
   const [isOpen, setIsOpen] = useState(false)
   const [isPinned, setIsPinned] = useState(PlannerService.getChromePinned())
 
-  const headerLabel = useMemo(() => viewLabels[activeView] ?? activeView, [activeView])
-  const expanded = isPinned || isHovered || isOpen
+  const expanded = isHovered || isOpen
 
   useEffect(() => {
     if (!isPinned) {
@@ -35,48 +25,91 @@ export function ChromeShell() {
     setIsPinned(next)
   }
 
-  const handlePeekClick = () => {
-    if (!expanded) {
-      setIsOpen(true)
-    }
+  const handleMouseEnter = () => {
+    if (isPinned) setIsHovered(true)
   }
 
   const handleMouseLeave = () => {
-    if (!isPinned) {
-      setIsOpen(false)
-    }
-    setIsHovered(false)
+    if (isPinned) setIsHovered(false)
+    if (!isPinned) setIsOpen(false)
   }
 
-  return (
-    <div
-      className={`${styles.chromeShellSlot} ${expanded ? styles.expanded : styles.collapsed}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div className={styles.chromeShellSticky}>
-        <div
-          className={styles.peekBar}
-          onClick={handlePeekClick}
-        >
-          <div className={styles.peekTitle}>{headerLabel}</div>
+  const handlePeekClick = () => {
+    if (!isPinned) setIsOpen(true)
+  }
+
+  const handleFocus = () => {
+    if (isPinned) setIsHovered(true)
+  }
+
+  const handleBlur = (e: React.FocusEvent) => {
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      if (isPinned) setIsHovered(false)
+      if (!isPinned) setIsOpen(false)
+    }
+  }
+
+  /* When pinned: show compact single-line header always */
+  if (isPinned) {
+    return (
+      <header
+        className={`${styles.shell} ${styles.pinned}`}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+      >
+        <div className={styles.compactRow}>
           <button
             type="button"
-            className={styles.pinButton}
+            className={styles.pinBtn}
             onClick={togglePin}
             aria-pressed={isPinned}
-            aria-label={isPinned ? 'Desfijar barra superior' : 'Fijar barra superior'}
+            aria-label="Desfijar barra superior"
+            title="Desfijar barra"
           >
-            {isPinned ? 'Unpin' : 'Pin'}
+            📌
           </button>
+          <span className={styles.logo}>◈ UAI Planner</span>
+          <NavBar expanded={expanded} />
         </div>
-        <div className={styles.contentArea}>
-          <div className={styles.headerIntro}>
-            <div className={styles.headerTitle}>{headerLabel}</div>
-            <p className={styles.headerSubtitle}>Navegación rápida entre vistas y acceso a filtros.</p>
-          </div>
-          <NavBar />
+      </header>
+    )
+  }
+
+  /* When unpinned: hide upward, show peek bar, expand on click/hover */
+  return (
+    <div
+      className={`${styles.shell} ${styles.floating} ${isOpen ? styles.floatingOpen : styles.floatingCollapsed}`}
+      onMouseLeave={handleMouseLeave}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+    >
+      <div className={styles.floatingPanel}>
+        <div className={styles.compactRow}>
+          <button
+            type="button"
+            className={styles.pinBtn}
+            onClick={togglePin}
+            aria-pressed={isPinned}
+            aria-label="Fijar barra superior"
+            title="Fijar barra"
+          >
+            ☰
+          </button>
+          <span className={styles.logo}>◈ UAI Planner</span>
+          <NavBar expanded={isOpen} />
         </div>
+      </div>
+      <div
+        className={styles.peekBar}
+        onClick={handlePeekClick}
+        role="button"
+        tabIndex={0}
+        aria-label="Expandir barra de navegación"
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handlePeekClick() }}
+      >
+        <span className={styles.peekLabel}>◈ UAI</span>
       </div>
     </div>
   )

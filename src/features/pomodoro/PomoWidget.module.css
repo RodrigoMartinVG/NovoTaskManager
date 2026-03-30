@@ -2,7 +2,7 @@
   position: fixed;
   right: var(--sp-4);
   bottom: calc(var(--sp-4) + 3.25rem);
-  z-index: 1600;
+  z-index: var(--z-pomo-widget);
   min-width: 16rem;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -68,6 +68,16 @@
   background: var(--warn-bg);
   border-color: var(--warn-accent);
   color: var(--warn-accent);
+}
+
+.expandBtn {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2);
+  font-size: var(--t-xs);
+  background: var(--bg2);
+  color: var(--text2);
+  cursor: pointer;
 }
 
 @media (max-width: 720px) {

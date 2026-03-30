@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { PlannerService } from '../../../domains/planner/service'
 import {
   selectHorasSemanaPorMateria,
@@ -9,52 +9,24 @@ import {
   selectTareasFiltradas,
   selectUrgentTasks,
 } from '../../../domains/planner/selectors'
-import { DIAS } from '../../../domains/schedule/franjas'
 import { getDiaActual, getMomentoActualEnFranjas, getPlannerNowParts } from '../../../domains/schedule/timezone'
-import type { DiaId, FranjaId, Materia } from '../../../domains/planner/types'
+import type { Materia } from '../../../domains/planner/types'
 import { usePlannerStore } from '../../../store/usePlannerStore'
 import { usePomoStore } from '../../../store/usePomoStore'
 import { useUIStore } from '../../../store/useUIStore'
+import { HeroClock } from './HeroClock'
 import { CurrentSlotSection } from './CurrentSlotSection'
 import { LaterSection } from './LaterSection'
 import { UrgentTasksSection } from './UrgentTasksSection'
-import { WeekReferenceSection } from './WeekReferenceSection'
 import styles from './HoyView.module.css'
-
-const DAY_LABELS: Record<DiaId, string> = {
-  lun: 'Lunes',
-  mar: 'Martes',
-  mie: 'Miercoles',
-  jue: 'Jueves',
-  vie: 'Viernes',
-  sab: 'Sabado',
-  dom: 'Domingo',
-}
-
-function franjaEmoji(franjaId: FranjaId): string {
-  if (franjaId.startsWith('manana')) return '🌅'
-  if (franjaId.startsWith('tarde')) return '☀'
-  return '🌙'
-}
-
-function cellKey(dia: DiaId, franjaId: FranjaId): string {
-  return `${dia}:${franjaId}`
-}
 
 export function HoyView() {
   const data = usePlannerStore((state) => state.data)
-  const materiaSlotMovido = usePlannerStore((state) => state.materiaSlotMovido)
-  const materiaHorasCambiadas = usePlannerStore((state) => state.materiaHorasCambiadas)
   const filters = useUIStore((state) => state.filters)
   const listFilters = useUIStore((state) => state.listFilters)
-  const weekLayout = useUIStore((state) => state.weekLayout)
-  const weekLayoutChanged = useUIStore((state) => state.weekLayoutChanged)
   const taskSelected = useUIStore((state) => state.taskSelected)
   const viewChanged = useUIStore((state) => state.viewChanged)
   const contextOpened = usePomoStore((state) => state.contextOpened)
-
-  const [dragInfo, setDragInfo] = useState<{ materiaId: string; fromDia: DiaId; fromFranjaId: FranjaId } | null>(null)
-  const [openCell, setOpenCell] = useState<{ dia: DiaId; franjaId: FranjaId } | null>(null)
 
   const franjasMap = PlannerService.getFranjas()
   const franjas = Object.values(franjasMap).sort((left, right) => left.startsAt.localeCompare(right.startsAt))
@@ -70,16 +42,6 @@ export function HoyView() {
     }
     return byFilter.filter((materia) => materia.anio === filters.anio)
   }, [data, filters])
-
-  const materiasByCell = useMemo(() => {
-    return materiasFiltradas.reduce<Record<string, Materia[]>>((acc, materia) => {
-      for (const slot of materia.slots) {
-        const key = cellKey(slot.dia, slot.momento)
-        acc[key] = [...(acc[key] ?? []), materia]
-      }
-      return acc
-    }, {})
-  }, [materiasFiltradas])
 
   const materiasById = useMemo(() => selectSubjectsById(data.materias), [data.materias])
   const tiposById = useMemo(() => selectTaskTypesById(data.tipos), [data.tipos])
@@ -128,23 +90,6 @@ export function HoyView() {
       .sort((left, right) => left.startsAtMinutes - right.startsAtMinutes)
   }, [materiasFiltradas, currentDia, franjas, nowMinutes])
 
-  function updateMateriaSlots(
-    materiaId: string,
-    updater: (materia: Materia) => { slots: Materia['slots'] } | null,
-  ) {
-    const materia = data.materias.find((item) => item.id === materiaId)
-    if (!materia) {
-      return
-    }
-
-    const next = updater(materia)
-    if (!next) {
-      return
-    }
-
-    materiaHorasCambiadas(materia.id, materia.horasMin, materia.horasMax, next.slots)
-  }
-
   function onStartSession(materia: Materia) {
     contextOpened({
       materiaId: materia.id,
@@ -153,56 +98,9 @@ export function HoyView() {
     })
   }
 
-  function handleDropMateria(dia: DiaId, franjaId: FranjaId) {
-    if (!dragInfo) {
-      return
-    }
-
-    const alreadyAssigned = data.materias
-      .find((materia) => materia.id === dragInfo.materiaId)
-      ?.slots.some((slot) => slot.dia === dia && slot.momento === franjaId)
-
-    if (!alreadyAssigned && (dragInfo.fromDia !== dia || dragInfo.fromFranjaId !== franjaId)) {
-      materiaSlotMovido(
-        dragInfo.materiaId,
-        { dia: dragInfo.fromDia, momento: dragInfo.fromFranjaId },
-        { dia, momento: franjaId },
-      )
-    }
-
-    setDragInfo(null)
-  }
-
-  function handleAddMateria(materiaId: string, dia: DiaId, franjaId: FranjaId) {
-    updateMateriaSlots(materiaId, (materia) => {
-      const exists = materia.slots.some((slot) => slot.dia === dia && slot.momento === franjaId)
-      if (exists) {
-        return null
-      }
-
-      return {
-        slots: [...materia.slots, { dia, momento: franjaId }],
-      }
-    })
-  }
-
-  function handleRemoveMateria(materiaId: string, dia: DiaId, franjaId: FranjaId) {
-    updateMateriaSlots(materiaId, (materia) => ({
-      slots: materia.slots.filter((slot) => !(slot.dia === dia && slot.momento === franjaId)),
-    }))
-  }
-
-  const totalWeeklySlots = useMemo(
-    () => materiasFiltradas.reduce((count, materia) => count + materia.slots.length, 0),
-    [materiasFiltradas],
-  )
-
   return (
     <section className={styles.wrapper}>
-      <header className={styles.header}>
-        <h2 className={styles.title}>Hoy</h2>
-        <p className={styles.subtitle}>{`${DAY_LABELS[currentDia]} · ${franjaEmoji(currentFranja)} ${franjas.find((item) => item.id === currentFranja)?.label ?? 'Franja actual'}`}</p>
-      </header>
+      <HeroClock />
 
       <CurrentSlotSection
         currentFranja={currentFranja}
@@ -225,32 +123,6 @@ export function HoyView() {
         tiposById={tiposById}
         alertas={data.alertas}
         onSelectTask={taskSelected}
-      />
-
-      <WeekReferenceSection
-        title="📅 Semana"
-        subtitle={`${materiasFiltradas.length} materias · ${totalWeeklySlots} slots`}
-        weekLayout={weekLayout}
-        onChangeLayout={weekLayoutChanged}
-        dias={DIAS}
-        franjas={franjas}
-        currentDia={currentDia}
-        currentFranja={currentFranja}
-        materiasByCell={materiasByCell}
-        materiasFiltradas={materiasFiltradas}
-        openCell={openCell}
-        dayLabels={DAY_LABELS}
-        onToggleCell={(dia, franjaId) =>
-          setOpenCell((current) =>
-            current?.dia === dia && current.franjaId === franjaId ? null : { dia, franjaId },
-          )
-        }
-        onClosePopover={() => setOpenCell(null)}
-        onDragStart={(materiaId, fromDia, fromFranjaId) => setDragInfo({ materiaId, fromDia, fromFranjaId })}
-        onDragEnd={() => setDragInfo(null)}
-        onDropMateria={handleDropMateria}
-        onAddMateria={handleAddMateria}
-        onRemoveMateria={handleRemoveMateria}
       />
     </section>
   )

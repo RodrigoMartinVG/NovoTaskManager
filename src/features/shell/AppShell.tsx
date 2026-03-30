@@ -10,6 +10,7 @@ import { SchemaHint } from './SchemaHint'
 import { usePomoTimer } from '../pomodoro/usePomoTimer'
 import { PomoContextPopup } from '../pomodoro/PomoContextPopup'
 import { PomoWidget } from '../pomodoro/PomoWidget'
+import { PomoFocusView } from '../pomodoro/PomoFocusView'
 import { SettingsModal } from '../settings/SettingsModal'
 import { ResetModal } from '../settings/ResetModal'
 import { HorasEditorModal } from '../settings/HorasEditorModal'
@@ -42,6 +43,7 @@ export function AppShell({ children }: AppShellProps) {
   const confirm = useUIStore((state) => state.confirm)
   const contextMateria = usePomoStore((state) => state.contextMateria)
   const pomoSession = usePomoStore((state) => state.session)
+  const pomoFocusMode = usePomoStore((state) => state.focusMode)
   const driveConflict = useDriveStore((state) => state.conflict)
   const appMode = usePlannerStore((state) => state.appMode)
 
@@ -73,7 +75,8 @@ export function AppShell({ children }: AppShellProps) {
       {manualSessionMateriaId && <ManualSessionModal />}
       {helpOpen && <HelpGuide />}
       {contextMateria && <PomoContextPopup />}
-      {pomoSession && <PomoWidget />}
+      {pomoSession && pomoFocusMode && <PomoFocusView />}
+      {pomoSession && !pomoFocusMode && <PomoWidget />}
       {driveConflict && <DriveConflictModal />}
       {confirm && <ConfirmModal />}
     </div>

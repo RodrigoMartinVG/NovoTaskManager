@@ -2,7 +2,7 @@
   position: absolute;
   top: calc(100% + var(--sp-2));
   left: 0;
-  z-index: 40;
+  z-index: var(--z-popover);
   width: min(19rem, calc(100vw - 3rem));
   display: grid;
   gap: var(--sp-3);

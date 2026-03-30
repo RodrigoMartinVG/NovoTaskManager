@@ -1,22 +1,29 @@
 .button {
-  border: 1px solid var(--border);
+  border: none;
   border-radius: var(--r-sm);
-  background: var(--surface);
-  color: var(--text1);
+  background: transparent;
+  color: var(--text2);
   display: flex;
   align-items: center;
-  gap: var(--sp-2);
-  padding: 0.65rem 0.85rem;
+  gap: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+
+.button:hover {
+  color: var(--text0);
 }
 
 .dot {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .dotSaved {
   background: var(--ok-text);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ok-text) 18%, transparent);
 }
 
 .dotSaving {
@@ -33,5 +40,7 @@
 }
 
 .text {
-  font-size: var(--t-xs);
+  font-size: var(--t-xxs);
+  white-space: nowrap;
+  display: none;
 }

@@ -32,8 +32,8 @@ export function DriveDropdown() {
 
   return (
     <div className={styles.wrapper}>
-      <button type="button" className={styles.button} onClick={() => setOpen((value) => !value)}>
-        💾 Datos
+      <button type="button" className={styles.button} onClick={() => setOpen((value) => !value)} aria-label="Datos y sincronización" title="Datos">
+        💾
       </button>
 
       {open && (

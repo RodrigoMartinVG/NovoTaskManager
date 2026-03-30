@@ -13,8 +13,12 @@ function formatElapsed(seconds: number): string {
 export function PomoWidget() {
   const session = usePomoStore((state) => state.session)
   const elapsedSeconds = usePomoStore((state) => state.elapsedSeconds)
+  const isPaused = usePomoStore((state) => state.isPaused)
   const pomoStopped = usePomoStore((state) => state.pomoStopped)
   const pomoCancelled = usePomoStore((state) => state.pomoCancelled)
+  const pomoPaused = usePomoStore((state) => state.pomoPaused)
+  const pomoResumed = usePomoStore((state) => state.pomoResumed)
+  const focusModeToggled = usePomoStore((state) => state.focusModeToggled)
 
   const data = usePlannerStore((state) => state.data)
   const sesionAgregada = usePlannerStore((state) => state.sesionAgregada)
@@ -67,7 +71,7 @@ export function PomoWidget() {
     <aside className={styles.widget} aria-live="polite">
       <header className={styles.header}>
         <div className={styles.subject}>
-          <span className={styles.dot} style={{ backgroundColor: materia?.color ?? '#999999' }} />
+          <span className={styles.dot} style={{ backgroundColor: materia?.color ?? '#999999' }} aria-hidden="true" />
           <span>{materia?.nombre ?? 'Materia'}</span>
         </div>
       </header>
@@ -76,11 +80,22 @@ export function PomoWidget() {
       <p className={styles.timer}>{formatElapsed(elapsedSeconds)}</p>
 
       <div className={styles.actions}>
+        <button
+          type="button"
+          className={isPaused ? styles.stopBtn : styles.cancelBtn}
+          onClick={() => (isPaused ? pomoResumed() : pomoPaused())}
+          aria-label={isPaused ? 'Retomar sesion' : 'Pausar sesion'}
+        >
+          {isPaused ? '▶' : '⏸'}
+        </button>
         <button type="button" className={styles.stopBtn} onClick={handleStop}>
           ⏹ Detener
         </button>
-        <button type="button" className={styles.cancelBtn} onClick={handleCancel}>
-          ✕ Cancelar
+        <button type="button" className={styles.cancelBtn} onClick={handleCancel} aria-label="Cancelar sesion">
+          ✕
+        </button>
+        <button type="button" className={styles.expandBtn} onClick={focusModeToggled} aria-label="Expandir a vista completa">
+          ▴
         </button>
       </div>
     </aside>

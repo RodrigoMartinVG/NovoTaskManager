@@ -5,6 +5,7 @@ import { normalizePlannerData } from './domains/import-export/normalizer'
 import { PlannerService } from './domains/planner/service'
 import './styles/reset.css'
 import './styles/tokens.css'
+import './styles/layers.css'
 import './styles/themes.css'
 import './styles/base.css'
 

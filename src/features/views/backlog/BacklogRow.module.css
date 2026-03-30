@@ -100,19 +100,19 @@
 }
 
 .urgOverdue .dateInfo small {
-  color: #fb7185;
+  color: var(--err-text);
 }
 
 .urgSoon .dateInfo small {
-  color: #facc15;
+  color: var(--warn-text);
 }
 
 .urgWarn .dateInfo small {
-  color: #facc15;
+  color: var(--warn-text);
 }
 
 .urgNormal .dateInfo small {
-  color: #4ade80;
+  color: var(--ok-text);
 }
 
 @media (max-width: 960px) {

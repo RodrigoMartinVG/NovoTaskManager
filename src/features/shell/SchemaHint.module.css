@@ -2,7 +2,7 @@
   position: fixed;
   right: var(--sp-4);
   bottom: var(--sp-4);
-  z-index: 1200;
+  z-index: var(--z-toast);
   max-width: min(42rem, calc(100vw - 2rem));
 }
 

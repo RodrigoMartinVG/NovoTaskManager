@@ -235,7 +235,11 @@ export function HelpGuide() {
         <section className={styles.contentPanel}>
           <header className={styles.contentHeader}>
             <h3>{`${section.icon} ${section.title}`}</h3>
-            <p>Guía práctica para usar UAI Planner en el orden que más valor devuelve desde el primer día.</p>
+            <p>
+              {section.id === 'inicio'
+                ? 'El orden que más valor devuelve: Materias → Semana → Tareas → Pomodoro. Cada paso activa el siguiente.'
+                : 'Guía práctica para usar UAI Planner en el orden que más valor devuelve desde el primer día.'}
+            </p>
           </header>
 
           <div className={styles.contentBody}>

@@ -14,6 +14,7 @@ export function BacklogView() {
   const data = usePlannerStore((state) => state.data)
   const listFilters = useUIStore((state) => state.listFilters)
   const taskSelected = useUIStore((state) => state.taskSelected)
+  const taskEditOpened = useUIStore((state) => state.taskEditOpened)
 
   const materiaIds = useMemo(() => selectMatIdsActivos(data.materias), [data.materias])
   const tareasFiltradas = useMemo(
@@ -30,7 +31,14 @@ export function BacklogView() {
           <h2 className={styles.title}>Backlog</h2>
           <span className={styles.meta}>0 tareas</span>
         </header>
-        <div className={styles.empty}>Todavia no hay tareas cargadas. Crea tu primera tarea desde el boton +</div>
+        <div className={styles.empty}>
+          {data.tareas.length === 0
+            ? <>
+                Todavia no hay tareas cargadas.
+                <button type="button" className={styles.emptyAction} onClick={() => taskEditOpened({})}>+ Nueva tarea</button>
+              </>
+            : 'No hay tareas para los filtros actuales.'}
+        </div>
       </section>
     )
   }

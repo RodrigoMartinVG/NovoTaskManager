@@ -1,0 +1,12 @@
+:root {
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-popover: 300;
+  --z-shell: 400;
+  --z-toast: 500;
+  --z-modal-backdrop: 600;
+  --z-modal: 700;
+  --z-pomo-widget: 800;
+  --z-pomo-focus: 900;
+}

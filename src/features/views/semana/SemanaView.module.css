@@ -69,6 +69,19 @@
   background: var(--surface);
   color: var(--text2);
   padding: var(--sp-6);
+  display: grid;
+  gap: var(--sp-3);
+}
+
+.emptyAction {
+  justify-self: flex-start;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  background: var(--bg2);
+  color: var(--accent);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--t-xs);
+  cursor: pointer;
 }
 
 @media (max-width: 720px) {
