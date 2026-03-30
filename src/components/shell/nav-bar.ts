@@ -32,10 +32,23 @@ const THEMES: ThemeDef[] = [
   { id: "cafe", label: "Café", dot: "#362820" },
 ];
 
+interface DensityDef {
+  id: string;
+  label: string;
+  icon: string;
+}
+
+const DENSITIES: DensityDef[] = [
+  { id: "compacto", label: "Compacto", icon: "A" },
+  { id: "", label: "Normal", icon: "A" },
+  { id: "comodo", label: "Cómodo", icon: "A" },
+];
+
 @customElement("nav-bar")
 export class NavBar extends LitElement {
   @property() activeView: ViewId = "hoy";
   @property() currentTheme = "noche";
+  @property() currentDensity = "";
 
   private themeOpen = false;
 
@@ -66,6 +79,16 @@ export class NavBar extends LitElement {
     .logo-glyph {
       color: var(--accent);
       margin-right: 0.25rem;
+    }
+    .logo-full { display: inline; }
+    .logo-short { display: none; }
+
+    @media (max-width: 60em) {
+      .logo-full { display: none; }
+      .logo-short { display: inline; }
+    }
+    @media (max-width: 30em) {
+      .logo-short { display: none; }
     }
 
     /* ── Nav pills (centradas, ocupan espacio restante) ── */
@@ -255,6 +278,44 @@ export class NavBar extends LitElement {
       border: 1px solid var(--border);
       flex-shrink: 0;
     }
+
+    /* ── Density options ── */
+    .tsw-separator {
+      height: 1px;
+      background: var(--border);
+      margin: 0.375rem 0;
+    }
+    .density-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text1);
+      padding: 0.375rem 0.5rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .12s;
+    }
+    .density-option:hover {
+      background: var(--bg2);
+      color: var(--text0);
+    }
+    .density-option[data-active] {
+      color: var(--text0);
+      font-weight: 600;
+    }
+    .density-ico {
+      font-weight: 700;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .density-ico-sm { font-size: 0.625rem; }
+    .density-ico-md { font-size: 0.75rem; }
+    .density-ico-lg { font-size: 0.875rem; }
   `;
 
   private _onNavClick(id: ViewId) {
@@ -265,9 +326,21 @@ export class NavBar extends LitElement {
 
   private _onThemeClick(id: string) {
     document.documentElement.setAttribute("data-theme", id);
-    localStorage.setItem("uai-theme", id);
+    localStorage.setItem("oda-theme", id);
     this.currentTheme = id;
     this.themeOpen = false;
+    this.requestUpdate();
+  }
+
+  private _onDensityClick(id: string) {
+    if (id) {
+      document.documentElement.setAttribute("data-density", id);
+      localStorage.setItem("oda-density", id);
+    } else {
+      document.documentElement.removeAttribute("data-density");
+      localStorage.removeItem("oda-density");
+    }
+    this.currentDensity = id;
     this.requestUpdate();
   }
 
@@ -288,6 +361,7 @@ export class NavBar extends LitElement {
     super.connectedCallback();
     document.addEventListener("click", this._closeThemePopover);
     this.currentTheme = document.documentElement.getAttribute("data-theme") || "noche";
+    this.currentDensity = document.documentElement.getAttribute("data-density") || "";
   }
 
   disconnectedCallback() {
@@ -304,7 +378,7 @@ export class NavBar extends LitElement {
 
     return html`
       <header class="hdr">
-        <span class="logo"><span class="logo-glyph">◈</span>UAI Planner</span>
+        <span class="logo"><span class="logo-glyph">◈</span><span class="logo-full">Oda Planner</span><span class="logo-short">Oda</span></span>
 
         <nav class="nav" aria-label="Vistas principales">
           ${NAV_ITEMS.map(
@@ -339,7 +413,7 @@ export class NavBar extends LitElement {
             ${
               this.themeOpen
                 ? html`
-              <div class="tsw-popover" role="listbox" aria-label="Temas">
+              <div class="tsw-popover" role="group" aria-label="Apariencia">
                 <div class="tsw-pop-title">TEMA</div>
                 ${THEMES.map(
                   (t) => html`
@@ -352,6 +426,20 @@ export class NavBar extends LitElement {
                   >
                     <span class="tsw-option-dot" style="background:${t.dot}"></span>
                     ${t.label}
+                  </button>
+                `,
+                )}
+                <div class="tsw-separator"></div>
+                <div class="tsw-pop-title">DENSIDAD</div>
+                ${DENSITIES.map(
+                  (d) => html`
+                  <button
+                    class="density-option"
+                    ?data-active=${this.currentDensity === d.id}
+                    @click=${() => this._onDensityClick(d.id)}
+                  >
+                    <span class="density-ico ${d.id === "compacto" ? "density-ico-sm" : d.id === "comodo" ? "density-ico-lg" : "density-ico-md"}">${d.icon}</span>
+                    ${d.label}
                   </button>
                 `,
                 )}

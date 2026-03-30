@@ -1,4 +1,4 @@
-/* ═══ UAI Planner v3.0 — Entry Point ═══ */
+/* ═══ Oda v3.0 — Entry Point ═══ */
 
 // Global styles (tokens, themes, reset)
 import "./styles/tokens.css";
