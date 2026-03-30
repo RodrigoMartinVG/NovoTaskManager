@@ -1,5 +1,7 @@
+import { SignalWatcher } from "@lit-labs/signals";
 import { LitElement, css, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import { isWelcome } from "../../state/store.js";
 import type { ViewId } from "./nav-bar.js";
 import "./nav-bar.js";
 import "../views/hoy-view.js";
@@ -10,7 +12,7 @@ import "../views/kanban-view.js";
 import "../views/calendario-view.js";
 
 @customElement("app-shell")
-export class AppShell extends LitElement {
+export class AppShell extends SignalWatcher(LitElement) {
   @state() private activeView: ViewId = "hoy";
 
   static styles = css`
@@ -80,6 +82,11 @@ export class AppShell extends LitElement {
   }
 
   render() {
+    // Onboarding mode: only show the wizard
+    if (isWelcome.value) {
+      return html`<onboarding-flow @onboarding-done=${() => this.requestUpdate()}></onboarding-flow>`;
+    }
+
     return html`
       <nav-bar
         .activeView=${this.activeView}
@@ -88,6 +95,10 @@ export class AppShell extends LitElement {
       <main class="main">
         ${this._renderView()}
       </main>
+
+      <!-- Pomodoro overlays (self-hide via signals) -->
+      <pomo-focus-view></pomo-focus-view>
+      <pomo-widget></pomo-widget>
     `;
   }
 }
