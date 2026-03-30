@@ -32,7 +32,7 @@ export class ViewPlaceholder extends LitElement {
     .msg {
       font-size: var(--text-sm);
       color: var(--text2);
-      max-width: 320px;
+      max-width: 20rem;
       line-height: 1.6;
     }
   `;

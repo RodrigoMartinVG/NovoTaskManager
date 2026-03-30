@@ -44,7 +44,7 @@
   --duration-slow: 400ms;
 
   /* ── Layout Budgets ── */
-  --header-height: 56px;
-  --modal-max-width: 560px;
-  --content-max-width: 1200px;
+  --header-height: 3.5rem; /* 56px */
+  --modal-max-width: 35rem; /* 560px */
+  --content-max-width: 75rem; /* 1200px */
 }

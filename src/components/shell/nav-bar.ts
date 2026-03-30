@@ -47,17 +47,17 @@ export class NavBar extends LitElement {
     .hdr {
       display: flex;
       align-items: center;
-      padding: 0 16px;
-      height: var(--header-height, 56px);
+      padding: 0 1rem;
+      height: var(--header-height, 3.5rem);
       border-bottom: 1px solid var(--border);
       background: var(--bg1);
-      gap: 8px;
+      gap: 0.5rem;
     }
 
     /* ── Logo ── */
     .logo {
       flex: 0 0 auto;
-      font-size: 15px;
+      font-size: 0.9375rem;
       font-weight: 700;
       color: var(--text0);
       letter-spacing: .05em;
@@ -65,14 +65,14 @@ export class NavBar extends LitElement {
     }
     .logo-glyph {
       color: var(--accent);
-      margin-right: 4px;
+      margin-right: 0.25rem;
     }
 
     /* ── Nav pills (centradas, ocupan espacio restante) ── */
     .nav {
       flex: 1 1 0;
       display: flex;
-      gap: 4px;
+      gap: 0.25rem;
       justify-content: center;
       min-width: 0;
       overflow-x: auto;
@@ -84,17 +84,17 @@ export class NavBar extends LitElement {
       background: transparent;
       border: none;
       color: var(--text2);
-      padding: 6px 14px;
-      border-radius: 6px;
+      padding: 0.375rem 0.875rem;
+      border-radius: 0.375rem;
       cursor: pointer;
       font-family: inherit;
-      font-size: 12px;
+      font-size: 0.75rem;
       font-weight: 500;
       transition: all .18s;
       white-space: nowrap;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 0.375rem;
       line-height: 1;
     }
     .nb:hover {
@@ -112,11 +112,11 @@ export class NavBar extends LitElement {
       outline-offset: 2px;
     }
     .nb-ico {
-      font-size: 11px;
+      font-size: 0.6875rem;
       font-weight: 700;
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
+      width: 1.125rem;
+      height: 1.125rem;
+      border-radius: 0.25rem;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -133,24 +133,24 @@ export class NavBar extends LitElement {
     }
 
     /* ── Responsive: icon-only pills on narrow viewports ── */
-    @media (max-width: 768px) {
+    @media (max-width: 48em) {
       .nb-label {
         display: none;
       }
       .nb {
-        padding: 6px 8px;
+        padding: 0.375rem 0.5rem;
       }
       .ibtn {
-        width: 28px;
-        height: 28px;
-        font-size: 12px;
+        width: 1.75rem;
+        height: 1.75rem;
+        font-size: 0.75rem;
       }
       .tsw-dot {
-        width: 10px;
-        height: 10px;
+        width: 0.625rem;
+        height: 0.625rem;
       }
       .actions {
-        gap: 3px;
+        gap: 0.1875rem;
       }
     }
 
@@ -158,7 +158,7 @@ export class NavBar extends LitElement {
     .actions {
       flex: 0 0 auto;
       display: flex;
-      gap: 4px;
+      gap: 0.25rem;
       align-items: center;
     }
 
@@ -166,13 +166,13 @@ export class NavBar extends LitElement {
       background: transparent;
       border: 1px solid var(--border);
       color: var(--text2);
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 0.5rem;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 0.875rem;
       cursor: pointer;
       transition: all .16s;
       position: relative;
@@ -194,48 +194,48 @@ export class NavBar extends LitElement {
     .tsw-btn {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 12px;
+      gap: 0.375rem;
+      font-size: 0.75rem;
     }
     .tsw-dot {
-      width: 12px;
-      height: 12px;
+      width: 0.75rem;
+      height: 0.75rem;
       border-radius: 50%;
       border: 1px solid var(--border2);
       flex-shrink: 0;
     }
     .tsw-popover {
       position: absolute;
-      top: calc(100% + 8px);
+      top: calc(100% + 0.5rem);
       right: 0;
-      width: 160px;
+      width: 10rem;
       background: var(--bg1);
       border: 1px solid var(--border2);
-      border-radius: 9px;
+      border-radius: 0.5625rem;
       box-shadow: 0 8px 24px rgba(0,0,0,.15);
       z-index: var(--z-dropdown, 100);
       overflow: hidden;
-      padding: 8px;
+      padding: 0.5rem;
     }
     .tsw-pop-title {
-      font-size: 9px;
+      font-size: 0.5625rem;
       color: var(--text3);
       letter-spacing: .1em;
       font-weight: 600;
-      padding: 2px 6px 6px;
+      padding: 0.125rem 0.375rem 0.375rem;
       text-transform: uppercase;
     }
     .tsw-option {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 0.5rem;
       width: 100%;
       background: transparent;
       border: none;
       color: var(--text1);
-      padding: 6px 8px;
-      border-radius: 6px;
-      font-size: 12px;
+      padding: 0.375rem 0.5rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
       font-family: inherit;
       cursor: pointer;
       transition: all .12s;
@@ -249,8 +249,8 @@ export class NavBar extends LitElement {
       font-weight: 600;
     }
     .tsw-option-dot {
-      width: 10px;
-      height: 10px;
+      width: 0.625rem;
+      height: 0.625rem;
       border-radius: 50%;
       border: 1px solid var(--border);
       flex-shrink: 0;

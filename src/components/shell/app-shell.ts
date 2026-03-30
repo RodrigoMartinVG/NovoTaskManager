@@ -38,7 +38,7 @@ export class AppShell extends LitElement {
     @keyframes viewFadeIn {
       from {
         opacity: 0;
-        transform: translateY(6px);
+        transform: translateY(0.375rem);
       }
       to {
         opacity: 1;
