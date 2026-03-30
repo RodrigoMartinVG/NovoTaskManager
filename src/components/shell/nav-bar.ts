@@ -107,6 +107,10 @@ export class NavBar extends LitElement {
       box-shadow: 0 1px 3px rgba(0,0,0,.12);
       font-weight: 600;
     }
+    .nb:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
     .nb-ico {
       font-size: 11px;
       font-weight: 700;
@@ -136,6 +140,18 @@ export class NavBar extends LitElement {
       .nb {
         padding: 6px 8px;
       }
+      .ibtn {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+      }
+      .tsw-dot {
+        width: 10px;
+        height: 10px;
+      }
+      .actions {
+        gap: 3px;
+      }
     }
 
     /* ── Actions (derecha) ── */
@@ -157,6 +173,7 @@ export class NavBar extends LitElement {
       align-items: center;
       justify-content: center;
       font-size: 14px;
+      cursor: pointer;
       transition: all .16s;
       position: relative;
     }
@@ -164,6 +181,10 @@ export class NavBar extends LitElement {
       color: var(--text0);
       background: var(--bg2);
       border-color: var(--border2);
+    }
+    .ibtn:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
 
     /* ── Theme switcher ── */
@@ -303,6 +324,9 @@ export class NavBar extends LitElement {
         </nav>
 
         <div class="actions">
+          <button class="ibtn" aria-label="Ayuda" title="Ayuda">?</button>
+          <button class="ibtn" aria-label="Configuración" title="Configuración">⚙</button>
+          <button class="ibtn" aria-label="Datos" title="Datos">💾</button>
           <div class="tsw">
             <button
               class="ibtn tsw-btn"
