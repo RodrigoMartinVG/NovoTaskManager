@@ -3,8 +3,9 @@ import { customElement, state } from "lit/decorators.js";
 import "./config-tab-tipos.js";
 import "./config-tab-franjas.js";
 import "./config-tab-tema.js";
+import "./config-tab-alertas.js";
 
-type ConfigTab = "tipos" | "franjas" | "tema";
+type ConfigTab = "tipos" | "franjas" | "tema" | "alertas";
 
 interface TabDef {
   id: ConfigTab;
@@ -16,6 +17,7 @@ const TABS: TabDef[] = [
   { id: "tipos", label: "Tipos", icon: "📋" },
   { id: "franjas", label: "Franjas", icon: "🕐" },
   { id: "tema", label: "Apariencia", icon: "🎨" },
+  { id: "alertas", label: "Alertas", icon: "🔔" },
 ];
 
 @customElement("config-view")
@@ -105,6 +107,8 @@ export class ConfigView extends LitElement {
         return html`<config-tab-franjas></config-tab-franjas>`;
       case "tema":
         return html`<config-tab-tema></config-tab-tema>`;
+      case "alertas":
+        return html`<config-tab-alertas></config-tab-alertas>`;
     }
   }
 

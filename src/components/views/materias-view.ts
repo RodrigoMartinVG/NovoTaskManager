@@ -1,17 +1,19 @@
 import { SignalWatcher } from "@lit-labs/signals";
+import { effect } from "@preact/signals-core";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import type { FranjaDef, Materia, MateriaSlot } from "../../state/types.js";
+import type { FranjaDef, Materia } from "../../state/types.js";
 import {
   editingMateriaId,
   materiaReturnView,
-  materias,
+  filteredMaterias as materias,
   plannerData,
+  statsMateriaId,
+  statsReturnView,
 } from "../../state/store.js";
 import type { ViewId } from "../shell/nav-bar.js";
 
 /* ═══ Constants ═══ */
-const DIA_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
 type ProgresoEstado = "al_dia" | "casi" | "atrasado" | "sin_slots" | "sin_objetivo";
 
@@ -110,24 +112,24 @@ const ESTADO_BADGE: Record<ProgresoEstado, { label: string; cls: string }> = {
   sin_objetivo: { label: "Sin objetivo", cls: "badge-muted" },
 };
 
-function slotSummary(slots: MateriaSlot[], franjas: FranjaDef[]): string {
-  if (slots.length === 0) return "Sin horarios";
-  const map = new Map<string, FranjaDef>();
-  for (const f of franjas) map.set(f.id, f);
-  let totalMins = 0;
-  for (const s of slots) {
-    const f = map.get(s.franjaId);
-    if (f) totalMins += Math.max(0, f.horaFin - f.horaInicio);
-  }
-  const h = (totalMins / 60).toFixed(1);
-  const days = new Set(slots.map((s) => s.dia)).size;
-  return `${slots.length} slot${slots.length !== 1 ? "s" : ""} · ${days} día${days !== 1 ? "s" : ""} · ≈${h}h/sem`;
-}
-
 /* ═══ Component ═══ */
 @customElement("materias-view")
 export class MateriasView extends SignalWatcher(LitElement) {
-  @state() private expandedId: string | null = null;
+  private _dispose?: () => void;
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._dispose = effect(() => {
+      materias.value;
+      plannerData.value;
+      this.requestUpdate();
+    });
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._dispose?.();
+  }
 
   static styles = css`
     :host {
@@ -160,14 +162,6 @@ export class MateriasView extends SignalWatcher(LitElement) {
     }
     .btn-primary:hover { opacity: 0.85; }
 
-    .btn-edit {
-      background: transparent; color: var(--accent); border: 1px solid var(--accent);
-      border-radius: 0.375rem; padding: 0.375rem 0.75rem; font: inherit;
-      font-size: var(--text-xs, 0.75rem); font-weight: 600;
-      cursor: pointer; transition: all 0.12s; white-space: nowrap;
-    }
-    .btn-edit:hover { background: var(--accent); color: #fff; }
-
     /* ── Cards list ── */
     .cards { display: flex; flex-direction: column; gap: var(--space-3, 0.75rem); }
 
@@ -189,9 +183,15 @@ export class MateriasView extends SignalWatcher(LitElement) {
       width: 0.75rem; height: 0.75rem; border-radius: 50%; flex-shrink: 0;
     }
     .card-info { flex: 1; min-width: 0; }
+    .card-name-row {
+      display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap;
+    }
     .card-name {
       font-size: var(--text-base); font-weight: 600; color: var(--text0); margin: 0;
-      display: inline;
+    }
+    .card-subtitle {
+      font-size: var(--text-xs); color: var(--text3);
+      display: inline-flex; gap: 0.375rem; align-items: baseline;
     }
     .card-meta {
       display: flex; gap: var(--space-3, 0.75rem);
@@ -223,80 +223,19 @@ export class MateriasView extends SignalWatcher(LitElement) {
       transition: width 0.3s var(--ease-out, ease-out);
     }
 
-    /* expand icon */
+    /* chevron */
     .expand-ico {
-      font-size: var(--text-sm); color: var(--text3);
-      transition: transform 0.2s; flex-shrink: 0;
+      font-size: 1.25rem; color: var(--text3); flex-shrink: 0;
+      line-height: 1;
     }
-    .card[data-expanded] .expand-ico { transform: rotate(180deg); }
-
-    /* ── Detail panel (read-only) ── */
-    .detail {
-      border-top: 1px solid var(--border);
-      padding: var(--space-4, 1rem);
+    .btn-icon {
+      background: transparent; border: none; cursor: pointer;
+      font-size: var(--text-sm); padding: 0.25rem; border-radius: 0.25rem;
+      opacity: 0; transition: opacity 0.15s;
+      flex-shrink: 0;
     }
-
-    .detail-row {
-      display: flex; flex-wrap: wrap; gap: var(--space-4, 1rem);
-      margin-bottom: var(--space-3, 0.75rem);
-    }
-
-    .detail-block {
-      display: flex; flex-direction: column; gap: var(--space-1, 0.25rem);
-    }
-    .detail-label {
-      font-size: var(--text-xs, 0.75rem); font-weight: 600; color: var(--text2);
-      text-transform: uppercase; letter-spacing: 0.04em;
-    }
-    .detail-value {
-      font-size: var(--text-sm); color: var(--text0);
-    }
-
-    /* ── Slot visual (read-only dots) ── */
-    .slot-visual {
-      display: grid;
-      grid-template-columns: minmax(5rem, auto) repeat(7, 1fr);
-      gap: 0.25rem;
-      font-size: var(--text-xs);
-    }
-    .slot-visual .day-hdr {
-      text-align: center; font-weight: 600; color: var(--text2);
-      padding: 0.125rem 0;
-    }
-    .slot-visual .franja-label {
-      display: flex; align-items: center; gap: 0.25rem;
-      padding-right: 0.5rem; color: var(--text2); white-space: nowrap;
-    }
-    .slot-dot-cell {
-      display: flex; align-items: center; justify-content: center;
-    }
-    .slot-dot {
-      width: 0.875rem; height: 0.875rem; border-radius: 0.25rem;
-    }
-    .slot-dot-on { background: var(--accent); opacity: 0.85; }
-    .slot-dot-off { background: var(--bg3); }
-
-    /* ── Progress section (expanded) ── */
-    .progress-section {
-      display: flex; align-items: center; gap: var(--space-3, 0.75rem);
-      flex-wrap: wrap;
-    }
-    .progress-bar-wrap {
-      flex: 1; min-width: 8rem; height: 0.5rem;
-      background: var(--bg3); border-radius: 0.25rem; overflow: hidden;
-    }
-    .progress-bar-fill {
-      height: 100%; border-radius: 0.25rem;
-      transition: width 0.3s var(--ease-out, ease-out);
-    }
-    .progress-text { font-size: var(--text-xs); color: var(--text2); white-space: nowrap; }
-
-    /* ── Detail actions ── */
-    .detail-actions {
-      display: flex; gap: var(--space-2, 0.5rem);
-      margin-top: var(--space-4, 1rem); padding-top: var(--space-3, 0.75rem);
-      border-top: 1px solid var(--border);
-    }
+    .card-hdr:hover .btn-icon { opacity: 0.7; }
+    .btn-icon:hover { opacity: 1 !important; background: var(--bg2); }
 
     /* ── Empty state ── */
     .empty {
@@ -336,16 +275,24 @@ export class MateriasView extends SignalWatcher(LitElement) {
   }
 
   /* ── Actions ── */
-  private _toggle(id: string) {
-    this.expandedId = this.expandedId === id ? null : id;
-  }
-
   private _openEdit(id: string) {
     editingMateriaId.value = id;
     materiaReturnView.value = "materias";
     this.dispatchEvent(
       new CustomEvent<ViewId>("view-change", {
         detail: "materia-edit",
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  private _openStats(id: string) {
+    statsMateriaId.value = id;
+    statsReturnView.value = "materias";
+    this.dispatchEvent(
+      new CustomEvent<ViewId>("view-change", {
+        detail: "materia-stats",
         bubbles: true,
         composed: true,
       }),
@@ -395,18 +342,26 @@ export class MateriasView extends SignalWatcher(LitElement) {
   }
 
   private _renderCard(mat: Materia, franjaMap: Map<string, FranjaDef>) {
-    const expanded = this.expandedId === mat.id;
     const weekMins = this._weekMinutesFor(mat.id);
     const progreso = computeProgreso(mat, franjaMap, weekMins);
     const taskCount = this._taskCountFor(mat.id);
     const badge = ESTADO_BADGE[progreso.estado];
 
     return html`
-      <div class="card" ?data-expanded=${expanded} ?data-inactive=${mat.activa === false}>
-        <div class="card-hdr" @click=${() => this._toggle(mat.id)}>
+      <div class="card" ?data-inactive=${mat.activa === false}>
+        <div class="card-hdr" @click=${() => this._openStats(mat.id)}>
           <span class="color-dot" style="background:${mat.color}"></span>
           <div class="card-info">
-            <p class="card-name">${mat.nombre}</p>
+            <div class="card-name-row">
+              <p class="card-name">${mat.nombre}</p>
+              ${(mat.codigo || mat.anio || mat.periodo) ? html`
+                <span class="card-subtitle">
+                  ${mat.codigo ? html`<span>${mat.codigo}</span>` : nothing}
+                  ${mat.anio ? html`<span>Año ${mat.anio}</span>` : nothing}
+                  ${mat.periodo ? html`<span>${mat.periodo === "anual" ? "Anual" : mat.periodo}</span>` : nothing}
+                </span>
+              ` : nothing}
+            </div>
             <div class="card-meta">
               <span class="meta-item">📋 ${taskCount} tarea${taskCount !== 1 ? "s" : ""}</span>
               ${mat.horasSemanalesMin
@@ -422,79 +377,8 @@ export class MateriasView extends SignalWatcher(LitElement) {
               `
               : nothing}
           </div>
-          <span class="expand-ico">▼</span>
-        </div>
-
-        ${expanded ? this._renderDetail(mat, franjaMap, progreso) : nothing}
-      </div>
-    `;
-  }
-
-  private _renderDetail(mat: Materia, _franjaMap: Map<string, FranjaDef>, progreso: ProgresoInfo) {
-    const franjas = plannerData.value.franjas ?? [];
-    const slots = mat.slots ?? [];
-    const badge = ESTADO_BADGE[progreso.estado];
-
-    return html`
-      <div class="detail">
-        <!-- Objective + Slots summary row -->
-        <div class="detail-row">
-          ${mat.horasSemanalesMin
-            ? html`
-              <div class="detail-block">
-                <span class="detail-label">Objetivo semanal</span>
-                <span class="detail-value">
-                  ${mat.horasSemanalesMin}h${mat.horasSemanalesMax ? ` – ${mat.horasSemanalesMax}h` : ""}
-                </span>
-              </div>
-            `
-            : nothing}
-          <div class="detail-block">
-            <span class="detail-label">Horarios</span>
-            <span class="detail-value">${slotSummary(slots, franjas)}</span>
-          </div>
-        </div>
-
-        <!-- Slot visual grid (read-only) -->
-        ${franjas.length > 0 && slots.length > 0
-          ? html`
-            <div class="slot-visual" style="margin-bottom:var(--space-3,0.75rem)">
-              <div></div>
-              ${DIA_LABELS.map((d) => html`<div class="day-hdr">${d}</div>`)}
-              ${franjas.map((f) => html`
-                <div class="franja-label">${f.emoji} ${f.nombre}</div>
-                ${DIA_LABELS.map((_, di) => {
-                  const on = slots.some((s) => s.dia === di && s.franjaId === f.id);
-                  return html`
-                    <div class="slot-dot-cell">
-                      <div class="slot-dot ${on ? "slot-dot-on" : "slot-dot-off"}"
-                        style="${on ? `background:${mat.color}` : ""}"></div>
-                    </div>
-                  `;
-                })}
-              `)}
-            </div>
-          `
-          : nothing}
-
-        <!-- Progress (expanded) -->
-        ${mat.horasSemanalesMin && progreso.estado !== "sin_objetivo"
-          ? html`
-            <div class="progress-section" style="margin-bottom:var(--space-3,0.75rem)">
-              <div class="progress-bar-wrap">
-                <div class="progress-bar-fill" style="width:${progreso.pct}%; background:${mat.color}"></div>
-              </div>
-              <span class="progress-text">${progreso.actual.toFixed(1)}h / ${progreso.expected.toFixed(1)}h esperadas</span>
-              <span class="badge ${badge.cls}">${badge.label}</span>
-            </div>
-          `
-          : nothing}
-
-        <!-- Actions -->
-        <div class="detail-actions">
-          <button class="btn-edit" @click=${(e: Event) => { e.stopPropagation(); this._openEdit(mat.id); }}>
-            ✏️ Editar materia
-          </button>
+          <button class="btn-icon" @click=${(e: Event) => { e.stopPropagation(); this._openEdit(mat.id); }} title="Editar">✏️</button>
+          <span class="expand-ico">›</span>
         </div>
       </div>
     `;

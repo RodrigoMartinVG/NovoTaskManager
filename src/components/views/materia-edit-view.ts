@@ -1,7 +1,7 @@
 import { SignalWatcher } from "@lit-labs/signals";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import type { FranjaDef, Materia, MateriaSlot } from "../../state/types.js";
+import type { FranjaDef, Materia, MateriaSlot, Periodo } from "../../state/types.js";
 import {
   addMateria,
   deleteMateria,
@@ -52,6 +52,9 @@ function slotSummary(slots: MateriaSlot[], franjas: FranjaDef[]): string {
 export class MateriaEditView extends SignalWatcher(LitElement) {
   @state() private nombre = "";
   @state() private color = COLOR_PRESETS[0];
+  @state() private codigo = "";
+  @state() private anio = "";
+  @state() private periodo: Periodo | "" = "";
   @state() private horasMin: string = "";
   @state() private horasMax: string = "";
   @state() private slots: MateriaSlot[] = [];
@@ -133,6 +136,14 @@ export class MateriaEditView extends SignalWatcher(LitElement) {
       transition: border-color 0.16s;
     }
     .field input:focus { outline: none; border-color: var(--accent); }
+    .field select {
+      font: inherit; font-size: var(--text-sm);
+      background: var(--bg0); color: var(--text0);
+      border: 1px solid var(--border); border-radius: 0.375rem;
+      padding: 0.5rem 0.625rem;
+      transition: border-color 0.16s;
+    }
+    .field select:focus { outline: none; border-color: var(--accent); }
 
     .nombre-input {
       font-size: var(--text-lg) !important;
@@ -291,6 +302,9 @@ export class MateriaEditView extends SignalWatcher(LitElement) {
       if (mat) {
         this.nombre = mat.nombre;
         this.color = mat.color;
+        this.codigo = mat.codigo ?? "";
+        this.anio = mat.anio != null ? String(mat.anio) : "";
+        this.periodo = mat.periodo ?? "";
         this.horasMin = mat.horasSemanalesMin != null ? String(mat.horasSemanalesMin) : "";
         this.horasMax = mat.horasSemanalesMax != null ? String(mat.horasSemanalesMax) : "";
         this.slots = mat.slots ? mat.slots.map((s) => ({ ...s })) : [];
@@ -334,10 +348,14 @@ export class MateriaEditView extends SignalWatcher(LitElement) {
 
     const minVal = Number.parseFloat(this.horasMin);
     const maxVal = Number.parseFloat(this.horasMax);
+    const anioVal = Number.parseInt(this.anio, 10);
 
     const patch: Partial<Materia> = {
       nombre: this.nombre.trim(),
       color: this.color,
+      codigo: this.codigo.trim() || undefined,
+      anio: anioVal > 0 ? anioVal : undefined,
+      periodo: (this.periodo as Periodo) || undefined,
       horasSemanalesMin: minVal > 0 ? minVal : undefined,
       horasSemanalesMax: maxVal > 0 ? maxVal : undefined,
       slots: this.slots.length > 0 ? this.slots : undefined,
@@ -397,6 +415,37 @@ export class MateriaEditView extends SignalWatcher(LitElement) {
               .value=${this.nombre}
               @input=${(e: Event) => { this.nombre = (e.target as HTMLInputElement).value; }}
             />
+          </div>
+
+          <!-- Código, Año, Periodo -->
+          <div class="inline-row">
+            <div class="field">
+              <label for="mat-codigo">Código</label>
+              <input id="mat-codigo" type="text"
+                placeholder="ej: MAT-201"
+                .value=${this.codigo}
+                @input=${(e: Event) => { this.codigo = (e.target as HTMLInputElement).value; }}
+              />
+            </div>
+            <div class="field">
+              <label for="mat-anio">Año</label>
+              <input id="mat-anio" type="number" min="1" max="10" step="1"
+                placeholder="ej: 2"
+                .value=${this.anio}
+                @input=${(e: Event) => { this.anio = (e.target as HTMLInputElement).value; }}
+              />
+            </div>
+            <div class="field">
+              <label for="mat-periodo">Período</label>
+              <select id="mat-periodo"
+                .value=${this.periodo}
+                @change=${(e: Event) => { this.periodo = (e.target as HTMLSelectElement).value as Periodo | ""; }}>
+                <option value="">—</option>
+                <option value="C1">Cuatrimestre 1</option>
+                <option value="C2">Cuatrimestre 2</option>
+                <option value="anual">Anual</option>
+              </select>
+            </div>
           </div>
 
           <!-- Objectives -->
@@ -474,7 +523,14 @@ export class MateriaEditView extends SignalWatcher(LitElement) {
           <!-- Preview -->
           <div class="preview-row">
             <span class="preview-dot" style="background:${this.color}"></span>
-            <span class="preview-name">${this.nombre || "Sin nombre"}</span>
+            <div style="min-width:0">
+              <span class="preview-name">${this.nombre || "Sin nombre"}</span>
+              ${(this.codigo || this.anio || this.periodo) ? html`
+                <div style="font-size:var(--text-xs);color:var(--text3);margin-top:0.125rem">
+                  ${[this.codigo, this.anio ? `Año ${this.anio}` : "", this.periodo ? (this.periodo === "anual" ? "Anual" : this.periodo) : ""].filter(Boolean).join(" · ")}
+                </div>
+              ` : nothing}
+            </div>
           </div>
 
           <!-- Color -->

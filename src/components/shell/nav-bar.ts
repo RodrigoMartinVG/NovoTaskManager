@@ -1,7 +1,8 @@
 import { LitElement, css, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import "./global-filter.js";
 
-export type ViewId = "hoy" | "semana" | "materias" | "backlog" | "kanban" | "calendario" | "config" | "task" | "materia-edit";
+export type ViewId = "hoy" | "semana" | "materias" | "backlog" | "sesiones" | "kanban" | "calendario" | "config" | "datos" | "task" | "materia-edit" | "materia-stats" | "sesion-edit" | "ayuda";
 
 export interface NavItem {
   id: ViewId;
@@ -13,6 +14,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "hoy", icon: "H", label: "Hoy" },
   { id: "semana", icon: "S", label: "Semana" },
   { id: "materias", icon: "M", label: "Materias" },
+  { id: "sesiones", icon: "🕐", label: "Sesiones" },
   { id: "backlog", icon: "B", label: "Backlog" },
   { id: "kanban", icon: "K", label: "Kanban" },
   { id: "calendario", icon: "C", label: "Calendario" },
@@ -198,6 +200,8 @@ export class NavBar extends LitElement {
       <header class="hdr">
         <span class="logo"><span class="logo-glyph">◈</span><span class="logo-full">Oda Planner</span><span class="logo-short">Oda</span></span>
 
+        <global-filter></global-filter>
+
         <nav class="nav" aria-label="Vistas principales">
           ${NAV_ITEMS.map(
             (item) => html`
@@ -216,9 +220,9 @@ export class NavBar extends LitElement {
         </nav>
 
         <div class="actions">
-          <button class="ibtn" aria-label="Ayuda" title="Ayuda">?</button>
+          <button class="ibtn" aria-label="Ayuda" title="Ayuda" ?data-active=${this.activeView === "ayuda"} @click=${() => this._onNavClick("ayuda")}>?</button>
           <button class="ibtn" aria-label="Configuración" title="Configuración" ?data-active=${this.activeView === "config"} @click=${() => this._onNavClick("config")}>⚙</button>
-          <button class="ibtn" aria-label="Datos" title="Datos">💾</button>
+          <button class="ibtn" aria-label="Datos" title="Datos" ?data-active=${this.activeView === "datos"} @click=${() => this._onNavClick("datos")}>💾</button>
         </div>
       </header>
     `;

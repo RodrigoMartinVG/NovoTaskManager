@@ -13,6 +13,13 @@ import "../views/calendario-view.js";
 import "../views/config/config-view.js";
 import "../views/task-view.js";
 import "../views/materia-edit-view.js";
+import "../views/materia-stats-view.js";
+import "../views/sesiones-view.js";
+import "../views/sesion-edit-view.js";
+import "../views/datos-view.js";
+import "../views/ayuda-view.js";
+import "../pomodoro/pomo-focus-view.js";
+import "../pomodoro/pomo-widget.js";
 
 @customElement("app-shell")
 export class AppShell extends SignalWatcher(LitElement) {
@@ -77,23 +84,33 @@ export class AppShell extends SignalWatcher(LitElement) {
         return html`<materias-view class="view-enter"></materias-view>`;
       case "backlog":
         return html`<backlog-view class="view-enter"></backlog-view>`;
+      case "sesiones":
+        return html`<sesiones-view class="view-enter" @view-change=${this._onViewChange}></sesiones-view>`;
       case "kanban":
         return html`<kanban-view class="view-enter"></kanban-view>`;
       case "calendario":
         return html`<calendario-view class="view-enter"></calendario-view>`;
       case "config":
         return html`<config-view class="view-enter"></config-view>`;
+      case "datos":
+        return html`<datos-view class="view-enter"></datos-view>`;
+      case "ayuda":
+        return html`<ayuda-view class="view-enter"></ayuda-view>`;
       case "task":
         return html`<task-view class="view-enter" @view-change=${this._onViewChange}></task-view>`;
       case "materia-edit":
         return html`<materia-edit-view class="view-enter" @view-change=${this._onViewChange}></materia-edit-view>`;
+      case "materia-stats":
+        return html`<materia-stats-view class="view-enter" @view-change=${this._onViewChange}></materia-stats-view>`;
+      case "sesion-edit":
+        return html`<sesion-edit-view class="view-enter" @view-change=${this._onViewChange}></sesion-edit-view>`;
     }
   }
 
   render() {
     // Onboarding mode: only show the wizard
     if (isWelcome.value) {
-      return html`<onboarding-flow @onboarding-done=${() => this.requestUpdate()}></onboarding-flow>`;
+      return html`<onboarding-flow @onboarding-done=${() => { this.activeView = "ayuda"; this.requestUpdate(); }}></onboarding-flow>`;
     }
 
     return html`

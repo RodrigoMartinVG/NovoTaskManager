@@ -6,18 +6,18 @@ import type { FranjaDef } from "../../../state/types.js";
 
 // horaInicio/horaFin stored as minutes from midnight (e.g. 480 = 08:00, 750 = 12:30)
 const DEFAULT_3: FranjaDef[] = [
-  { id: "f-am", nombre: "Mañana", emoji: "☀️", horaInicio: 480, horaFin: 720 },
-  { id: "f-pm", nombre: "Tarde", emoji: "🌤", horaInicio: 780, horaFin: 1080 },
-  { id: "f-nt", nombre: "Noche", emoji: "🌙", horaInicio: 1140, horaFin: 1380 },
+  { id: "f-am", nombre: "Matutino", emoji: "☀️", horaInicio: 480, horaFin: 720 },
+  { id: "f-pm", nombre: "Vespertino", emoji: "🌤", horaInicio: 780, horaFin: 1080 },
+  { id: "f-nt", nombre: "Nocturno", emoji: "🌙", horaInicio: 1140, horaFin: 1380 },
 ];
 
 const DEFAULT_6: FranjaDef[] = [
-  { id: "f-1", nombre: "Temprano", emoji: "🌅", horaInicio: 360, horaFin: 480 },
-  { id: "f-2", nombre: "Mañana", emoji: "☀️", horaInicio: 480, horaFin: 660 },
-  { id: "f-3", nombre: "Mediodía", emoji: "🌤", horaInicio: 660, horaFin: 840 },
-  { id: "f-4", nombre: "Tarde", emoji: "🌇", horaInicio: 840, horaFin: 1080 },
-  { id: "f-5", nombre: "Noche", emoji: "🌙", horaInicio: 1080, horaFin: 1260 },
-  { id: "f-6", nombre: "Trasnochar", emoji: "🦉", horaInicio: 1260, horaFin: 1440 },
+  { id: "f-1", nombre: "Aurora", emoji: "🌅", horaInicio: 360, horaFin: 480 },
+  { id: "f-2", nombre: "Cenit", emoji: "☀️", horaInicio: 480, horaFin: 660 },
+  { id: "f-3", nombre: "Postmeridiano", emoji: "🌤", horaInicio: 660, horaFin: 840 },
+  { id: "f-4", nombre: "Ocaso", emoji: "🌇", horaInicio: 840, horaFin: 1080 },
+  { id: "f-5", nombre: "Penumbra", emoji: "🌙", horaInicio: 1080, horaFin: 1260 },
+  { id: "f-6", nombre: "Nocturno", emoji: "🦉", horaInicio: 1260, horaFin: 1440 },
 ];
 
 function timeLabel(minutes: number): string {
@@ -90,6 +90,8 @@ export class ConfigTabFranjas extends SignalWatcher(LitElement) {
     .row-emoji {
       font-size: 1.125rem;
       flex-shrink: 0;
+      width: 1.75rem;
+      text-align: center;
     }
 
     .row-name {
@@ -195,14 +197,14 @@ export class ConfigTabFranjas extends SignalWatcher(LitElement) {
         const ref2 = DEFAULT_6[i * 2 + 1];
         result.push({
           id: ref1?.id ?? `f-${i * 2 + 1}`,
-          nombre: `${f.nombre} 1`,
+          nombre: ref1?.nombre ?? `${f.nombre} 1`,
           emoji: ref1?.emoji ?? f.emoji,
           horaInicio: f.horaInicio,
           horaFin: mid,
         });
         result.push({
           id: ref2?.id ?? `f-${i * 2 + 2}`,
-          nombre: `${f.nombre} 2`,
+          nombre: ref2?.nombre ?? `${f.nombre} 2`,
           emoji: ref2?.emoji ?? f.emoji,
           horaInicio: mid,
           horaFin: f.horaFin,

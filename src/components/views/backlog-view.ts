@@ -1,13 +1,17 @@
 import { SignalWatcher } from "@lit-labs/signals";
-import { LitElement, css, html, nothing } from "lit";
+import { effect } from "@preact/signals-core";
+import { LitElement, css, html, nothing, unsafeCSS } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { EstadoTarea, Tarea } from "../../state/types.js";
 import {
+  alertConfig,
   editingTaskId,
-  materias,
+  filteredMaterias as materias,
+  filteredTareas,
   plannerData,
   taskReturnView,
 } from "../../state/store.js";
+import { computeAlertLevel, getAlertInfo, ALERT_CSS } from "../../domain/alert-engine.js";
 import type { ViewId } from "../shell/nav-bar.js";
 
 const ESTADO_LABEL: Record<EstadoTarea, string> = {
@@ -34,6 +38,23 @@ export class BacklogView extends SignalWatcher(LitElement) {
   @state() private filterTipo = "";
   @state() private filterEstado = "";
   @state() private searchQuery = "";
+
+  private _dispose?: () => void;
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._dispose = effect(() => {
+      filteredTareas.value;
+      materias.value;
+      plannerData.value;
+      this.requestUpdate();
+    });
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._dispose?.();
+  }
 
   static styles = css`
     :host {
@@ -139,6 +160,7 @@ export class BacklogView extends SignalWatcher(LitElement) {
       width: 100%;
       border-collapse: collapse;
       font-size: var(--text-sm);
+      table-layout: fixed;
     }
     thead th {
       text-align: left;
@@ -162,12 +184,18 @@ export class BacklogView extends SignalWatcher(LitElement) {
       padding: 0.625rem;
       border-bottom: 1px solid var(--border);
       vertical-align: middle;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     /* ── Cell helpers ── */
     .cell-titulo {
       font-weight: 500;
       color: var(--text0);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .cell-titulo.done {
       text-decoration: line-through;
@@ -213,6 +241,23 @@ export class BacklogView extends SignalWatcher(LitElement) {
     .fecha-err {
       color: var(--err-text);
       font-weight: 600;
+    }
+
+    /* ── Alert badges ── */
+    ${unsafeCSS(ALERT_CSS)}
+    .alert-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.125rem 0.4375rem;
+      border-radius: 0.75rem;
+      background: var(--alert-bg);
+      color: var(--alert-text);
+      border: 1px solid var(--alert-border);
+      font-size: 0.625rem;
+      font-weight: 600;
+      white-space: nowrap;
+      line-height: 1.3;
     }
     .cell-oblig {
       font-size: 0.75rem;
@@ -297,7 +342,7 @@ export class BacklogView extends SignalWatcher(LitElement) {
   }
 
   private _getFiltered(): Tarea[] {
-    let list = plannerData.value.tareas;
+    let list = filteredTareas.value;
 
     if (this.filterMateria) {
       list = list.filter((t) => t.materiaId === this.filterMateria);
@@ -330,15 +375,19 @@ export class BacklogView extends SignalWatcher(LitElement) {
     });
   }
 
-  private _fechaClass(fecha: string | undefined): string {
-    if (!fecha) return "cell-fecha";
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const d = new Date(fecha + "T00:00:00");
-    const diff = (d.getTime() - today.getTime()) / 86400000;
-    if (diff < 0) return "cell-fecha fecha-err";
-    if (diff <= 2) return "cell-fecha fecha-warn";
+  private _fechaClass(tarea: Tarea): string {
+    const level = computeAlertLevel(tarea, alertConfig.value);
+    if (!level) return "cell-fecha";
+    if (level === "red" || level === "overdue" || level === "start_overdue") return "cell-fecha fecha-err";
+    if (level === "yellow" || level === "start_now" || level === "start_soon") return "cell-fecha fecha-warn";
     return "cell-fecha";
+  }
+
+  private _alertBadge(tarea: Tarea) {
+    const level = computeAlertLevel(tarea, alertConfig.value);
+    if (!level) return nothing;
+    const info = getAlertInfo(level);
+    return html`<span class="alert-badge ${info.cssClass}">${info.emoji} ${info.label}</span>`;
   }
 
   private _formatFecha(fecha: string | undefined): string {
@@ -350,7 +399,7 @@ export class BacklogView extends SignalWatcher(LitElement) {
   render() {
     const mats = materias.value;
     const tipos = plannerData.value.tipos;
-    const allTareas = plannerData.value.tareas;
+    const allTareas = filteredTareas.value;
     const filtered = this._getFiltered();
     const matMap = new Map(mats.map((m) => [m.id, m]));
     const tipoMap = new Map(tipos.map((t) => [t.id, t]));
@@ -463,8 +512,8 @@ export class BacklogView extends SignalWatcher(LitElement) {
                         </span>
                       </td>
                       <td>${PRIO_ICON[t.prioridad] ?? ""} ${t.prioridad}</td>
-                      <td class="${this._fechaClass(t.fechaLimite)} col-fecha">${this._formatFecha(t.fechaLimite)}</td>
-                      <td class="col-oblig cell-oblig">${t.obligatorio ? "⚡" : ""}</td>
+                      <td class="${this._fechaClass(t)} col-fecha">${this._formatFecha(t.fechaLimite)}</td>
+                      <td class="col-oblig cell-oblig">${t.obligatorio ? this._alertBadge(t) || html`⚡` : ""}</td>
                     </tr>
                   `;
                 })}

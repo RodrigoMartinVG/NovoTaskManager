@@ -6,10 +6,15 @@ export interface MateriaSlot {
   franjaId: string; // referencia a FranjaDef.id
 }
 
+export type Periodo = "C1" | "C2" | "anual";
+
 export interface Materia {
   id: string;
   nombre: string;
   color: string;
+  codigo?: string;
+  anio?: number;
+  periodo?: Periodo;
   horasSemanalesMin?: number;
   horasSemanalesMax?: number;
   slots?: MateriaSlot[];

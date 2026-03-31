@@ -1,6 +1,6 @@
 /* ═══ Oda v3.0 — App Store (Signals) ═══ */
 import { computed, signal } from "@preact/signals-core";
-import type { AppMode, FranjaDef, Materia, MateriaSlot, PlannerData, Sesion, Tarea, TipoTarea } from "./types.js";
+import type { AlertConfig, AppMode, FranjaDef, Materia, MateriaSlot, Periodo, PlannerData, Sesion, Tarea, TipoTarea } from "./types.js";
 
 // ── Storage keys ──
 const KEY_MODE = "oda-mode";
@@ -8,17 +8,32 @@ const KEY_DATA = "oda-data-v1";
 
 // ── Default empty data ──
 const DEFAULT_FRANJAS: FranjaDef[] = [
-  { id: "f-am", nombre: "Mañana", emoji: "☀️", horaInicio: 480, horaFin: 720 },
-  { id: "f-pm", nombre: "Tarde", emoji: "🌤", horaInicio: 780, horaFin: 1080 },
-  { id: "f-nt", nombre: "Noche", emoji: "🌙", horaInicio: 1140, horaFin: 1380 },
+  { id: "f-am", nombre: "Matutino", emoji: "☀️", horaInicio: 480, horaFin: 720 },
+  { id: "f-pm", nombre: "Vespertino", emoji: "🌤", horaInicio: 780, horaFin: 1080 },
+  { id: "f-nt", nombre: "Nocturno", emoji: "🌙", horaInicio: 1140, horaFin: 1380 },
 ];
+
+const DEFAULT_TIPOS: TipoTarea[] = [
+  { id: "t-tp", nombre: "TP", icono: "📝", activo: true },
+  { id: "t-parcial", nombre: "Parcial", icono: "📝", activo: true },
+  { id: "t-final", nombre: "Final", icono: "🎯", activo: true },
+  { id: "t-lectura", nombre: "Lectura", icono: "📖", activo: true },
+  { id: "t-guia", nombre: "Guía de ejercicios", icono: "📊", activo: true },
+  { id: "t-video", nombre: "Video / Clase", icono: "🎥", activo: true },
+  { id: "t-resumen", nombre: "Resumen", icono: "🗒️", activo: true },
+  { id: "t-proyecto", nombre: "Proyecto", icono: "🛠️", activo: true },
+  { id: "t-otro", nombre: "Otro", icono: "📌", activo: true },
+];
+
+export const DEFAULT_ALERTAS: AlertConfig = { rojo: 2, amarillo: 7, verde: 14, inicio: 2 };
 
 const emptyData = (): PlannerData => ({
   materias: [],
-  tipos: [],
+  tipos: DEFAULT_TIPOS.map((t) => ({ ...t })),
   tareas: [],
   sesiones: [],
   franjas: DEFAULT_FRANJAS.map((f) => ({ ...f })),
+  alertas: { ...DEFAULT_ALERTAS },
 });
 
 // ── Core signals ──
@@ -33,6 +48,10 @@ export const plannerData = signal<PlannerData>(
       // Backfill default franjas for existing users
       if (!data.franjas || data.franjas.length === 0) {
         data.franjas = DEFAULT_FRANJAS.map((f) => ({ ...f }));
+      }
+      // Backfill default alertas for existing users
+      if (!data.alertas) {
+        data.alertas = { ...DEFAULT_ALERTAS };
       }
       return data;
     } catch {
@@ -56,6 +75,39 @@ export const materias = computed(() => plannerData.value.materias);
 export const tareas = computed(() => plannerData.value.tareas);
 export const sesiones = computed(() => plannerData.value.sesiones);
 export const isWelcome = computed(() => appMode.value === "welcome");
+export const alertConfig = computed(() => plannerData.value.alertas ?? DEFAULT_ALERTAS);
+
+// ── Global filter ──
+export const globalFilterAnio = signal<number | null>(null);
+export const globalFilterPeriodos = signal<Periodo[]>([]);
+
+const _filterMateriaIds = computed(() => {
+  const anio = globalFilterAnio.value;
+  const periodos = globalFilterPeriodos.value;
+  if (anio === null && periodos.length === 0) return null;
+  const ids = new Set<string>();
+  for (const m of plannerData.value.materias) {
+    if (anio !== null && m.anio !== anio) continue;
+    if (periodos.length > 0 && (!m.periodo || !periodos.includes(m.periodo))) continue;
+    ids.add(m.id);
+  }
+  return ids;
+});
+
+export const filteredMaterias = computed(() => {
+  const ids = _filterMateriaIds.value;
+  return ids === null ? plannerData.value.materias : plannerData.value.materias.filter((m) => ids.has(m.id));
+});
+
+export const filteredTareas = computed(() => {
+  const ids = _filterMateriaIds.value;
+  return ids === null ? plannerData.value.tareas : plannerData.value.tareas.filter((t) => ids.has(t.materiaId));
+});
+
+export const filteredSesiones = computed(() => {
+  const ids = _filterMateriaIds.value;
+  return ids === null ? plannerData.value.sesiones : plannerData.value.sesiones.filter((s) => ids.has(s.materiaId));
+});
 
 // ── Actions ──
 export function setAppMode(mode: AppMode) {
@@ -72,6 +124,25 @@ export function addSesion(ses: Sesion) {
   const d = plannerData.value;
   setPlannerData({ ...d, sesiones: [...d.sesiones, ses] });
 }
+
+export function updateSesion(id: string, patch: Partial<Sesion>) {
+  const d = plannerData.value;
+  setPlannerData({
+    ...d,
+    sesiones: d.sesiones.map((s) => (s.id === id ? { ...s, ...patch } : s)),
+  });
+}
+
+export function deleteSesion(id: string) {
+  const d = plannerData.value;
+  setPlannerData({ ...d, sesiones: d.sesiones.filter((s) => s.id !== id) });
+}
+
+// ── Sesion editing ──
+/** Signal: session id being edited, "new" for creation, null for none */
+export const editingSesionId = signal<string | null>(null);
+/** Signal: view to return to after session editing */
+export const sesionReturnView = signal<string>("sesiones");
 
 // ── Materia CRUD ──
 export function addMateria(m: Materia) {
@@ -109,6 +180,12 @@ export function updateTipo(id: string, patch: Partial<TipoTarea>) {
 export function deleteTipo(id: string) {
   const d = plannerData.value;
   setPlannerData({ ...d, tipos: d.tipos.filter((t) => t.id !== id) });
+}
+
+// ── Alertas ──
+export function setAlertConfig(cfg: AlertConfig) {
+  const d = plannerData.value;
+  setPlannerData({ ...d, alertas: cfg });
 }
 
 // ── Franjas ──
@@ -203,6 +280,12 @@ export const editingMateriaId = signal<string | null>(null);
 /** Signal: view to return to after materia editing */
 export const materiaReturnView = signal<string>("materias");
 
+// ── Materia stats ──
+/** Signal: materia id whose stats are being viewed */
+export const statsMateriaId = signal<string | null>(null);
+/** Signal: view to return to after materia stats */
+export const statsReturnView = signal<string>("materias");
+
 export function addTarea(t: Tarea) {
   const d = plannerData.value;
   setPlannerData({ ...d, tareas: [...d.tareas, t] });
@@ -246,6 +329,9 @@ function buildDemoData(): PlannerData {
         id: "m1",
         nombre: "Análisis Matemático",
         color: "#6366f1",
+        codigo: "MAT-201",
+        anio: 2,
+        periodo: "C1",
         horasSemanalesMin: 6,
         horasSemanalesMax: 8,
         slots: [
@@ -259,6 +345,9 @@ function buildDemoData(): PlannerData {
         id: "m2",
         nombre: "Bases de Datos",
         color: "#f59e0b",
+        codigo: "INF-302",
+        anio: 3,
+        periodo: "C1",
         horasSemanalesMin: 4,
         horasSemanalesMax: 6,
         slots: [
@@ -271,6 +360,9 @@ function buildDemoData(): PlannerData {
         id: "m3",
         nombre: "Historia",
         color: "#10b981",
+        codigo: "HIS-101",
+        anio: 1,
+        periodo: "C2",
         horasSemanalesMin: 3,
         slots: [
           { dia: 4, franjaId: "f-nt" },
@@ -279,17 +371,13 @@ function buildDemoData(): PlannerData {
         activa: true,
       },
     ],
-    tipos: [
-      { id: "t1", nombre: "TP", icono: "📝", activo: true },
-      { id: "t2", nombre: "Parcial", icono: "📋", activo: true },
-      { id: "t3", nombre: "Lectura", icono: "📖", activo: true },
-    ],
+    tipos: DEFAULT_TIPOS.map((t) => ({ ...t })),
     tareas: [
       {
         id: "ta1",
         titulo: "TP Integrales definidas",
         materiaId: "m1",
-        tipo: "t1",
+        tipo: "t-tp",
         estado: "en_progreso",
         prioridad: "alta",
         fechaLimite: inDays(2),
@@ -300,7 +388,7 @@ function buildDemoData(): PlannerData {
         id: "ta2",
         titulo: "Resumen normalización 3FN",
         materiaId: "m2",
-        tipo: "t3",
+        tipo: "t-resumen",
         estado: "pendiente",
         prioridad: "media",
         fechaLimite: inDays(5),
@@ -311,7 +399,7 @@ function buildDemoData(): PlannerData {
         id: "ta3",
         titulo: "Parcial Revolución Francesa",
         materiaId: "m3",
-        tipo: "t2",
+        tipo: "t-parcial",
         estado: "pendiente",
         prioridad: "alta",
         fechaLimite: inDays(1),
@@ -322,7 +410,7 @@ function buildDemoData(): PlannerData {
         id: "ta4",
         titulo: "Ejercicios ecuaciones diferenciales",
         materiaId: "m1",
-        tipo: "t1",
+        tipo: "t-guia",
         estado: "completada",
         prioridad: "media",
         obligatorio: false,
