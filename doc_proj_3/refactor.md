@@ -1,8 +1,4 @@
-Antes de opinar con fundamento, déjame leer el código real de los archivos clave.Ya tengo suficiente contexto. Ahora sí puedo darte un análisis fundado en el código real.Perfecto. Leí todo el código. Ahora sí te doy un análisis real, con los problemas específicos que encontré en cada archivo.
-
----
-
-Hay bastante código bien escrito acá — el `alert-engine.ts` es elegante, el `pomo.ts` es prolijo, y la elección de señales es correcta. Pero hay patrones que se repiten y que vale la pena atacar. Te los organizo por impacto:
+Hay patrones que se repiten y que vale la pena atacar. Te los organizo por impacto:
 
 ---
 
