@@ -1,11 +1,11 @@
+/* ═══ Oda v3.0 — Onboarding Flow ═══ */
 import { SignalWatcher } from "@lit-labs/signals";
 import { gsap } from "gsap";
-/* ═══ Oda v3.0 — Onboarding Flow ═══ */
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { appMode, enterDemo, enterLocal } from "../../state/store.js";
 
-type Step = "welcome" | "tema" | "dataset";
+type Step = "splash" | "estilo" | "welcome" | "dataset";
 
 const THEMES = [
   { id: "hueso", label: "Hueso", bg: "#f0ece3", fg: "#28231c", bar: "#4e47b8" },
@@ -15,27 +15,181 @@ const THEMES = [
   { id: "cafe", label: "Café", bg: "#1a1410", fg: "#f0e8d8", bar: "#c0a8f0" },
 ] as const;
 
-const STEPS: Step[] = ["welcome", "tema", "dataset"];
+const DENSITIES = [
+  { id: "compacto", label: "Compacto", desc: "Más info en pantalla", sample: "Aa" },
+  { id: "", label: "Normal", desc: "Equilibrio", sample: "Aa" },
+  { id: "comodo", label: "Cómodo", desc: "Más legible", sample: "Aa" },
+  { id: "grande", label: "Extra grande", desc: "Máxima legibilidad", sample: "Aa" },
+] as const;
+
+const STEPS: Step[] = ["estilo", "welcome", "dataset"];
+const STEP_LABELS = ["Estilo", "Bienvenida", "Arranque"];
 
 @customElement("onboarding-flow")
 export class OnboardingFlow extends SignalWatcher(LitElement) {
-  @state() private step: Step = "welcome";
-  @state() private selectedTheme = "noche";
+  @state() private step: Step = "splash";
+  @state() private selectedTheme = "";
+  @state() private selectedDensity = "";
   @state() private animating = false;
 
   static styles = css`
-    :host {
-      display: block;
-    }
+    :host { display: block; }
 
-    /* ── Screen ── */
-    .ob-screen {
-      min-height: 100vh;
+    /* ── Splash (step 0) ── */
+    .splash {
+      box-sizing: border-box;
+      height: 100vh;
+      height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 2rem 1.25rem;
+      background: #f4f1eb;
+      position: relative;
+      overflow: hidden;
+      padding: 2rem;
+    }
+
+    /* Radial glow behind the logo */
+    .splash::before {
+      content: "";
+      position: absolute;
+      width: 36rem;
+      height: 36rem;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(78,71,184,0.10) 0%, rgba(78,71,184,0.03) 50%, transparent 75%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -58%);
+      pointer-events: none;
+    }
+
+    .splash-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.5rem;
+    }
+
+    .splash-diamond {
+      font-size: 5rem;
+      line-height: 1;
+      color: #4e47b8;
+      filter: drop-shadow(0 0 2rem rgba(78,71,184,0.35));
+      margin-bottom: 0.5rem;
+    }
+
+    .splash-logo {
+      font-size: 3.5rem;
+      font-weight: 800;
+      color: #1c1a2e;
+      letter-spacing: 0.08em;
+      line-height: 1.1;
+    }
+
+    .splash-sub {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #4e47b8;
+      margin-bottom: 0.25rem;
+    }
+
+    .splash-tagline {
+      font-size: 1.3125rem;
+      font-weight: 600;
+      color: #4a4860;
+      line-height: 1.4;
+      max-width: 24rem;
+      margin-top: 1rem;
+    }
+
+    .splash-ctas {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 2rem;
+    }
+
+    .splash-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.875rem 3rem;
+      border-radius: 0.625rem;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      background: #4e47b8;
+      color: #fff;
+      letter-spacing: 0.04em;
+      transition: all 0.2s;
+      box-shadow: 0 0.375rem 1.5rem rgba(78,71,184,0.30);
+    }
+    .splash-btn:hover {
+      filter: brightness(1.12);
+      transform: translateY(-2px);
+      box-shadow: 0 0.5rem 2rem rgba(78,71,184,0.40);
+    }
+
+    .splash-skip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: none;
+      border: 1px solid #c4bcaf;
+      border-radius: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      font-family: inherit;
+      font-size: 0.6875rem;
+      color: #6d6358;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .splash-skip:hover {
+      color: #28231c;
+      border-color: #8a8278;
+    }
+
+    .splash-footer {
+      margin-top: auto;
+      padding-top: 1rem;
+      text-align: center;
+      font-size: 0.5625rem;
+      color: #8a8278;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+
+    @media (min-width: 40em) {
+      .splash-diamond { font-size: 6rem; }
+      .splash-logo { font-size: 4rem; }
+      .splash-tagline { font-size: 1.5rem; }
+    }
+    @media (max-width: 30em) {
+      .splash-diamond { font-size: 3.5rem; }
+      .splash-logo { font-size: 2.5rem; }
+      .splash-tagline { font-size: 1.0625rem; max-width: 18rem; }
+      .splash-btn { padding: 0.625rem 2rem; font-size: 0.875rem; }
+    }
+
+    /* ── Screen: full viewport, no scroll ── */
+    .ob-screen {
+      box-sizing: border-box;
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
       background: var(--bg0);
       position: relative;
       overflow: hidden;
@@ -50,7 +204,7 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
         linear-gradient(var(--border) 1px, transparent 1px),
         linear-gradient(90deg, var(--border) 1px, transparent 1px);
       background-size: 2.5rem 2.5rem;
-      opacity: 0.18;
+      opacity: 0.15;
       pointer-events: none;
     }
 
@@ -66,51 +220,52 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
     .ob-inner {
       position: relative;
       z-index: 1;
-      max-width: 32.5rem;
       width: 100%;
+      max-width: 40rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-height: calc(100vh - 2rem);
+      max-height: calc(100dvh - 2rem);
     }
 
     /* ── Progress ── */
     .ob-progress {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
+      gap: 0.375rem;
+      margin-bottom: 0.5rem;
+      flex-shrink: 0;
     }
     .ob-step {
       display: flex;
       align-items: center;
-      gap: 0.375rem;
-      font-size: 0.6875rem;
+      gap: 0.25rem;
+      font-size: 0.625rem;
       color: var(--text3);
       font-weight: 500;
     }
     .ob-step-num {
-      width: 1.5rem;
-      height: 1.5rem;
+      width: 1.25rem;
+      height: 1.25rem;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.6875rem;
+      font-size: 0.5625rem;
       font-weight: 700;
       border: 1px solid var(--border2);
       color: var(--text3);
       background: transparent;
     }
-    .ob-step[data-active] .ob-step-num {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-    }
+    .ob-step[data-active] .ob-step-num,
     .ob-step[data-done] .ob-step-num {
       background: var(--accent);
       color: #fff;
       border-color: var(--accent);
     }
     .ob-step-line {
-      width: 2rem;
+      width: 1.5rem;
       height: 1px;
       background: var(--border2);
     }
@@ -119,25 +274,28 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
     .ob-card {
       background: var(--bg1);
       border: 1px solid var(--border2);
-      border-radius: 1rem;
-      padding: 2rem 2rem 1.75rem;
-      box-shadow: 0 1.5rem 3.75rem rgba(0,0,0,.18);
+      border-radius: 0.875rem;
+      padding: 1rem;
+      box-shadow: 0 1rem 3rem rgba(0,0,0,.15);
+      width: 100%;
+      overflow-y: auto;
     }
 
-    /* ── Hero ── */
+    /* ── Hero (step 2 only) ── */
     .ob-hero {
       text-align: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.75rem;
+      flex-shrink: 0;
     }
     .ob-logo-mark {
-      font-size: 2.5rem;
+      font-size: 2rem;
       color: var(--accent);
       line-height: 1;
       display: block;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.25rem;
     }
     .ob-logo-text {
-      font-size: 1.25rem;
+      font-size: 1rem;
       font-weight: 700;
       color: var(--text0);
       letter-spacing: .04em;
@@ -145,141 +303,65 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
 
     /* ── Titles & text ── */
     .ob-title {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       font-weight: 700;
       color: var(--text0);
-      margin-bottom: 0.75rem;
-      line-height: 1.3;
+      margin-bottom: 0.375rem;
+      line-height: 1.25;
     }
     .ob-desc {
-      font-size: var(--text-sm);
-      color: var(--text2);
-      line-height: 1.65;
-      margin-bottom: 1.25rem;
-    }
-    .ob-desc strong {
-      color: var(--text0);
-    }
-
-    /* ── Feature values ── */
-    .ob-values {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
-    }
-    .ob-value {
-      display: flex;
-      gap: 0.75rem;
-      align-items: flex-start;
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      background: var(--bg2);
-    }
-    .ob-value-ico {
-      font-size: 1.25rem;
-      line-height: 1;
-      flex-shrink: 0;
-    }
-    .ob-value-text h4 {
-      font-size: var(--text-sm);
-      font-weight: 600;
-      color: var(--text0);
-      margin-bottom: 0.25rem;
-    }
-    .ob-value-text p {
-      font-size: 0.6875rem;
+      font-size: 0.75rem;
       color: var(--text2);
       line-height: 1.5;
+      margin-bottom: 0.5rem;
     }
 
-    /* ── Mini preview ── */
-    .ob-preview {
-      border: 1px solid var(--border);
-      border-radius: 0.625rem;
-      padding: 0.875rem;
-      margin-bottom: 1.25rem;
-      background: var(--bg0);
+    /* ── Sections (step 1) ── */
+    .ob-sections {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
-    .ob-preview-title {
-      font-size: 0.6875rem;
+    .ob-section-label {
+      font-size: 0.625rem;
       font-weight: 600;
       color: var(--text3);
       text-transform: uppercase;
       letter-spacing: .08em;
-      margin-bottom: 0.75rem;
-    }
-    .ob-preview-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.375rem 0;
-      font-size: 0.6875rem;
-    }
-    .ob-preview-item + .ob-preview-item {
-      border-top: 1px solid var(--border);
-    }
-    .ob-preview-left {
-      color: var(--text1);
-    }
-    .ob-preview-right {
-      color: var(--text3);
-      font-size: 0.625rem;
-    }
-    .ob-preview-bar {
-      height: 0.25rem;
-      border-radius: 0.125rem;
-      background: var(--bg3);
-      margin-top: 0.75rem;
-      overflow: hidden;
-    }
-    .ob-preview-fill {
-      height: 100%;
-      width: 62%;
-      background: var(--accent);
-      border-radius: 0.125rem;
-    }
-    .ob-preview-footer {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.625rem;
-      color: var(--text3);
-      margin-top: 0.375rem;
+      margin-bottom: 0.375rem;
     }
 
-    /* ── Theme chips ── */
+    /* ── Theme chips (step 1) — always horizontal row ── */
     .ob-themes {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 0.5rem;
-      margin-bottom: 1.25rem;
+      display: flex;
+      gap: 0.375rem;
     }
     .ob-theme-chip {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.375rem;
-      padding: 0.625rem 0.375rem;
+      gap: 0.1875rem;
+      padding: 0.375rem 0.25rem 0.25rem;
       border: 2px solid var(--border);
-      border-radius: 0.5rem;
+      border-radius: 0.375rem;
       background: transparent;
       cursor: pointer;
       font-family: inherit;
-      font-size: 0.625rem;
+      font-size: 0.5rem;
       color: var(--text2);
-      transition: all .16s;
+      transition: border-color .16s;
+      flex: 1;
+      min-width: 0;
     }
-    .ob-theme-chip:hover {
-      border-color: var(--text3);
-    }
+    .ob-theme-chip:hover { border-color: var(--text3); }
     .ob-theme-chip[data-active] {
       border-color: var(--accent);
       color: var(--text0);
     }
     .ob-theme-preview {
       width: 100%;
-      height: 1.625rem;
-      border-radius: 0.25rem;
+      height: 1.25rem;
+      border-radius: 0.1875rem;
       position: relative;
       overflow: hidden;
     }
@@ -291,35 +373,152 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
       height: 0.25rem;
       border-radius: 0.125rem;
     }
-    .ob-theme-note {
-      font-size: 0.6875rem;
-      color: var(--text3);
-      text-align: center;
-      margin-bottom: 1.25rem;
-      font-style: italic;
+
+    /* ── Density selector (step 1) ── */
+    .ob-densities {
+      display: flex;
+      gap: 0.375rem;
+    }
+    .ob-density-chip {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.1875rem;
+      padding: 0.375rem 0.25rem 0.25rem;
+      border: 2px solid var(--border);
+      border-radius: 0.375rem;
+      background: transparent;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color .16s;
+      min-width: 0;
+    }
+    .ob-density-chip:hover { border-color: var(--text3); }
+    .ob-density-chip[data-active] {
+      border-color: var(--accent);
+    }
+    .ob-density-sample {
+      font-weight: 700;
+      color: var(--text0);
+      line-height: 1;
+    }
+    .ob-density-sample-sm { font-size: 0.75rem; }
+    .ob-density-sample-md { font-size: 0.9375rem; }
+    .ob-density-sample-lg { font-size: 1.125rem; }
+    .ob-density-sample-xl { font-size: 1.375rem; }
+    .ob-density-label {
+      font-size: 0.5rem;
+      font-weight: 600;
+      color: var(--text2);
+      white-space: nowrap;
+    }
+    .ob-density-desc {
+      display: none;
     }
 
-    /* ── Dataset options ── */
-    .ob-opts-label {
-      font-size: 0.6875rem;
-      color: var(--text3);
+    /* ── Feature values (step 2) ── */
+    .ob-values {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .ob-value {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      background: var(--bg2);
+      text-align: center;
+    }
+    .ob-value-ico {
+      font-size: 1.125rem;
+      line-height: 1;
+    }
+    .ob-value-text h4 {
+      font-size: 0.625rem;
       font-weight: 600;
+      color: var(--text0);
+      margin-bottom: 0.125rem;
+    }
+    .ob-value-text p {
+      font-size: 0.5625rem;
+      color: var(--text2);
+      line-height: 1.45;
+    }
+
+    /* ── Mini preview (step 2) ── */
+    .ob-preview {
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 0.625rem;
+      margin-bottom: 0.75rem;
+      background: var(--bg0);
+    }
+    .ob-preview-title {
+      font-size: 0.5625rem;
+      font-weight: 600;
+      color: var(--text3);
       text-transform: uppercase;
       letter-spacing: .08em;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .ob-preview-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.25rem 0;
+      font-size: 0.625rem;
+    }
+    .ob-preview-item + .ob-preview-item {
+      border-top: 1px solid var(--border);
+    }
+    .ob-preview-left { color: var(--text1); }
+    .ob-preview-right { color: var(--text3); font-size: 0.5625rem; }
+    .ob-preview-bar {
+      height: 0.1875rem;
+      border-radius: 0.0625rem;
+      background: var(--bg3);
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+    .ob-preview-fill {
+      height: 100%;
+      width: 62%;
+      background: var(--accent);
+      border-radius: 0.0625rem;
+    }
+    .ob-preview-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.5625rem;
+      color: var(--text3);
+      margin-top: 0.25rem;
+    }
+
+    /* ── Dataset options (step 3) ── */
+    .ob-opts-label {
+      font-size: 0.625rem;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 0.5rem;
     }
     .ob-opt {
       display: block;
       width: 100%;
       text-align: left;
       border: 1px solid var(--border2);
-      border-radius: 0.625rem;
-      padding: 1rem;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
       background: transparent;
       cursor: pointer;
       font-family: inherit;
       transition: all .16s;
-      margin-bottom: 0.625rem;
+      margin-bottom: 0.5rem;
     }
     .ob-opt:hover {
       background: var(--bg2);
@@ -332,36 +531,28 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
     .ob-opt-header {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.375rem;
+      gap: 0.375rem;
+      margin-bottom: 0.25rem;
     }
-    .ob-opt-ico {
-      font-size: 1.125rem;
-    }
+    .ob-opt-ico { font-size: 1rem; }
     .ob-opt-title {
-      font-size: var(--text-sm);
+      font-size: 0.75rem;
       font-weight: 600;
       color: var(--text0);
     }
     .ob-opt-tag {
-      font-size: 0.5625rem;
+      font-size: 0.5rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: .06em;
-      padding: 0.125rem 0.375rem;
-      border-radius: 0.25rem;
+      padding: 0.0625rem 0.3125rem;
+      border-radius: 0.1875rem;
       background: var(--accent);
       color: #fff;
     }
     .ob-opt-desc {
-      font-size: 0.6875rem;
-      color: var(--text2);
-      line-height: 1.5;
-      margin-bottom: 0.375rem;
-    }
-    .ob-opt-small {
       font-size: 0.625rem;
-      color: var(--text3);
+      color: var(--text2);
       line-height: 1.5;
     }
 
@@ -370,10 +561,10 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0.625rem 1.25rem;
+      padding: 0.5rem 1rem;
       border-radius: 0.5rem;
       font-family: inherit;
-      font-size: var(--text-sm);
+      font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
       border: none;
@@ -382,11 +573,9 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
     .ob-btn-pri {
       background: var(--accent);
       color: #fff;
-      width: 100%;
+      flex: 1;
     }
-    .ob-btn-pri:hover {
-      filter: brightness(1.12);
-    }
+    .ob-btn-pri:hover { filter: brightness(1.12); }
     .ob-btn-sec {
       background: transparent;
       color: var(--text2);
@@ -398,39 +587,59 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
     }
     .ob-actions {
       display: flex;
-      gap: 0.75rem;
-      margin-top: 1.25rem;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
     }
-    .ob-actions .ob-btn { flex: 1; }
 
     /* ── Hints ── */
     .ob-hint {
-      font-size: 0.6875rem;
+      font-size: 0.5625rem;
       color: var(--text3);
-      line-height: 1.55;
-      margin-top: 1rem;
-      padding-top: 0.75rem;
+      line-height: 1.5;
+      margin-top: 0.75rem;
+      padding-top: 0.5rem;
       border-top: 1px solid var(--border);
     }
-    .ob-hint strong {
-      color: var(--text2);
-    }
+    .ob-hint strong { color: var(--text2); }
 
     /* ── Footnote ── */
     .ob-footnote {
-      font-size: 0.625rem;
+      font-size: 0.5625rem;
       color: var(--text3);
       text-align: center;
-      margin-top: 1.5rem;
+      margin-top: 0.75rem;
       max-width: 28rem;
       line-height: 1.5;
+      flex-shrink: 0;
     }
 
-    /* ── Responsive ── */
-    @media (max-width: 40em) {
-      .ob-card { padding: 1.375rem 1.125rem 1.25rem; border-radius: 1.125rem; }
-      .ob-title { font-size: 1.25rem; }
-      .ob-themes { grid-template-columns: repeat(3, 1fr); }
+    /* ══════ Responsive ══════ */
+
+    /* Desktop — two columns in step 1 */
+    @media (min-width: 40em) {
+      .ob-sections {
+        flex-direction: row;
+      }
+      .ob-sections > * { flex: 1; }
+      .ob-themes { flex-direction: column; }
+      .ob-densities { flex-direction: column; }
+      .ob-density-desc { display: block; font-size: 0.5rem; color: var(--text3); }
+      .ob-card { padding: 1.5rem; }
+      .ob-title { font-size: 1.375rem; }
+
+      /* Step 2: horizontal values */
+      .ob-values { gap: 0.625rem; }
+    }
+
+    /* Mobile small — stack everything */
+    @media (max-width: 30em) {
+      .ob-screen { padding: 0.75rem; }
+      .ob-card { padding: 0.875rem 0.75rem; border-radius: 0.75rem; }
+      .ob-title { font-size: 1.0625rem; }
+      .ob-desc { font-size: 0.6875rem; margin-bottom: 0.5rem; }
+      .ob-section-label { font-size: 0.5625rem; margin-bottom: 0.25rem; }
+      .ob-values { flex-direction: column; gap: 0.375rem; }
+      .ob-value { flex-direction: row; text-align: left; }
     }
   `;
 
@@ -439,14 +648,28 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
     if (this.animating) return;
     this.animating = true;
 
-    const inner = this.renderRoot.querySelector(".ob-inner") as HTMLElement;
-    if (inner) {
-      await gsap.to(inner, { opacity: 0, y: 10, duration: 0.2, ease: "power2.in" });
+    // Exit current step
+    if (this.step === "splash") {
+      const splash = this.renderRoot.querySelector(".splash") as HTMLElement;
+      if (splash) {
+        await gsap.to(splash, { opacity: 0, duration: 0.35, ease: "power2.in" });
+      }
+      // Apply hueso theme for seamless splash→onboarding transition
+      if (!localStorage.getItem("oda-theme")) {
+        this._applyTheme("hueso");
+      }
+    } else {
+      const inner = this.renderRoot.querySelector(".ob-inner") as HTMLElement;
+      if (inner) {
+        await gsap.to(inner, { opacity: 0, y: 10, duration: 0.2, ease: "power2.in" });
+      }
     }
 
     this.step = next;
     await this.updateComplete;
 
+    // Enter next step
+    const inner = this.renderRoot.querySelector(".ob-inner") as HTMLElement;
     if (inner) {
       gsap.fromTo(
         inner,
@@ -472,13 +695,24 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
     localStorage.setItem("oda-theme", id);
   }
 
+  private _applyDensity(id: string) {
+    this.selectedDensity = id;
+    if (id) {
+      document.documentElement.setAttribute("data-density", id);
+      localStorage.setItem("oda-density", id);
+    } else {
+      document.documentElement.removeAttribute("data-density");
+      localStorage.removeItem("oda-density");
+    }
+  }
+
   private async _onEnterLocal() {
     if (this.animating) return;
     this.animating = true;
-
-    const screen = this.renderRoot.querySelector(".ob-screen") as HTMLElement;
-    if (screen) {
-      await gsap.to(screen, { opacity: 0, scale: 0.97, duration: 0.4, ease: "power2.in" });
+    const target = (this.renderRoot.querySelector(".ob-screen") ||
+      this.renderRoot.querySelector(".splash")) as HTMLElement;
+    if (target) {
+      await gsap.to(target, { opacity: 0, scale: 0.97, duration: 0.4, ease: "power2.in" });
     }
     enterLocal();
     this.dispatchEvent(new CustomEvent("onboarding-done", { bubbles: true, composed: true }));
@@ -487,35 +721,57 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
   private async _onEnterDemo() {
     if (this.animating) return;
     this.animating = true;
-
-    const screen = this.renderRoot.querySelector(".ob-screen") as HTMLElement;
-    if (screen) {
-      await gsap.to(screen, { opacity: 0, scale: 0.97, duration: 0.4, ease: "power2.in" });
+    const target = (this.renderRoot.querySelector(".ob-screen") ||
+      this.renderRoot.querySelector(".splash")) as HTMLElement;
+    if (target) {
+      await gsap.to(target, { opacity: 0, scale: 0.97, duration: 0.4, ease: "power2.in" });
     }
     enterDemo();
     this.dispatchEvent(new CustomEvent("onboarding-done", { bubbles: true, composed: true }));
   }
 
+  // ── Read current theme/density without triggering re-render ──
+  override connectedCallback() {
+    super.connectedCallback();
+    this.selectedTheme = document.documentElement.getAttribute("data-theme") || "noche";
+    this.selectedDensity = document.documentElement.getAttribute("data-density") || "";
+  }
+
   // ── Entrance animation ──
   protected firstUpdated() {
-    const hero = this.renderRoot.querySelector(".ob-hero");
-    const card = this.renderRoot.querySelector(".ob-card");
-    const footnote = this.renderRoot.querySelector(".ob-footnote");
+    requestAnimationFrame(() => this._animateCurrentStep());
+  }
 
-    const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
-    if (hero) tl.from(hero, { opacity: 0, y: 18, duration: 0.5 });
-    if (card) tl.from(card, { opacity: 0, y: 18, duration: 0.45 }, "-=0.3");
-    if (footnote) tl.from(footnote, { opacity: 0, duration: 0.4 }, "-=0.2");
+  private _animateCurrentStep() {
+    if (this.step === "splash") {
+      const diamond = this.renderRoot.querySelector(".splash-diamond");
+      const logo = this.renderRoot.querySelector(".splash-logo");
+      const sub = this.renderRoot.querySelector(".splash-sub");
+      const tagline = this.renderRoot.querySelector(".splash-tagline");
+      const ctas = this.renderRoot.querySelector(".splash-ctas");
+      const footer = this.renderRoot.querySelector(".splash-footer");
+
+      const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+      if (diamond) tl.from(diamond, { opacity: 0, scale: 0.6, duration: 0.6 });
+      if (logo) tl.from(logo, { opacity: 0, y: 12, duration: 0.4 }, "-=0.2");
+      if (sub) tl.from(sub, { opacity: 0, duration: 0.3 }, "-=0.15");
+      if (tagline) tl.from(tagline, { opacity: 0, y: 10, duration: 0.4 }, "-=0.1");
+      if (ctas) tl.from(ctas, { opacity: 0, y: 14, duration: 0.45 }, "-=0.1");
+      if (footer) tl.from(footer, { opacity: 0, duration: 0.3 }, "-=0.2");
+    } else {
+      const card = this.renderRoot.querySelector(".ob-card");
+      const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+      if (card) tl.from(card, { opacity: 0, y: 18, duration: 0.5 });
+    }
   }
 
   // ── Progress rendering ──
   private _renderProgress() {
-    const labels = ["Inicio", "Estilo", "Arranque"];
     const currentIdx = STEPS.indexOf(this.step);
 
     return html`
       <div class="ob-progress">
-        ${labels.map(
+        ${STEP_LABELS.map(
           (label, i) => html`
           ${i > 0 ? html`<span class="ob-step-line"></span>` : nothing}
           <span class="ob-step" ?data-active=${i === currentIdx} ?data-done=${i < currentIdx}>
@@ -528,7 +784,94 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
     `;
   }
 
-  // ── Step 1: Welcome ──
+  // ── Step 0: Splash ──
+  private _renderSplash() {
+    return html`
+      <div class="splash">
+        <div class="splash-inner">
+          <span class="splash-diamond">◈</span>
+          <span class="splash-logo">Oda</span>
+          <span class="splash-sub">Planner</span>
+          <p class="splash-tagline">
+            Cada hora de estudio cuenta.<br>Organizalas sin esfuerzo.
+          </p>
+          <div class="splash-ctas">
+            <button class="splash-btn" @click=${() => this._goTo("estilo")}>
+              Empezar
+            </button>
+            <button class="splash-skip" @click=${this._onEnterLocal}>
+              Ya tengo experiencia · Ir al planner →
+            </button>
+          </div>
+        </div>
+        <div class="splash-footer">
+          100 % offline · Tus datos se guardan en este dispositivo
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Step 1: Style (theme + density) ──
+  private _renderEstilo() {
+    return html`
+      ${this._renderProgress()}
+      <div class="ob-card">
+        <h1 class="ob-title">Elegí cómo se ve Oda</h1>
+        <p class="ob-desc">
+          Tema y tamaño de letra. Lo podés cambiar cuando quieras desde ⚙.
+        </p>
+
+        <div class="ob-sections">
+          <div>
+            <div class="ob-section-label">Tema</div>
+            <div class="ob-themes">
+              ${THEMES.map(
+                (t) => html`
+                <button
+                  class="ob-theme-chip"
+                  ?data-active=${this.selectedTheme === t.id}
+                  @click=${() => this._applyTheme(t.id)}
+                >
+                  <div class="ob-theme-preview" style="background:${t.bg}">
+                    <div class="ob-theme-bar" style="background:${t.bar}"></div>
+                  </div>
+                  ${t.label}
+                </button>
+              `,
+              )}
+            </div>
+          </div>
+
+          <div>
+            <div class="ob-section-label">Tamaño de letra</div>
+            <div class="ob-densities">
+              ${DENSITIES.map(
+                (d) => html`
+                <button
+                  class="ob-density-chip"
+                  ?data-active=${this.selectedDensity === d.id}
+                  @click=${() => this._applyDensity(d.id)}
+                >
+                  <span class="ob-density-sample ${d.id === "compacto" ? "ob-density-sample-sm" : d.id === "grande" ? "ob-density-sample-xl" : d.id === "comodo" ? "ob-density-sample-lg" : "ob-density-sample-md"}">${d.sample}</span>
+                  <span class="ob-density-label">${d.label}</span>
+                  <span class="ob-density-desc">${d.desc}</span>
+                </button>
+              `,
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div class="ob-actions">
+          <button class="ob-btn ob-btn-pri" @click=${() => this._goTo("welcome")}>
+            Continuar →
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Step 2: Welcome ──
   private _renderWelcome() {
     return html`
       <div class="ob-hero">
@@ -538,15 +881,9 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
       ${this._renderProgress()}
       <div class="ob-card">
         <h1 class="ob-title">Organizá tu semana sin caos</h1>
-        <p class="ob-desc">
-          Convertí materias, fechas límite, sesiones y horarios en un plan claro
-          que podés seguir todos los días. Oda te ayuda a dejar de improvisar,
-          ver qué toca hoy y adelantarte a lo importante antes de llegar con el
-          agua al cuello.
-        </p>
 
         <div class="ob-preview">
-          <div class="ob-preview-title">Vista rápida de una semana viva</div>
+          <div class="ob-preview-title">Tu semana en un vistazo</div>
           <div class="ob-preview-item">
             <span class="ob-preview-left">🔴 TP de Matemática · arrancar hoy</span>
             <span class="ob-preview-right">vence mañana</span>
@@ -570,77 +907,28 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
           <div class="ob-value">
             <span class="ob-value-ico">📚</span>
             <div class="ob-value-text">
-              <h4>Convierte materias en un plan real</h4>
-              <p>Pasás de una lista suelta de entregas a una semana ordenada por franjas, prioridades y horas disponibles.</p>
+              <h4>Plan real</h4>
+              <p>Materias, franjas y prioridades en una semana concreta.</p>
             </div>
           </div>
           <div class="ob-value">
             <span class="ob-value-ico">⏱</span>
             <div class="ob-value-text">
-              <h4>Registra estudio sin fricción</h4>
-              <p>Cada sesión suma tiempo real a tus materias y tareas, para ver si vas llegando o si ya te estás quedando atrás.</p>
+              <h4>Tracking</h4>
+              <p>Cada sesión suma tiempo real a tus materias y tareas.</p>
             </div>
           </div>
           <div class="ob-value">
             <span class="ob-value-ico">🚨</span>
             <div class="ob-value-text">
-              <h4>Te avisa antes del desastre</h4>
-              <p>Fechas de inicio, vencimientos y alertas configurables para no enterarte tarde de lo importante.</p>
+              <h4>Alertas</h4>
+              <p>Te avisa antes de que sea tarde para lo importante.</p>
             </div>
           </div>
         </div>
 
-        <button class="ob-btn ob-btn-pri" @click=${() => this._goTo("tema")}>
-          Empezar →
-        </button>
-
-        <div class="ob-hint">
-          <strong>Inicio recomendado:</strong> arrancá en local y, cuando ya tengas
-          tu planner armado, conectá Google Drive desde 💾 Datos para sincronizarlo
-          entre dispositivos.
-        </div>
-      </div>
-
-      <p class="ob-footnote">
-        Tus datos pueden vivir en este navegador, en un JSON exportado o sincronizados
-        con Google Drive · La configuración visual se puede cambiar en cualquier momento
-      </p>
-    `;
-  }
-
-  // ── Step 2: Theme ──
-  private _renderTema() {
-    return html`
-      ${this._renderProgress()}
-      <div class="ob-card">
-        <h1 class="ob-title">Antes de empezar, elegí tu tema</h1>
-        <p class="ob-desc">
-          Elegí el tema que más te guste para arrancar. Es solo una personalización
-          visual, así que después podés cambiarlo cuando quieras desde el header o
-          desde Configuración.
-        </p>
-
-        <div class="ob-themes">
-          ${THEMES.map(
-            (t) => html`
-            <button
-              class="ob-theme-chip"
-              ?data-active=${this.selectedTheme === t.id}
-              @click=${() => this._applyTheme(t.id)}
-            >
-              <div class="ob-theme-preview" style="background:${t.bg}">
-                <div class="ob-theme-bar" style="background:${t.bar}"></div>
-              </div>
-              ${t.label}
-            </button>
-          `,
-          )}
-        </div>
-
-        <p class="ob-theme-note">No te bloquees acá: es solo estética. Lo importante viene en el siguiente paso.</p>
-
         <div class="ob-actions">
-          <button class="ob-btn ob-btn-sec" @click=${() => this._goTo("welcome")}>← Atrás</button>
+          <button class="ob-btn ob-btn-sec" @click=${() => this._goTo("estilo")}>← Atrás</button>
           <button class="ob-btn ob-btn-pri" @click=${() => this._goTo("dataset")}>Continuar →</button>
         </div>
       </div>
@@ -652,28 +940,17 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
     return html`
       ${this._renderProgress()}
       <div class="ob-card">
-        <h1 class="ob-title">Elegí tu forma de arranque</h1>
-        <p class="ob-desc">
-          Elegís cómo entrar por primera vez y listo. En cuanto entres, la app te
-          abre la guía completa para que no tengas que adivinar nada ni perder
-          tiempo buscando dónde está cada cosa.
-        </p>
-
-        <div class="ob-opts-label">Elegí una opción</div>
+        <h1 class="ob-title">¿Cómo querés arrancar?</h1>
 
         <button class="ob-opt pri-opt" @click=${this._onEnterLocal}>
           <div class="ob-opt-header">
             <span class="ob-opt-ico">⚡</span>
-            <span class="ob-opt-title">Empezar rápido en modo local</span>
+            <span class="ob-opt-title">Empezar en modo local</span>
             <span class="ob-opt-tag">recomendado</span>
           </div>
           <p class="ob-opt-desc">
-            Entrás ya mismo a la app con tu planner vacío para empezar a cargar
-            materias, horarios y tareas.
-          </p>
-          <p class="ob-opt-small">
-            Tus datos quedan guardados en este navegador. Después podés exportar,
-            importar o sincronizar con Google Drive desde 💾 Datos.
+            Planner vacío para cargar tus materias, horarios y tareas.
+            Tus datos quedan en este navegador.
           </p>
         </button>
 
@@ -684,28 +961,17 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
             <span class="ob-opt-tag" style="background: var(--text3)">demo</span>
           </div>
           <p class="ob-opt-desc">
-            Ideal para entender rápido cómo se conectan materias, backlog,
-            calendario, sesiones y alertas.
-          </p>
-          <p class="ob-opt-small">
-            Se cargan materias, tareas y sesiones ficticias para que puedas
-            recorrer la app y enseguida ver cómo te devuelve valor.
+            Materias, tareas y sesiones ficticias para recorrer la app.
           </p>
         </button>
 
         <div class="ob-hint">
-          <strong>Al entrar se abre la guía completa:</strong> vas a tener a mano el
-          recorrido inicial, cómo cargar materias, cómo usar la Vista Semana y cómo
-          manejar tus datos sin romper nada.
-        </div>
-        <div class="ob-hint" style="border-top:none;margin-top:0.375rem;padding-top:0">
-          <strong>Siguiente paso recomendado al entrar:</strong> crear tus materias,
-          definir objetivos semanales y marcar tus slots en la Vista Semana. Con eso
-          la app ya empieza a transformarte fechas sueltas en un plan concreto.
+          <strong>Al entrar:</strong> creá tus materias, definí objetivos semanales y
+          marcá tus slots en la Vista Semana. Con eso Oda ya empieza a devolverte valor.
         </div>
 
         <div class="ob-actions">
-          <button class="ob-btn ob-btn-sec" @click=${() => this._goTo("tema")}>← Atrás</button>
+          <button class="ob-btn ob-btn-sec" @click=${() => this._goTo("welcome")}>← Atrás</button>
         </div>
       </div>
     `;
@@ -714,11 +980,15 @@ export class OnboardingFlow extends SignalWatcher(LitElement) {
   render() {
     if (appMode.value !== "welcome") return nothing;
 
+    if (this.step === "splash") {
+      return this._renderSplash();
+    }
+
     return html`
       <div class="ob-screen">
         <div class="ob-inner">
+          ${this.step === "estilo" ? this._renderEstilo() : nothing}
           ${this.step === "welcome" ? this._renderWelcome() : nothing}
-          ${this.step === "tema" ? this._renderTema() : nothing}
           ${this.step === "dataset" ? this._renderDataset() : nothing}
         </div>
       </div>

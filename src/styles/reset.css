@@ -18,6 +18,9 @@ html[data-density="compacto"] {
 html[data-density="comodo"] {
   font-size: 18px;
 }
+html[data-density="grande"] {
+  font-size: 20px;
+}
 
 body {
   min-height: 100vh;

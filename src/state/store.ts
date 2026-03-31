@@ -1,17 +1,24 @@
 /* ═══ Oda v3.0 — App Store (Signals) ═══ */
 import { computed, signal } from "@preact/signals-core";
-import type { AppMode, PlannerData, Sesion } from "./types.js";
+import type { AppMode, FranjaDef, Materia, MateriaSlot, PlannerData, Sesion, Tarea, TipoTarea } from "./types.js";
 
 // ── Storage keys ──
 const KEY_MODE = "oda-mode";
 const KEY_DATA = "oda-data-v1";
 
 // ── Default empty data ──
+const DEFAULT_FRANJAS: FranjaDef[] = [
+  { id: "f-am", nombre: "Mañana", emoji: "☀️", horaInicio: 480, horaFin: 720 },
+  { id: "f-pm", nombre: "Tarde", emoji: "🌤", horaInicio: 780, horaFin: 1080 },
+  { id: "f-nt", nombre: "Noche", emoji: "🌙", horaInicio: 1140, horaFin: 1380 },
+];
+
 const emptyData = (): PlannerData => ({
   materias: [],
   tipos: [],
   tareas: [],
   sesiones: [],
+  franjas: DEFAULT_FRANJAS.map((f) => ({ ...f })),
 });
 
 // ── Core signals ──
@@ -21,7 +28,13 @@ export const plannerData = signal<PlannerData>(
   (() => {
     try {
       const raw = localStorage.getItem(KEY_DATA);
-      return raw ? (JSON.parse(raw) as PlannerData) : emptyData();
+      if (!raw) return emptyData();
+      const data = JSON.parse(raw) as PlannerData;
+      // Backfill default franjas for existing users
+      if (!data.franjas || data.franjas.length === 0) {
+        data.franjas = DEFAULT_FRANJAS.map((f) => ({ ...f }));
+      }
+      return data;
     } catch {
       return emptyData();
     }
@@ -60,6 +73,154 @@ export function addSesion(ses: Sesion) {
   setPlannerData({ ...d, sesiones: [...d.sesiones, ses] });
 }
 
+// ── Materia CRUD ──
+export function addMateria(m: Materia) {
+  const d = plannerData.value;
+  setPlannerData({ ...d, materias: [...d.materias, m] });
+}
+
+export function updateMateria(id: string, patch: Partial<Materia>) {
+  const d = plannerData.value;
+  setPlannerData({
+    ...d,
+    materias: d.materias.map((m) => (m.id === id ? { ...m, ...patch } : m)),
+  });
+}
+
+export function deleteMateria(id: string) {
+  const d = plannerData.value;
+  setPlannerData({ ...d, materias: d.materias.filter((m) => m.id !== id) });
+}
+
+// ── TipoTarea CRUD ──
+export function addTipo(t: TipoTarea) {
+  const d = plannerData.value;
+  setPlannerData({ ...d, tipos: [...d.tipos, t] });
+}
+
+export function updateTipo(id: string, patch: Partial<TipoTarea>) {
+  const d = plannerData.value;
+  setPlannerData({
+    ...d,
+    tipos: d.tipos.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+  });
+}
+
+export function deleteTipo(id: string) {
+  const d = plannerData.value;
+  setPlannerData({ ...d, tipos: d.tipos.filter((t) => t.id !== id) });
+}
+
+// ── Franjas ──
+export function setFranjas(newFranjas: FranjaDef[]) {
+  const d = plannerData.value;
+  const oldFranjas = d.franjas ?? [];
+
+  // Detect if franja IDs changed (not just names/times)
+  const oldIds = new Set(oldFranjas.map((f) => f.id));
+  const newIds = new Set(newFranjas.map((f) => f.id));
+  const idsChanged = oldIds.size !== newIds.size || [...oldIds].some((id) => !newIds.has(id));
+
+  if (idsChanged && oldFranjas.length > 0 && d.materias.some((m) => m.slots && m.slots.length > 0)) {
+    const migrated = migrateSlots(oldFranjas, newFranjas, d.materias);
+    setPlannerData({ ...d, franjas: newFranjas, materias: migrated });
+  } else {
+    setPlannerData({ ...d, franjas: newFranjas });
+  }
+}
+
+/** Migrate materia slots when franja IDs change — maps by time-range overlap */
+function migrateSlots(
+  oldFranjas: FranjaDef[],
+  newFranjas: FranjaDef[],
+  mats: Materia[],
+): Materia[] {
+  if (newFranjas.length === 0) return mats;
+
+  // Build mapping: oldFranjaId → newFranjaId[]
+  const mapping = new Map<string, string[]>();
+
+  for (const oldF of oldFranjas) {
+    const targets: string[] = [];
+    for (const newF of newFranjas) {
+      // Strict interval overlap: (a1, a2) ∩ (b1, b2) ≠ ∅
+      if (oldF.horaInicio < newF.horaFin && newF.horaInicio < oldF.horaFin) {
+        targets.push(newF.id);
+      }
+    }
+
+    // Fallback: no overlap → pick nearest franja by midpoint distance
+    if (targets.length === 0) {
+      const oldMid = (oldF.horaInicio + oldF.horaFin) / 2;
+      let bestId = newFranjas[0].id;
+      let bestDist = Infinity;
+      for (const newF of newFranjas) {
+        const dist = Math.abs((newF.horaInicio + newF.horaFin) / 2 - oldMid);
+        if (dist < bestDist) {
+          bestDist = dist;
+          bestId = newF.id;
+        }
+      }
+      targets.push(bestId);
+    }
+
+    mapping.set(oldF.id, targets);
+  }
+
+  return mats.map((mat) => {
+    if (!mat.slots || mat.slots.length === 0) return mat;
+
+    const seen = new Set<string>();
+    const migrated: MateriaSlot[] = [];
+
+    for (const slot of mat.slots) {
+      const targets = mapping.get(slot.franjaId);
+      if (!targets) continue;
+      for (const fid of targets) {
+        const key = `${slot.dia}-${fid}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          migrated.push({ dia: slot.dia, franjaId: fid });
+        }
+      }
+    }
+
+    return { ...mat, slots: migrated.length > 0 ? migrated : undefined };
+  });
+}
+
+// ── Tarea CRUD ──
+/** Signal: task id being edited, "new" for creation, null for none */
+export const editingTaskId = signal<string | null>(null);
+/** Signal: view to return to after task editing */
+export const taskReturnView = signal<string>("backlog");
+/** Signal: pre-selected materia for new task */
+export const newTaskMateriaId = signal<string>("");
+
+// ── Materia editing ──
+/** Signal: materia id being edited, "new" for creation, null for none */
+export const editingMateriaId = signal<string | null>(null);
+/** Signal: view to return to after materia editing */
+export const materiaReturnView = signal<string>("materias");
+
+export function addTarea(t: Tarea) {
+  const d = plannerData.value;
+  setPlannerData({ ...d, tareas: [...d.tareas, t] });
+}
+
+export function updateTarea(id: string, patch: Partial<Tarea>) {
+  const d = plannerData.value;
+  setPlannerData({
+    ...d,
+    tareas: d.tareas.map((t) => (t.id === id ? { ...t, ...patch } : t)),
+  });
+}
+
+export function deleteTarea(id: string) {
+  const d = plannerData.value;
+  setPlannerData({ ...d, tareas: d.tareas.filter((t) => t.id !== id) });
+}
+
 export function enterLocal() {
   setPlannerData(emptyData());
   setAppMode("local");
@@ -85,11 +246,38 @@ function buildDemoData(): PlannerData {
         id: "m1",
         nombre: "Análisis Matemático",
         color: "#6366f1",
-        horasSemanales: 6,
+        horasSemanalesMin: 6,
+        horasSemanalesMax: 8,
+        slots: [
+          { dia: 0, franjaId: "f-am" },
+          { dia: 2, franjaId: "f-am" },
+          { dia: 4, franjaId: "f-pm" },
+        ],
         activa: true,
       },
-      { id: "m2", nombre: "Bases de Datos", color: "#f59e0b", horasSemanales: 4, activa: true },
-      { id: "m3", nombre: "Historia", color: "#10b981", horasSemanales: 3, activa: true },
+      {
+        id: "m2",
+        nombre: "Bases de Datos",
+        color: "#f59e0b",
+        horasSemanalesMin: 4,
+        horasSemanalesMax: 6,
+        slots: [
+          { dia: 1, franjaId: "f-pm" },
+          { dia: 3, franjaId: "f-pm" },
+        ],
+        activa: true,
+      },
+      {
+        id: "m3",
+        nombre: "Historia",
+        color: "#10b981",
+        horasSemanalesMin: 3,
+        slots: [
+          { dia: 4, franjaId: "f-nt" },
+          { dia: 5, franjaId: "f-am" },
+        ],
+        activa: true,
+      },
     ],
     tipos: [
       { id: "t1", nombre: "TP", icono: "📝", activo: true },
@@ -169,5 +357,6 @@ function buildDemoData(): PlannerData {
         titulo: "Lectura previa",
       },
     ],
+    franjas: DEFAULT_FRANJAS.map((f) => ({ ...f })),
   };
 }

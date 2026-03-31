@@ -1,7 +1,7 @@
 import { LitElement, css, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-export type ViewId = "hoy" | "semana" | "materias" | "backlog" | "kanban" | "calendario";
+export type ViewId = "hoy" | "semana" | "materias" | "backlog" | "kanban" | "calendario" | "config" | "task" | "materia-edit";
 
 export interface NavItem {
   id: ViewId;
@@ -18,39 +18,9 @@ const NAV_ITEMS: NavItem[] = [
   { id: "calendario", icon: "C", label: "Calendario" },
 ];
 
-interface ThemeDef {
-  id: string;
-  label: string;
-  dot: string;
-}
-
-const THEMES: ThemeDef[] = [
-  { id: "hueso", label: "Hueso", dot: "#c8b89a" },
-  { id: "claro", label: "Claro", dot: "#d0d0d0" },
-  { id: "noche", label: "Noche", dot: "#242428" },
-  { id: "pizarron", label: "Pizarrón", dot: "#1f2440" },
-  { id: "cafe", label: "Café", dot: "#362820" },
-];
-
-interface DensityDef {
-  id: string;
-  label: string;
-  icon: string;
-}
-
-const DENSITIES: DensityDef[] = [
-  { id: "compacto", label: "Compacto", icon: "A" },
-  { id: "", label: "Normal", icon: "A" },
-  { id: "comodo", label: "Cómodo", icon: "A" },
-];
-
 @customElement("nav-bar")
 export class NavBar extends LitElement {
   @property() activeView: ViewId = "hoy";
-  @property() currentTheme = "noche";
-  @property() currentDensity = "";
-
-  private themeOpen = false;
 
   static styles = css`
     :host {
@@ -205,117 +175,16 @@ export class NavBar extends LitElement {
       background: var(--bg2);
       border-color: var(--border2);
     }
+    .ibtn[data-active] {
+      color: var(--accent);
+      background: var(--bg2);
+      border-color: var(--accent);
+    }
     .ibtn:focus-visible {
       outline: 2px solid var(--accent);
       outline-offset: 2px;
     }
 
-    /* ── Theme switcher ── */
-    .tsw {
-      position: relative;
-    }
-    .tsw-btn {
-      display: flex;
-      align-items: center;
-      gap: 0.375rem;
-      font-size: 0.75rem;
-    }
-    .tsw-dot {
-      width: 0.75rem;
-      height: 0.75rem;
-      border-radius: 50%;
-      border: 1px solid var(--border2);
-      flex-shrink: 0;
-    }
-    .tsw-popover {
-      position: absolute;
-      top: calc(100% + 0.5rem);
-      right: 0;
-      width: 10rem;
-      background: var(--bg1);
-      border: 1px solid var(--border2);
-      border-radius: 0.5625rem;
-      box-shadow: 0 8px 24px rgba(0,0,0,.15);
-      z-index: var(--z-dropdown, 100);
-      overflow: hidden;
-      padding: 0.5rem;
-    }
-    .tsw-pop-title {
-      font-size: 0.5625rem;
-      color: var(--text3);
-      letter-spacing: .1em;
-      font-weight: 600;
-      padding: 0.125rem 0.375rem 0.375rem;
-      text-transform: uppercase;
-    }
-    .tsw-option {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      width: 100%;
-      background: transparent;
-      border: none;
-      color: var(--text1);
-      padding: 0.375rem 0.5rem;
-      border-radius: 0.375rem;
-      font-size: 0.75rem;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all .12s;
-    }
-    .tsw-option:hover {
-      background: var(--bg2);
-      color: var(--text0);
-    }
-    .tsw-option[data-active] {
-      color: var(--text0);
-      font-weight: 600;
-    }
-    .tsw-option-dot {
-      width: 0.625rem;
-      height: 0.625rem;
-      border-radius: 50%;
-      border: 1px solid var(--border);
-      flex-shrink: 0;
-    }
-
-    /* ── Density options ── */
-    .tsw-separator {
-      height: 1px;
-      background: var(--border);
-      margin: 0.375rem 0;
-    }
-    .density-option {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      width: 100%;
-      background: transparent;
-      border: none;
-      color: var(--text1);
-      padding: 0.375rem 0.5rem;
-      border-radius: 0.375rem;
-      font-size: 0.75rem;
-      font-family: inherit;
-      cursor: pointer;
-      transition: all .12s;
-    }
-    .density-option:hover {
-      background: var(--bg2);
-      color: var(--text0);
-    }
-    .density-option[data-active] {
-      color: var(--text0);
-      font-weight: 600;
-    }
-    .density-ico {
-      font-weight: 700;
-      flex-shrink: 0;
-      line-height: 1;
-    }
-    .density-ico-sm { font-size: 0.625rem; }
-    .density-ico-md { font-size: 0.75rem; }
-    .density-ico-lg { font-size: 0.875rem; }
   `;
 
   private _onNavClick(id: ViewId) {
@@ -324,58 +193,7 @@ export class NavBar extends LitElement {
     );
   }
 
-  private _onThemeClick(id: string) {
-    document.documentElement.setAttribute("data-theme", id);
-    localStorage.setItem("oda-theme", id);
-    this.currentTheme = id;
-    this.themeOpen = false;
-    this.requestUpdate();
-  }
-
-  private _onDensityClick(id: string) {
-    if (id) {
-      document.documentElement.setAttribute("data-density", id);
-      localStorage.setItem("oda-density", id);
-    } else {
-      document.documentElement.removeAttribute("data-density");
-      localStorage.removeItem("oda-density");
-    }
-    this.currentDensity = id;
-    this.requestUpdate();
-  }
-
-  private _toggleThemePopover() {
-    this.themeOpen = !this.themeOpen;
-    this.requestUpdate();
-  }
-
-  private _closeThemePopover = (e: MouseEvent) => {
-    const path = e.composedPath();
-    if (!path.includes(this)) {
-      this.themeOpen = false;
-      this.requestUpdate();
-    }
-  };
-
-  connectedCallback() {
-    super.connectedCallback();
-    document.addEventListener("click", this._closeThemePopover);
-    this.currentTheme = document.documentElement.getAttribute("data-theme") || "noche";
-    this.currentDensity = document.documentElement.getAttribute("data-density") || "";
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    document.removeEventListener("click", this._closeThemePopover);
-  }
-
-  private _currentThemeDef() {
-    return THEMES.find((t) => t.id === this.currentTheme) || THEMES[2];
-  }
-
   render() {
-    const theme = this._currentThemeDef();
-
     return html`
       <header class="hdr">
         <span class="logo"><span class="logo-glyph">◈</span><span class="logo-full">Oda Planner</span><span class="logo-short">Oda</span></span>
@@ -399,55 +217,8 @@ export class NavBar extends LitElement {
 
         <div class="actions">
           <button class="ibtn" aria-label="Ayuda" title="Ayuda">?</button>
-          <button class="ibtn" aria-label="Configuración" title="Configuración">⚙</button>
+          <button class="ibtn" aria-label="Configuración" title="Configuración" ?data-active=${this.activeView === "config"} @click=${() => this._onNavClick("config")}>⚙</button>
           <button class="ibtn" aria-label="Datos" title="Datos">💾</button>
-          <div class="tsw">
-            <button
-              class="ibtn tsw-btn"
-              @click=${this._toggleThemePopover}
-              aria-label="Cambiar tema"
-              aria-expanded=${this.themeOpen}
-            >
-              <span class="tsw-dot" style="background:${theme.dot}"></span>
-            </button>
-            ${
-              this.themeOpen
-                ? html`
-              <div class="tsw-popover" role="group" aria-label="Apariencia">
-                <div class="tsw-pop-title">TEMA</div>
-                ${THEMES.map(
-                  (t) => html`
-                  <button
-                    class="tsw-option"
-                    ?data-active=${t.id === this.currentTheme}
-                    role="option"
-                    aria-selected=${t.id === this.currentTheme}
-                    @click=${() => this._onThemeClick(t.id)}
-                  >
-                    <span class="tsw-option-dot" style="background:${t.dot}"></span>
-                    ${t.label}
-                  </button>
-                `,
-                )}
-                <div class="tsw-separator"></div>
-                <div class="tsw-pop-title">DENSIDAD</div>
-                ${DENSITIES.map(
-                  (d) => html`
-                  <button
-                    class="density-option"
-                    ?data-active=${this.currentDensity === d.id}
-                    @click=${() => this._onDensityClick(d.id)}
-                  >
-                    <span class="density-ico ${d.id === "compacto" ? "density-ico-sm" : d.id === "comodo" ? "density-ico-lg" : "density-ico-md"}">${d.icon}</span>
-                    ${d.label}
-                  </button>
-                `,
-                )}
-              </div>
-            `
-                : null
-            }
-          </div>
         </div>
       </header>
     `;

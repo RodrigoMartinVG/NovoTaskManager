@@ -1,11 +1,18 @@
 /* ═══ Oda v3.0 — Domain Types ═══ */
 
 // ── Materia ──
+export interface MateriaSlot {
+  dia: number;      // 0=lun, 1=mar, 2=mié, 3=jue, 4=vie, 5=sáb, 6=dom
+  franjaId: string; // referencia a FranjaDef.id
+}
+
 export interface Materia {
   id: string;
   nombre: string;
   color: string;
-  horasSemanales?: number;
+  horasSemanalesMin?: number;
+  horasSemanalesMax?: number;
+  slots?: MateriaSlot[];
   activa?: boolean;
 }
 

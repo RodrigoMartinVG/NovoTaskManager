@@ -10,6 +10,9 @@ import "../views/materias-view.js";
 import "../views/backlog-view.js";
 import "../views/kanban-view.js";
 import "../views/calendario-view.js";
+import "../views/config/config-view.js";
+import "../views/task-view.js";
+import "../views/materia-edit-view.js";
 
 @customElement("app-shell")
 export class AppShell extends SignalWatcher(LitElement) {
@@ -78,6 +81,12 @@ export class AppShell extends SignalWatcher(LitElement) {
         return html`<kanban-view class="view-enter"></kanban-view>`;
       case "calendario":
         return html`<calendario-view class="view-enter"></calendario-view>`;
+      case "config":
+        return html`<config-view class="view-enter"></config-view>`;
+      case "task":
+        return html`<task-view class="view-enter" @view-change=${this._onViewChange}></task-view>`;
+      case "materia-edit":
+        return html`<materia-edit-view class="view-enter" @view-change=${this._onViewChange}></materia-edit-view>`;
     }
   }
 
@@ -92,7 +101,7 @@ export class AppShell extends SignalWatcher(LitElement) {
         .activeView=${this.activeView}
         @view-change=${this._onViewChange}
       ></nav-bar>
-      <main class="main">
+      <main class="main" @view-change=${this._onViewChange}>
         ${this._renderView()}
       </main>
 
