@@ -230,25 +230,89 @@ export class DatosView extends SignalWatcher(LitElement) {
       margin-top: var(--space-2);
     }
 
-    /* ── Drive placeholder ── */
-    .drive-placeholder {
-      text-align: center;
-      padding: var(--space-4);
-      color: var(--text3);
-      font-size: var(--text-sm);
+    /* ── Drive hero section ── */
+    .drive-hero {
+      background: var(--bg1);
+      border: 2px solid var(--accent);
+      border-radius: 0.75rem;
+      padding: var(--space-5);
+      margin-bottom: var(--space-5);
+      position: relative;
+      overflow: hidden;
     }
-    .drive-icon { font-size: 2rem; margin-bottom: var(--space-2); }
+    .drive-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%);
+      pointer-events: none;
+    }
+    .drive-hero-hdr {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+      position: relative;
+    }
+    .drive-cloud {
+      font-size: 1.75rem;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .drive-hero-title {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--text0);
+      margin: 0;
+    }
+    .drive-hero-sub {
+      font-size: var(--text-xs);
+      color: var(--text3);
+      font-weight: 400;
+    }
+    .drive-hero-body {
+      position: relative;
+    }
 
-    /* ── Drive section ── */
+    /* ── Drive disconnected ── */
+    .drive-cta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+    .drive-cta-text {
+      flex: 1;
+      font-size: var(--text-sm);
+      color: var(--text2);
+      line-height: 1.5;
+    }
+    .btn-drive {
+      padding: 0.625rem 1.25rem;
+      border-radius: 0.5rem;
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font: inherit;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .btn-drive:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-drive:disabled { opacity: 0.5; cursor: default; transform: none; }
+
+    /* ── Drive connected status ── */
     .drive-status {
       display: flex;
       align-items: center;
       gap: var(--space-3);
       margin-bottom: var(--space-3);
-      padding: 0.5rem 0.75rem;
+      padding: 0.75rem 1rem;
       background: var(--bg0);
       border: 1px solid var(--border);
-      border-radius: 0.375rem;
+      border-radius: 0.5rem;
     }
     .drive-dot {
       width: 0.5rem;
@@ -330,6 +394,23 @@ export class DatosView extends SignalWatcher(LitElement) {
         <h2 class="hdr-title">💾 Datos</h2>
       </div>
 
+      <!-- Google Drive (hero) -->
+      <div class="drive-hero">
+        <div class="drive-hero-hdr">
+          <span class="drive-cloud">☁️</span>
+          <div>
+            <h3 class="drive-hero-title">Google Drive</h3>
+            <span class="drive-hero-sub">${driveConnected.value ? "Sincronización activa" : "Sincronizá tus datos en la nube"}</span>
+          </div>
+        </div>
+        <div class="drive-hero-body">
+          ${driveConnected.value ? this._renderDriveConnected() : this._renderDriveDisconnected()}
+        </div>
+      </div>
+
+      <!-- Conflict modal -->
+      ${driveConflictData.value ? this._renderConflictModal() : nothing}
+
       <!-- Stats overview -->
       <div class="section">
         <h3 class="sec-title">Resumen de datos</h3>
@@ -379,14 +460,6 @@ export class DatosView extends SignalWatcher(LitElement) {
         <button class="btn btn-danger" @click=${this._reset}>🗑️ Borrar todo</button>
       </div>
 
-      <!-- Google Drive -->
-      <div class="section">
-        <h3 class="sec-title">Google Drive</h3>
-        ${driveConnected.value ? this._renderDriveConnected() : this._renderDriveDisconnected()}
-      </div>
-
-      <!-- Conflict modal -->
-      ${driveConflictData.value ? this._renderConflictModal() : nothing}
     `;
   }
 
@@ -395,13 +468,17 @@ export class DatosView extends SignalWatcher(LitElement) {
   private _renderDriveDisconnected() {
     const loading = this.driveLoading;
     return html`
-      <p class="sec-desc">Sincronizá tus datos con Google Drive para acceder desde cualquier dispositivo.</p>
-      <button
-        class="btn btn-accent"
-        ?disabled=${loading}
-        @click=${this._handleDriveConnect}
-      >${loading ? "Conectando…" : "☁️ Conectar con Google Drive"}</button>
-      ${!gisReady() ? html`<div class="msg-error" style="margin-top: 0.5rem">Google Identity Services no cargó. Verificá tu conexión o que no tengas un bloqueador activo.</div>` : nothing}
+      <div class="drive-cta">
+        <div class="drive-cta-text">
+          Guardá tu información de forma segura y accedé desde cualquier dispositivo.
+        </div>
+        <button
+          class="btn-drive"
+          ?disabled=${loading}
+          @click=${this._handleDriveConnect}
+        >${loading ? "Conectando…" : "Conectar"}</button>
+      </div>
+      ${!gisReady() ? html`<div class="msg-error" style="margin-top: 0.75rem">Google Identity Services no cargó. Verificá tu conexión o que no tengas un bloqueador activo.</div>` : nothing}
     `;
   }
 
