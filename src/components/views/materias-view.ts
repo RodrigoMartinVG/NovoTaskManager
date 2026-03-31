@@ -1,7 +1,7 @@
 import { SignalWatcher } from "@lit-labs/signals";
 import { effect } from "@preact/signals-core";
 import { LitElement, css, html, nothing } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { customElement } from "lit/decorators.js";
 import type { FranjaDef, Materia } from "../../state/types.js";
 import {
   editingMateriaId,

@@ -1,5 +1,6 @@
 /* ═══ Oda v3.0 — App Store (Signals) ═══ */
 import { computed, signal } from "@preact/signals-core";
+import { driveConnected, scheduleAutoSave } from "./gdrive.js";
 import type { AlertConfig, AppMode, FranjaDef, Materia, MateriaSlot, Periodo, PlannerData, Sesion, Tarea, TipoTarea } from "./types.js";
 
 // ── Storage keys ──
@@ -118,6 +119,10 @@ export function setAppMode(mode: AppMode) {
 export function setPlannerData(data: PlannerData) {
   plannerData.value = data;
   localStorage.setItem(KEY_DATA, JSON.stringify(data));
+  // Auto-save to Drive if connected
+  if (driveConnected.value) {
+    scheduleAutoSave(() => plannerData.value);
+  }
 }
 
 export function addSesion(ses: Sesion) {

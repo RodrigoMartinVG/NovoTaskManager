@@ -1,5 +1,8 @@
+import { SignalWatcher } from "@lit-labs/signals";
+import { effect } from "@preact/signals-core";
 import { LitElement, css, html } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
+import { driveConnected, syncStatus, type SyncStatus } from "../../state/gdrive.js";
 import "./global-filter.js";
 
 export type ViewId = "hoy" | "semana" | "materias" | "backlog" | "sesiones" | "kanban" | "calendario" | "config" | "datos" | "task" | "materia-edit" | "materia-stats" | "sesion-edit" | "ayuda";
@@ -21,8 +24,26 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 @customElement("nav-bar")
-export class NavBar extends LitElement {
+export class NavBar extends SignalWatcher(LitElement) {
   @property() activeView: ViewId = "hoy";
+  @state() private _connected = false;
+  @state() private _syncStatus: SyncStatus = "idle";
+
+  private _dispose?: () => void;
+
+  override connectedCallback() {
+    super.connectedCallback();
+    this._dispose = effect(() => {
+      this._connected = driveConnected.value;
+      this._syncStatus = syncStatus.value;
+      this.requestUpdate();
+    });
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._dispose?.();
+  }
 
   static styles = css`
     :host {
@@ -187,6 +208,24 @@ export class NavBar extends LitElement {
       outline-offset: 2px;
     }
 
+    /* ── Sync indicator ── */
+    .sync-dot {
+      width: 0.375rem;
+      height: 0.375rem;
+      border-radius: 50%;
+      position: absolute;
+      top: 0.25rem;
+      right: 0.25rem;
+    }
+    .sync-dot[data-s="idle"] { background: var(--text3); opacity: 0.5; }
+    .sync-dot[data-s="saving"] { background: var(--accent); animation: navPulse 1s ease infinite; }
+    .sync-dot[data-s="saved"] { background: var(--ok-text, #22c55e); }
+    .sync-dot[data-s="error"] { background: var(--err-text, #ef4444); }
+    @keyframes navPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
   `;
 
   private _onNavClick(id: ViewId) {
@@ -222,7 +261,7 @@ export class NavBar extends LitElement {
         <div class="actions">
           <button class="ibtn" aria-label="Ayuda" title="Ayuda" ?data-active=${this.activeView === "ayuda"} @click=${() => this._onNavClick("ayuda")}>?</button>
           <button class="ibtn" aria-label="Configuración" title="Configuración" ?data-active=${this.activeView === "config"} @click=${() => this._onNavClick("config")}>⚙</button>
-          <button class="ibtn" aria-label="Datos" title="Datos" ?data-active=${this.activeView === "datos"} @click=${() => this._onNavClick("datos")}>💾</button>
+          <button class="ibtn" aria-label="Datos" title="Datos" ?data-active=${this.activeView === "datos"} @click=${() => this._onNavClick("datos")}>💾${this._connected ? html`<span class="sync-dot" data-s=${this._syncStatus}></span>` : ""}</button>
         </div>
       </header>
     `;

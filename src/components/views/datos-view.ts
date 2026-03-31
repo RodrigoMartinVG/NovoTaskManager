@@ -2,11 +2,24 @@ import { SignalWatcher } from "@lit-labs/signals";
 import { effect } from "@preact/signals-core";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
+import {
+  driveConnect,
+  driveConnected,
+  driveConflictData,
+  driveDisconnect,
+  driveFlush,
+  driveUser,
+  gisReady,
+  syncError,
+  syncStatus,
+  type SyncStatus,
+} from "../../state/gdrive.js";
 import type { PlannerData } from "../../state/types.js";
 import {
   materias,
   plannerData,
   sesiones,
+  setAppMode,
   setPlannerData,
   tareas,
 } from "../../state/store.js";
@@ -77,6 +90,7 @@ function normalize(raw: unknown): PlannerData {
 export class DatosView extends SignalWatcher(LitElement) {
   @state() private importError = "";
   @state() private importSuccess = "";
+  @state() private driveLoading = false;
 
   private _dispose?: () => void;
 
@@ -84,6 +98,11 @@ export class DatosView extends SignalWatcher(LitElement) {
     super.connectedCallback();
     this._dispose = effect(() => {
       plannerData.value;
+      driveConnected.value;
+      driveUser.value;
+      syncStatus.value;
+      syncError.value;
+      driveConflictData.value;
       this.requestUpdate();
     });
   }
@@ -219,6 +238,85 @@ export class DatosView extends SignalWatcher(LitElement) {
       font-size: var(--text-sm);
     }
     .drive-icon { font-size: 2rem; margin-bottom: var(--space-2); }
+
+    /* ── Drive section ── */
+    .drive-status {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+      padding: 0.5rem 0.75rem;
+      background: var(--bg0);
+      border: 1px solid var(--border);
+      border-radius: 0.375rem;
+    }
+    .drive-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .drive-dot[data-status="idle"] { background: var(--text3); }
+    .drive-dot[data-status="saving"] { background: var(--warn-text, #f59e0b); animation: pulse-dot 1s ease infinite; }
+    .drive-dot[data-status="saved"] { background: var(--ok-text, #22c55e); }
+    .drive-dot[data-status="error"] { background: var(--err-text, #ef4444); }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .drive-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .drive-email {
+      font-size: var(--text-sm);
+      color: var(--text0);
+      font-weight: 600;
+    }
+    .drive-sync-label {
+      font-size: var(--text-xs);
+      color: var(--text3);
+    }
+    .drive-err {
+      font-size: var(--text-xs);
+      color: var(--err-text);
+    }
+
+    /* ── Conflict modal ── */
+    .conflict-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay, rgba(0,0,0,.5));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: var(--z-modal, 500);
+    }
+    .conflict-box {
+      background: var(--bg1);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: var(--space-5);
+      max-width: 28rem;
+      width: 90%;
+    }
+    .conflict-title {
+      font-size: var(--text-base);
+      font-weight: 700;
+      color: var(--text0);
+      margin: 0 0 var(--space-2);
+    }
+    .conflict-desc {
+      font-size: var(--text-sm);
+      color: var(--text2);
+      margin-bottom: var(--space-4);
+      line-height: 1.5;
+    }
+    .conflict-btns {
+      display: flex;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
   `;
 
   render() {
@@ -281,15 +379,126 @@ export class DatosView extends SignalWatcher(LitElement) {
         <button class="btn btn-danger" @click=${this._reset}>🗑️ Borrar todo</button>
       </div>
 
-      <!-- Drive (future) -->
+      <!-- Google Drive -->
       <div class="section">
         <h3 class="sec-title">Google Drive</h3>
-        <div class="drive-placeholder">
-          <div class="drive-icon">☁️</div>
-          Sincronización con Google Drive estará disponible próximamente.
+        ${driveConnected.value ? this._renderDriveConnected() : this._renderDriveDisconnected()}
+      </div>
+
+      <!-- Conflict modal -->
+      ${driveConflictData.value ? this._renderConflictModal() : nothing}
+    `;
+  }
+
+  /* ── Drive rendering ── */
+
+  private _renderDriveDisconnected() {
+    const loading = this.driveLoading;
+    return html`
+      <p class="sec-desc">Sincronizá tus datos con Google Drive para acceder desde cualquier dispositivo.</p>
+      <button
+        class="btn btn-accent"
+        ?disabled=${loading}
+        @click=${this._handleDriveConnect}
+      >${loading ? "Conectando…" : "☁️ Conectar con Google Drive"}</button>
+      ${!gisReady() ? html`<div class="msg-error" style="margin-top: 0.5rem">Google Identity Services no cargó. Verificá tu conexión o que no tengas un bloqueador activo.</div>` : nothing}
+    `;
+  }
+
+  private _renderDriveConnected() {
+    const status: SyncStatus = syncStatus.value;
+    const email = driveUser.value;
+    const err = syncError.value;
+    const statusLabels: Record<SyncStatus, string> = {
+      idle: "En espera",
+      saving: "Guardando…",
+      saved: "Guardado ✓",
+      error: "Error de sincronización",
+    };
+    return html`
+      <div class="drive-status">
+        <div class="drive-dot" data-status=${status}></div>
+        <div class="drive-info">
+          ${email ? html`<div class="drive-email">${email}</div>` : nothing}
+          <div class="drive-sync-label">${statusLabels[status]}</div>
+          ${err ? html`<div class="drive-err">${err}</div>` : nothing}
+        </div>
+        <button class="btn" style="flex-shrink:0" @click=${this._handleDriveSaveNow}>Guardar ahora</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-danger" @click=${this._handleDriveDisconnect}>Desconectar</button>
+      </div>
+    `;
+  }
+
+  private _renderConflictModal() {
+    return html`
+      <div class="conflict-overlay" @click=${(e: Event) => e.target === e.currentTarget && this._resolveConflict("local")}>
+        <div class="conflict-box">
+          <h3 class="conflict-title">Conflicto de datos</h3>
+          <p class="conflict-desc">
+            Se encontraron datos diferentes en Google Drive. ¿Qué datos querés usar?
+          </p>
+          <div class="conflict-btns">
+            <button class="btn btn-accent" @click=${() => this._resolveConflict("remote")}>Usar datos de Drive</button>
+            <button class="btn" @click=${() => this._resolveConflict("local")}>Mantener datos locales</button>
+          </div>
         </div>
       </div>
     `;
+  }
+
+  /* ── Drive handlers ── */
+
+  private async _handleDriveConnect() {
+    this.driveLoading = true;
+    try {
+      const result = await driveConnect();
+      if (!result.ok) {
+        this.driveLoading = false;
+        return;
+      }
+
+      if (result.remoteData) {
+        // Check if remote differs from local
+        const local = plannerData.value;
+        const remoteMats = result.remoteData.materias?.length ?? 0;
+        const localMats = local.materias.length;
+        const remoteTasks = result.remoteData.tareas?.length ?? 0;
+        const localTasks = local.tareas.length;
+
+        if (localMats === 0 && localTasks === 0) {
+          // Local is empty → use remote directly
+          setPlannerData(result.remoteData);
+        } else if (remoteMats !== localMats || remoteTasks !== localTasks) {
+          // Conflict → show modal
+          driveConflictData.value = result.remoteData;
+        }
+        // else: same counts → keep local, it'll auto-save
+      }
+
+      setAppMode("drive");
+    } catch (err) {
+      console.error("[GDrive] Connect error:", err);
+    }
+    this.driveLoading = false;
+  }
+
+  private _handleDriveDisconnect() {
+    if (!confirm("¿Desconectar Google Drive? Tus datos locales se mantendrán.")) return;
+    driveDisconnect();
+    setAppMode("local");
+  }
+
+  private async _handleDriveSaveNow() {
+    await driveFlush(() => plannerData.value);
+  }
+
+  private _resolveConflict(choice: "local" | "remote") {
+    if (choice === "remote" && driveConflictData.value) {
+      setPlannerData(driveConflictData.value);
+    }
+    driveConflictData.value = null;
   }
 
   private _export() {
