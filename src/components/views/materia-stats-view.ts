@@ -5,12 +5,9 @@ import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { EstadoTarea, Materia, Sesion, Tarea, FranjaDef, MateriaSlot } from "../../state/types.js";
 import {
-  editingMateriaId,
-  materiaReturnView,
   plannerData,
-  statsMateriaId,
-  statsReturnView,
 } from "../../state/store.js";
+import { editingMateriaId, materiaReturnView, statsMateriaId, statsReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
 
 /* ═══ Helpers ═══ */

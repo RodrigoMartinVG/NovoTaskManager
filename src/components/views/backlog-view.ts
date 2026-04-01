@@ -5,12 +5,11 @@ import { customElement, state } from "lit/decorators.js";
 import type { EstadoTarea, Tarea } from "../../state/types.js";
 import {
   alertConfig,
-  editingTaskId,
   filteredMaterias as materias,
   filteredTareas,
   plannerData,
-  taskReturnView,
 } from "../../state/store.js";
+import { editingTaskId, taskReturnView } from "../../state/navigation.js";
 import { computeAlertLevel, getAlertInfo } from "../../domain/alert-engine.js";
 import type { ViewId } from "../shell/nav-bar.js";
 

@@ -4,13 +4,10 @@ import { LitElement, css, html, nothing } from "lit";
 import { customElement } from "lit/decorators.js";
 import type { FranjaDef, Materia } from "../../state/types.js";
 import {
-  editingMateriaId,
-  materiaReturnView,
   filteredMaterias as materias,
   plannerData,
-  statsMateriaId,
-  statsReturnView,
 } from "../../state/store.js";
+import { editingMateriaId, materiaReturnView, statsMateriaId, statsReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
 
 /* ═══ Constants ═══ */

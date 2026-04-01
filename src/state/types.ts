@@ -93,6 +93,7 @@ export interface PlannerData {
   sesiones: Sesion[];
   franjas: FranjaDef[];
   alertas: AlertConfig;
+  updatedAt?: string; // ISO 8601
 }
 
 // ── App mode ──

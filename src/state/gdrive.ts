@@ -3,7 +3,11 @@ import { signal } from "@preact/signals-core";
 import type { PlannerData } from "./types.js";
 
 // ── Constants ──
-const CLIENT_ID = "666209409570-6rpat6b4j910acvp9kjgeemas3gnomm5.apps.googleusercontent.com";
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? "";
+
+if (import.meta.env.DEV && !CLIENT_ID) {
+  console.warn("[GDrive] VITE_GOOGLE_CLIENT_ID no configurado. Creá un archivo .env.local con tu Client ID.");
+}
 const SCOPE = "https://www.googleapis.com/auth/drive.file";
 const FILE_NAME = "oda-planner.json";
 const LS_FILE_ID = "oda-drive-fileid";
@@ -349,7 +353,7 @@ export async function driveFlush(getData: () => PlannerData): Promise<void> {
 export async function driveBoot(
   currentMode: string,
   currentData: PlannerData,
-  applyData: (data: PlannerData) => void,
+  applyData: (data: PlannerData, preserveTimestamp?: boolean) => void,
   setMode: (mode: "local") => void,
 ): Promise<void> {
   if (currentMode !== "drive") return;
@@ -362,17 +366,15 @@ export async function driveBoot(
     return;
   }
 
-  // If remote data exists and differs from local, apply remote (last writer wins for silent boot)
+  // Compare timestamps to decide which data is newer
   if (result.remoteData) {
-    const remote = result.remoteData;
-    const local = currentData;
-    const rMats = remote.materias?.length ?? 0;
-    const lMats = local.materias.length;
-    const rTasks = remote.tareas?.length ?? 0;
-    const lTasks = local.tareas.length;
-    if (rMats !== lMats || rTasks !== lTasks) {
-      // Use remote data on silent boot
-      applyData(remote);
+    const remoteTs = result.remoteData.updatedAt ?? "1970-01-01T00:00:00.000Z";
+    const localTs  = currentData.updatedAt       ?? "1970-01-01T00:00:00.000Z";
+
+    if (remoteTs > localTs) {
+      // Remote is newer — apply and preserve its timestamp
+      applyData(result.remoteData, true);
     }
+    // If local >= remote: local data is already loaded, nothing to do
   }
 }

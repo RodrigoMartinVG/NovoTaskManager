@@ -96,9 +96,12 @@ export function setAppMode(mode: AppMode) {
   localStorage.setItem(KEY_MODE, mode);
 }
 
-export function setPlannerData(data: PlannerData) {
-  plannerData.value = data;
-  localStorage.setItem(KEY_DATA, JSON.stringify(data));
+export function setPlannerData(data: PlannerData, preserveTimestamp = false) {
+  const stamped: PlannerData = preserveTimestamp
+    ? data
+    : { ...data, updatedAt: new Date().toISOString() };
+  plannerData.value = stamped;
+  localStorage.setItem(KEY_DATA, JSON.stringify(stamped));
   // Auto-save to Drive if connected
   if (driveConnected.value) {
     scheduleAutoSave(() => plannerData.value);
@@ -122,19 +125,6 @@ export function deleteSesion(id: string) {
   const d = plannerData.value;
   setPlannerData({ ...d, sesiones: d.sesiones.filter((s) => s.id !== id) });
 }
-
-// ── Sesion editing (re-exported from navigation.ts) ──
-export {
-  editingSesionId,
-  sesionReturnView,
-  editingTaskId,
-  taskReturnView,
-  newTaskMateriaId,
-  editingMateriaId,
-  materiaReturnView,
-  statsMateriaId,
-  statsReturnView,
-} from "./navigation.js";
 
 // ── Materia CRUD ──
 export function addMateria(m: Materia) {

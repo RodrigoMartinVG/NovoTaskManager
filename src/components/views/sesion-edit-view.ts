@@ -5,17 +5,14 @@ import type { Sesion } from "../../state/types.js";
 import {
   addSesion,
   deleteSesion,
-  editingSesionId,
   materias,
   plannerData,
-  sesionReturnView,
   updateSesion,
 } from "../../state/store.js";
+import { editingSesionId, sesionReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
 
-function uid(): string {
-  return `s-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
-}
+const uid = () => crypto.randomUUID();
 
 /** Generate time options (HH:MM) every 15 minutes */
 function timeOptions(): string[] {

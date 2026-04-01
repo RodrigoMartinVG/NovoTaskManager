@@ -5,11 +5,10 @@ import type { FranjaDef, Materia, MateriaSlot, Periodo } from "../../state/types
 import {
   addMateria,
   deleteMateria,
-  editingMateriaId,
-  materiaReturnView,
   plannerData,
   updateMateria,
 } from "../../state/store.js";
+import { editingMateriaId, materiaReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
 
 /* ═══ Constants ═══ */

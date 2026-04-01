@@ -4,12 +4,11 @@ import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { Sesion } from "../../state/types.js";
 import {
-  editingSesionId,
   filteredMaterias as materias,
   plannerData,
-  sesionReturnView,
   filteredSesiones as sesiones,
 } from "../../state/store.js";
+import { editingSesionId, sesionReturnView } from "../../state/navigation.js";
 import { pomoActive, pomoStart } from "../../state/pomo.js";
 import type { ViewId } from "../shell/nav-bar.js";
 

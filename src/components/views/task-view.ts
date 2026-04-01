@@ -5,18 +5,14 @@ import type { ChecklistItem, EstadoTarea, Prioridad, Tarea } from "../../state/t
 import {
   addTarea,
   deleteTarea,
-  editingTaskId,
   materias,
-  newTaskMateriaId,
   plannerData,
-  taskReturnView,
   updateTarea,
 } from "../../state/store.js";
+import { editingTaskId, newTaskMateriaId, taskReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
 
-function uid(): string {
-  return `t-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
-}
+const uid = () => crypto.randomUUID();
 
 @customElement("task-view")
 export class TaskView extends SignalWatcher(LitElement) {

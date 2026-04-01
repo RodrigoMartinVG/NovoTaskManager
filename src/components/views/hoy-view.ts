@@ -4,15 +4,12 @@ import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { FranjaDef, Materia, Sesion, Tarea } from "../../state/types.js";
 import {
-  editingTaskId,
   filteredMaterias as materias,
   plannerData,
   filteredSesiones as sesiones,
   filteredTareas as tareas,
-  statsMateriaId,
-  statsReturnView,
-  taskReturnView,
 } from "../../state/store.js";
+import { editingTaskId, statsMateriaId, statsReturnView, taskReturnView } from "../../state/navigation.js";
 import { pomoActive, pomoStart } from "../../state/pomo.js";
 import type { ViewId } from "../shell/nav-bar.js";
 

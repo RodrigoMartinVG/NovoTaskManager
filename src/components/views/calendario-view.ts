@@ -4,13 +4,12 @@ import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { Tarea } from "../../state/types.js";
 import {
-  editingTaskId,
   filteredMaterias as materias,
   filteredSesiones as sesiones,
   filteredTareas as tareas,
-  taskReturnView,
   updateTarea,
 } from "../../state/store.js";
+import { editingTaskId, taskReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
 
 /* ═══ Helpers ═══ */
