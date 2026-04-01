@@ -85,12 +85,19 @@ export class SemanaView extends PreactSignalWatcher(LitElement) {
     }
 
     /* ── Grid ── */
-    .grid {
-      display: grid;
-      grid-template-columns: minmax(7rem, auto) repeat(7, 1fr);
+    .grid-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
       border: 1px solid var(--border);
       border-radius: 0.5rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(7rem, auto) repeat(7, minmax(6.5rem, 1fr));
       background: var(--bg0);
+      min-width: max-content;
     }
 
     /* Corner cell */
@@ -104,6 +111,9 @@ export class SemanaView extends PreactSignalWatcher(LitElement) {
       display: flex;
       align-items: flex-end;
       justify-content: flex-end;
+      position: sticky;
+      left: 0;
+      z-index: 2;
     }
 
     /* Day headers */
@@ -132,6 +142,9 @@ export class SemanaView extends PreactSignalWatcher(LitElement) {
       display: flex;
       flex-direction: column;
       gap: 0.125rem;
+      position: sticky;
+      left: 0;
+      z-index: 2;
     }
     .franja-name {
       font-size: var(--text-sm);
@@ -363,7 +376,7 @@ export class SemanaView extends PreactSignalWatcher(LitElement) {
     /* ── Responsive ── */
     @media (max-width: 768px) {
       .grid {
-        grid-template-columns: minmax(4rem, auto) repeat(7, 1fr);
+        grid-template-columns: minmax(5.5rem, auto) repeat(7, minmax(5.5rem, 1fr));
       }
       .franja-label { padding: 0.5rem 0.375rem; }
       .franja-name { font-size: var(--text-xs); }
@@ -413,6 +426,7 @@ export class SemanaView extends PreactSignalWatcher(LitElement) {
         <span class="hdr-sub">${totalSlots} slots asignados · ${mats.length} materias activas</span>
       </div>
 
+      <div class="grid-scroll">
       <div class="grid">
         <!-- Corner -->
         <div class="corner">Horario</div>
@@ -468,6 +482,7 @@ export class SemanaView extends PreactSignalWatcher(LitElement) {
             `;
           })}
         `)}
+      </div>
       </div>
 
       <!-- Summary: hours per materia -->

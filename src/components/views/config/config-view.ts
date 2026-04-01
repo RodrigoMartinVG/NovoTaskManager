@@ -49,7 +49,11 @@ export class ConfigView extends LitElement {
       gap: 0.25rem;
       border-bottom: 1px solid var(--border);
       padding-bottom: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
     }
+    .tabs::-webkit-scrollbar { display: none; }
 
     .tab {
       background: transparent;
@@ -66,6 +70,8 @@ export class ConfigView extends LitElement {
       align-items: center;
       gap: 0.375rem;
       margin-bottom: -1px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .tab:hover {
