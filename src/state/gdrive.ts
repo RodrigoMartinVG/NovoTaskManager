@@ -18,13 +18,21 @@ export const syncError = signal<string | null>(null);
 export const driveConflictData = signal<PlannerData | null>(null);
 
 // ── Internal state ──
-let tokenClient: TokenClient | null = null;
-let accessToken: string | null = null;
-let tokenExpiry = 0;
-let fileId: string | null = localStorage.getItem(LS_FILE_ID);
+interface DriveSession {
+  tokenClient: TokenClient | null;
+  accessToken: string | null;
+  tokenExpiry: number;
+  fileId: string | null;
+  saveTimer: ReturnType<typeof setTimeout> | null;
+}
 
-// ── Auto-save debounce ──
-let saveTimer: ReturnType<typeof setTimeout> | null = null;
+const session: DriveSession = {
+  tokenClient: null,
+  accessToken: null,
+  tokenExpiry: 0,
+  fileId: localStorage.getItem(LS_FILE_ID),
+  saveTimer: null,
+};
 const SAVE_DEBOUNCE = 4_000;
 
 // ── GIS Ready ──
@@ -50,11 +58,11 @@ function waitForGis(): Promise<boolean> {
 // ── Token helpers ──
 
 function tokenValid(): boolean {
-  return !!accessToken && Date.now() < tokenExpiry;
+  return !!session.accessToken && Date.now() < session.tokenExpiry;
 }
 
 function initTokenClient(callback: (ok: boolean) => void): void {
-  tokenClient = google.accounts.oauth2.initTokenClient({
+  session.tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPE,
     callback: (resp) => {
@@ -63,8 +71,8 @@ function initTokenClient(callback: (ok: boolean) => void): void {
         callback(false);
         return;
       }
-      accessToken = resp.access_token;
-      tokenExpiry = Date.now() + resp.expires_in * 1000 - 60_000; // 1 min margin
+      session.accessToken = resp.access_token;
+      session.tokenExpiry = Date.now() + resp.expires_in * 1000 - 60_000; // 1 min margin
       callback(true);
     },
     error_callback: (err) => {
@@ -78,7 +86,7 @@ function requestToken(opts?: { prompt?: string }): Promise<boolean> {
   return new Promise((resolve) => {
     // Always (re)init so the callback for *this* call is wired
     initTokenClient(resolve);
-    tokenClient!.requestAccessToken(opts);
+    session.tokenClient!.requestAccessToken(opts);
   });
 }
 
@@ -92,7 +100,7 @@ async function apiFetch(url: string, options: RequestInit = {}): Promise<Respons
   const resp = await fetch(url, {
     ...options,
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${session.accessToken}`,
       ...options.headers,
     },
   });
@@ -103,7 +111,7 @@ async function apiFetch(url: string, options: RequestInit = {}): Promise<Respons
     return fetch(url, {
       ...options,
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${session.accessToken}`,
         ...options.headers,
       },
     });
@@ -147,9 +155,9 @@ export async function driveSave(plannerData: PlannerData): Promise<boolean> {
     let url: string;
     let method: string;
 
-    if (fileId) {
+    if (session.fileId) {
       // Update existing
-      url = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`;
+      url = `https://www.googleapis.com/upload/drive/v3/files/${session.fileId}?uploadType=multipart`;
       method = "PATCH";
     } else {
       // Create new
@@ -165,8 +173,8 @@ export async function driveSave(plannerData: PlannerData): Promise<boolean> {
 
     if (!resp.ok) {
       // If file was deleted on Drive, clear fileId and retry as create
-      if (resp.status === 404 && fileId) {
-        fileId = null;
+      if (resp.status === 404 && session.fileId) {
+        session.fileId = null;
         localStorage.removeItem(LS_FILE_ID);
         return driveSave(plannerData);
       }
@@ -174,8 +182,8 @@ export async function driveSave(plannerData: PlannerData): Promise<boolean> {
     }
 
     const result = await resp.json();
-    if (!fileId && result.id) {
-      fileId = result.id;
+    if (!session.fileId && result.id) {
+      session.fileId = result.id;
       localStorage.setItem(LS_FILE_ID, result.id);
     }
 
@@ -193,16 +201,16 @@ export async function driveSave(plannerData: PlannerData): Promise<boolean> {
 export async function driveLoad(): Promise<PlannerData | null> {
   try {
     // First try cached fileId
-    if (fileId) {
+    if (session.fileId) {
       const resp = await apiFetch(
-        `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+        `https://www.googleapis.com/drive/v3/files/${session.fileId}?alt=media`,
       );
       if (resp.ok) {
         return await resp.json();
       }
       // File might have been deleted
       if (resp.status === 404) {
-        fileId = null;
+        session.fileId = null;
         localStorage.removeItem(LS_FILE_ID);
       }
     }
@@ -211,11 +219,11 @@ export async function driveLoad(): Promise<PlannerData | null> {
     const foundId = await findFile();
     if (!foundId) return null;
 
-    fileId = foundId;
+    session.fileId = foundId;
     localStorage.setItem(LS_FILE_ID, foundId);
 
     const resp = await apiFetch(
-      `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+      `https://www.googleapis.com/drive/v3/files/${session.fileId}?alt=media`,
     );
     if (!resp.ok) return null;
 
@@ -289,12 +297,12 @@ export async function driveConnectSilent(): Promise<{
 
 /** Disconnect from Google Drive. Revoke token, keep local data. */
 export function driveDisconnect(): void {
-  if (accessToken) {
-    google.accounts.oauth2.revoke(accessToken, () => {});
+  if (session.accessToken) {
+    google.accounts.oauth2.revoke(session.accessToken, () => {});
   }
-  accessToken = null;
-  tokenExpiry = 0;
-  fileId = null;
+  session.accessToken = null;
+  session.tokenExpiry = 0;
+  session.fileId = null;
   localStorage.removeItem(LS_FILE_ID);
   driveConnected.value = false;
   driveUser.value = null;
@@ -310,17 +318,17 @@ export function driveDisconnect(): void {
 export function scheduleAutoSave(getData: () => PlannerData): void {
   if (!driveConnected.value) return;
   cancelAutoSave();
-  saveTimer = setTimeout(async () => {
-    saveTimer = null;
+  session.saveTimer = setTimeout(async () => {
+    session.saveTimer = null;
     await driveSave(getData());
   }, SAVE_DEBOUNCE);
 }
 
 /** Cancel any pending auto-save. */
 export function cancelAutoSave(): void {
-  if (saveTimer) {
-    clearTimeout(saveTimer);
-    saveTimer = null;
+  if (session.saveTimer) {
+    clearTimeout(session.saveTimer);
+    session.saveTimer = null;
   }
 }
 

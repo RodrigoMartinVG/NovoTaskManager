@@ -75,7 +75,7 @@ export class MateriaStatsView extends SignalWatcher(LitElement) {
       this._mat = data.materias.find((m) => m.id === id) ?? null;
       this._tareas = id ? data.tareas.filter((t) => t.materiaId === id) : [];
       this._sesiones = id ? data.sesiones.filter((s) => s.materiaId === id) : [];
-      this._franjas = data.franjas ?? [];
+      this._franjas = data.franjas;
       this.requestUpdate();
     });
   }

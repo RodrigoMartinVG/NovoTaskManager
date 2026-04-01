@@ -393,7 +393,7 @@ export class MateriaEditView extends SignalWatcher(LitElement) {
 
   /* ── Render ── */
   render() {
-    const franjas = plannerData.value.franjas ?? [];
+    const franjas = plannerData.value.franjas;
     const taskCount = this._isNew
       ? 0
       : plannerData.value.tareas.filter((t) => t.materiaId === editingMateriaId.value).length;

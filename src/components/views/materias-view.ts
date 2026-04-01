@@ -254,7 +254,7 @@ export class MateriasView extends SignalWatcher(LitElement) {
   /* ── Helpers ── */
   private _getFranjaMap(): Map<string, FranjaDef> {
     const map = new Map<string, FranjaDef>();
-    for (const f of plannerData.value.franjas ?? []) map.set(f.id, f);
+    for (const f of plannerData.value.franjas) map.set(f.id, f);
     return map;
   }
 

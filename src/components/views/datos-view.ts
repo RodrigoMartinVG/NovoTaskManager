@@ -23,6 +23,7 @@ import {
   setPlannerData,
   tareas,
 } from "../../state/store.js";
+import { DEFAULT_ALERTAS, DEFAULT_FRANJAS } from "../../state/defaults.js";
 
 /* ═══ Normalization ═══ */
 function normalize(raw: unknown): PlannerData {
@@ -79,10 +80,10 @@ function normalize(raw: unknown): PlannerData {
           titulo: typeof s.titulo === "string" ? s.titulo : undefined,
         }))
       : [],
-    franjas: Array.isArray(obj.franjas) ? obj.franjas as PlannerData["franjas"] : undefined,
+    franjas: Array.isArray(obj.franjas) ? obj.franjas as PlannerData["franjas"] : DEFAULT_FRANJAS.map((f) => ({ ...f })),
     alertas: typeof obj.alertas === "object" && obj.alertas !== null
       ? obj.alertas as PlannerData["alertas"]
-      : undefined,
+      : { ...DEFAULT_ALERTAS },
   };
 }
 
@@ -638,6 +639,8 @@ export class DatosView extends SignalWatcher(LitElement) {
       tipos: [],
       tareas: [],
       sesiones: [],
+      franjas: DEFAULT_FRANJAS.map((f) => ({ ...f })),
+      alertas: { ...DEFAULT_ALERTAS },
     });
     this.importSuccess = "";
     this.importError = "";

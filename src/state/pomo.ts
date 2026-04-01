@@ -82,7 +82,7 @@ export function pomoStop() {
     const localISO = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:00`;
 
     const ses: Sesion = {
-      id: `s${Date.now()}`,
+      id: crypto.randomUUID(),
       materiaId: session.materiaId,
       tareaId: session.tareaId,
       inicio: localISO,

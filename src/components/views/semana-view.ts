@@ -386,7 +386,7 @@ export class SemanaView extends SignalWatcher(LitElement) {
   `;
 
   render() {
-    const franjas: FranjaDef[] = plannerData.value.franjas ?? [];
+    const franjas: FranjaDef[] = plannerData.value.franjas;
     const mats = materias.value.filter((m) => m.activa !== false);
     const hoy = getHoyDia();
 

@@ -1,6 +1,6 @@
 import { SignalWatcher } from "@lit-labs/signals";
 import { effect } from "@preact/signals-core";
-import { LitElement, css, html, nothing, unsafeCSS } from "lit";
+import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { EstadoTarea, Tarea } from "../../state/types.js";
 import {
@@ -11,7 +11,7 @@ import {
   plannerData,
   taskReturnView,
 } from "../../state/store.js";
-import { computeAlertLevel, getAlertInfo, ALERT_CSS } from "../../domain/alert-engine.js";
+import { computeAlertLevel, getAlertInfo } from "../../domain/alert-engine.js";
 import type { ViewId } from "../shell/nav-bar.js";
 
 const ESTADO_LABEL: Record<EstadoTarea, string> = {
@@ -244,7 +244,13 @@ export class BacklogView extends SignalWatcher(LitElement) {
     }
 
     /* ── Alert badges ── */
-    ${unsafeCSS(ALERT_CSS)}
+    .alert-overdue { --alert-bg: var(--err-bg); --alert-text: var(--err-text); --alert-border: var(--err-border); }
+    .alert-red { --alert-bg: var(--err-bg); --alert-text: var(--err-text); --alert-border: var(--err-border); }
+    .alert-yellow { --alert-bg: var(--warn-bg); --alert-text: var(--warn-text); --alert-border: var(--warn-border); }
+    .alert-green { --alert-bg: var(--ok-bg); --alert-text: var(--ok-text); --alert-border: var(--ok-border); }
+    .alert-start-overdue { --alert-bg: var(--err-bg); --alert-text: var(--err-text); --alert-border: var(--err-border); }
+    .alert-start-now { --alert-bg: var(--info-bg); --alert-text: var(--info-text); --alert-border: var(--accent); }
+    .alert-start-soon { --alert-bg: var(--info-bg); --alert-text: var(--info-text); --alert-border: var(--accent); }
     .alert-badge {
       display: inline-flex;
       align-items: center;

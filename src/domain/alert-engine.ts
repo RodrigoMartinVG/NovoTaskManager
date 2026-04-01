@@ -105,13 +105,3 @@ export function computeAlertLevel(
   return null;
 }
 
-/** CSS custom property definitions for alert colors (use with :host or .alert-* classes) */
-export const ALERT_CSS = /* css */ `
-  .alert-overdue { --alert-bg: var(--err-bg); --alert-text: var(--err-text); --alert-border: var(--err-border); }
-  .alert-red { --alert-bg: var(--err-bg); --alert-text: var(--err-text); --alert-border: var(--err-border); }
-  .alert-yellow { --alert-bg: var(--warn-bg); --alert-text: var(--warn-text); --alert-border: var(--warn-border); }
-  .alert-green { --alert-bg: var(--ok-bg); --alert-text: var(--ok-text); --alert-border: var(--ok-border); }
-  .alert-start-overdue { --alert-bg: var(--err-bg); --alert-text: var(--err-text); --alert-border: var(--err-border); }
-  .alert-start-now { --alert-bg: var(--info-bg); --alert-text: var(--info-text); --alert-border: var(--accent); }
-  .alert-start-soon { --alert-bg: var(--info-bg); --alert-text: var(--info-text); --alert-border: var(--accent); }
-`;

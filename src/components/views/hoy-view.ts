@@ -2,7 +2,7 @@ import { SignalWatcher } from "@lit-labs/signals";
 import { effect } from "@preact/signals-core";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import type { FranjaDef, Materia, Tarea } from "../../state/types.js";
+import type { FranjaDef, Materia, Sesion, Tarea } from "../../state/types.js";
 import {
   editingTaskId,
   filteredMaterias as materias,
@@ -54,10 +54,10 @@ function getWeekStart(): Date {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate() + diff);
 }
 
-function sesMinsSemana(materiaId: string): number {
+function sesMinsSemana(materiaId: string, allSesiones: Sesion[]): number {
   const ws = getWeekStart();
   let total = 0;
-  for (const s of sesiones.value) {
+  for (const s of allSesiones) {
     if (s.materiaId === materiaId && new Date(s.inicio) >= ws) total += s.minutos;
   }
   return total;
@@ -488,7 +488,7 @@ export class HoyView extends SignalWatcher(LitElement) {
     const now = this._time;
     const h = now.getHours();
     const m = now.getMinutes();
-    const franjas: FranjaDef[] = plannerData.value.franjas ?? [];
+    const franjas: FranjaDef[] = plannerData.value.franjas;
     const franja = getFranjaActual(franjas);
     const dia = hoyDia();
     const nowMins = h * 60 + m;
@@ -605,7 +605,7 @@ export class HoyView extends SignalWatcher(LitElement) {
                   </div>
                   <div class="tl-mats">
                     ${fMats.map((mm) => {
-                      const sesMins = sesMinsSemana(mm.id);
+                      const sesMins = sesMinsSemana(mm.id, sesiones.value);
                       const objMins = (mm.horasSemanalesMin ?? 0) * 60;
                       return html`
                         <div class="tl-mat-row">
@@ -637,7 +637,7 @@ export class HoyView extends SignalWatcher(LitElement) {
           <div class="sec-title">📊 Progreso semanal</div>
           <div class="progress-row">
             ${matsConObj.map((mm) => {
-              const sesMins = sesMinsSemana(mm.id);
+              const sesMins = sesMinsSemana(mm.id, sesiones.value);
               const objMins = (mm.horasSemanalesMin ?? 0) * 60;
               const pct = objMins > 0 ? Math.min(100, Math.round((sesMins / objMins) * 100)) : 0;
               return html`
@@ -665,7 +665,7 @@ export class HoyView extends SignalWatcher(LitElement) {
 
   /** Renders a materia block inside the "Ahora" section */
   private _renderMateriaBlock(m: Materia, allTareas: Tarea[]) {
-    const sesMins = sesMinsSemana(m.id);
+    const sesMins = sesMinsSemana(m.id, sesiones.value);
     const objMins = (m.horasSemanalesMin ?? 0) * 60;
     const pct = objMins > 0 ? Math.min(100, Math.round((sesMins / objMins) * 100)) : 0;
 

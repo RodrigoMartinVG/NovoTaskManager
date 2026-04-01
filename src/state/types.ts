@@ -91,8 +91,8 @@ export interface PlannerData {
   tipos: TipoTarea[];
   tareas: Tarea[];
   sesiones: Sesion[];
-  franjas?: FranjaDef[];
-  alertas?: AlertConfig;
+  franjas: FranjaDef[];
+  alertas: AlertConfig;
 }
 
 // ── App mode ──
