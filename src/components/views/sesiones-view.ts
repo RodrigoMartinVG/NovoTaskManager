@@ -1,5 +1,3 @@
-import { SignalWatcher } from "@lit-labs/signals";
-import { effect } from "@preact/signals-core";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { Sesion } from "../../state/types.js";
@@ -11,6 +9,7 @@ import {
 import { editingSesionId, sesionReturnView } from "../../state/navigation.js";
 import { pomoActive, pomoStart } from "../../state/pomo.js";
 import type { ViewId } from "../shell/nav-bar.js";
+import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 
 const DIA_NOMBRES = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
 
@@ -45,7 +44,7 @@ type FilterOrigen = "" | "timer" | "manual";
 type FilterPeriod = "semana" | "mes" | "todo";
 
 @customElement("sesiones-view")
-export class SesionesView extends SignalWatcher(LitElement) {
+export class SesionesView extends PreactSignalWatcher(LitElement) {
   @state() private filterMateria = "";
   @state() private filterOrigen: FilterOrigen = "";
   @state() private filterPeriod: FilterPeriod = "todo";
@@ -53,23 +52,6 @@ export class SesionesView extends SignalWatcher(LitElement) {
   @state() private pomoMateriaId = "";
   @state() private pomoTareaId = "";
   @state() private pomoTitulo = "";
-
-  private _dispose?: () => void;
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this._dispose = effect(() => {
-      sesiones.value;
-      materias.value;
-      pomoActive.value;
-      this.requestUpdate();
-    });
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._dispose?.();
-  }
 
   static styles = css`
     :host {

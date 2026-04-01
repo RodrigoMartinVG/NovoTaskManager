@@ -1,6 +1,4 @@
 /* ═══ Oda v3.0 — Global Filter Chip + Dropdown ═══ */
-import { SignalWatcher } from "@lit-labs/signals";
-import { effect } from "@preact/signals-core";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { Periodo } from "../../state/types.js";
@@ -9,6 +7,7 @@ import {
   globalFilterPeriodos,
   plannerData,
 } from "../../state/store.js";
+import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 
 const PERIODO_LABEL: Record<Periodo, string> = {
   C1: "Cuatrimestre 1",
@@ -23,28 +22,8 @@ const PERIODO_SHORT: Record<Periodo, string> = {
 };
 
 @customElement("global-filter")
-export class GlobalFilter extends SignalWatcher(LitElement) {
+export class GlobalFilter extends PreactSignalWatcher(LitElement) {
   @state() private _open = false;
-  @state() private _anio: number | null = null;
-  @state() private _periodos: Periodo[] = [];
-  @state() private _hasMeta = false;
-
-  private _dispose?: () => void;
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this._dispose = effect(() => {
-      this._anio = globalFilterAnio.value;
-      this._periodos = globalFilterPeriodos.value;
-      this._hasMeta = plannerData.value.materias.some((m) => m.anio != null || m.periodo != null);
-      this.requestUpdate();
-    });
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._dispose?.();
-  }
 
   static styles = css`
     :host {
@@ -166,12 +145,12 @@ export class GlobalFilter extends SignalWatcher(LitElement) {
   }
 
   private get _hasFilter(): boolean {
-    return this._anio !== null || this._periodos.length > 0;
+    return globalFilterAnio.value !== null || globalFilterPeriodos.value.length > 0;
   }
 
   private get _chipLabel(): string {
-    const anio = this._anio;
-    const periodos = this._periodos;
+    const anio = globalFilterAnio.value;
+    const periodos = globalFilterPeriodos.value;
     if (anio === null && periodos.length === 0) return "Todos";
     const parts: string[] = [];
     if (anio !== null) parts.push(`${anio}°`);
@@ -194,11 +173,11 @@ export class GlobalFilter extends SignalWatcher(LitElement) {
 
   render() {
     const anioOptions = this._anioOptions;
-    const currentAnio = this._anio;
-    const currentPeriodos = this._periodos;
+    const currentAnio = globalFilterAnio.value;
+    const currentPeriodos = globalFilterPeriodos.value;
 
     // Don't show chip if no materias have año/periodo set
-    if (!this._hasMeta) return nothing;
+    if (!plannerData.value.materias.some((m) => m.anio != null || m.periodo != null)) return nothing;
 
     return html`
       <button class="chip ${this._hasFilter ? "active" : ""}"

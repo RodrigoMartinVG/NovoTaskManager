@@ -1,4 +1,4 @@
-import { SignalWatcher } from "@lit-labs/signals";
+import { PreactSignalWatcher } from "../../shared/preact-signal-watcher.js";
 import { LitElement, css, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import {
@@ -21,7 +21,7 @@ const COLOR_PRESETS = [
 ];
 
 @customElement("config-tab-materias")
-export class ConfigTabMaterias extends SignalWatcher(LitElement) {
+export class ConfigTabMaterias extends PreactSignalWatcher(LitElement) {
   @state() private newNombre = "";
   @state() private newColor = COLOR_PRESETS[0];
   @state() private newHoras = 4;

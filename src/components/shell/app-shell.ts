@@ -1,4 +1,4 @@
-import { SignalWatcher } from "@lit-labs/signals";
+import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 import { LitElement, css, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { isWelcome } from "../../state/store.js";
@@ -22,7 +22,7 @@ import "../pomodoro/pomo-focus-view.js";
 import "../pomodoro/pomo-widget.js";
 
 @customElement("app-shell")
-export class AppShell extends SignalWatcher(LitElement) {
+export class AppShell extends PreactSignalWatcher(LitElement) {
   @state() private activeView: ViewId = "hoy";
 
   static styles = css`

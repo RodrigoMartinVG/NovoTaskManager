@@ -1,5 +1,3 @@
-import { SignalWatcher } from "@lit-labs/signals";
-import { effect } from "@preact/signals-core";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement } from "lit/decorators.js";
 import type { FranjaDef, Materia } from "../../state/types.js";
@@ -9,6 +7,7 @@ import {
 } from "../../state/store.js";
 import { editingMateriaId, materiaReturnView, statsMateriaId, statsReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
+import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 
 /* ═══ Constants ═══ */
 
@@ -111,22 +110,7 @@ const ESTADO_BADGE: Record<ProgresoEstado, { label: string; cls: string }> = {
 
 /* ═══ Component ═══ */
 @customElement("materias-view")
-export class MateriasView extends SignalWatcher(LitElement) {
-  private _dispose?: () => void;
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this._dispose = effect(() => {
-      materias.value;
-      plannerData.value;
-      this.requestUpdate();
-    });
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._dispose?.();
-  }
+export class MateriasView extends PreactSignalWatcher(LitElement) {
 
   static styles = css`
     :host {

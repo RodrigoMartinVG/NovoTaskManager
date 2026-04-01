@@ -1,4 +1,4 @@
-import { SignalWatcher } from "@lit-labs/signals";
+import { PreactSignalWatcher } from "../../shared/preact-signal-watcher.js";
 import { LitElement, css, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { addTipo, deleteTipo, plannerData, updateTipo } from "../../../state/store.js";
@@ -17,7 +17,7 @@ const EMOJI_GRID = [
 ];
 
 @customElement("config-tab-tipos")
-export class ConfigTabTipos extends SignalWatcher(LitElement) {
+export class ConfigTabTipos extends PreactSignalWatcher(LitElement) {
   @state() private newNombre = "";
   @state() private newIcono = "📝";
   @state() private emojiOpen = false;

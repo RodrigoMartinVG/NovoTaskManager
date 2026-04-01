@@ -1,4 +1,4 @@
-import { SignalWatcher } from "@lit-labs/signals";
+import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { Sesion } from "../../state/types.js";
@@ -31,7 +31,7 @@ const TIME_OPTIONS = timeOptions();
 const DUR_PRESETS = [15, 25, 30, 45, 60, 90, 120];
 
 @customElement("sesion-edit-view")
-export class SesionEditView extends SignalWatcher(LitElement) {
+export class SesionEditView extends PreactSignalWatcher(LitElement) {
   @state() private materiaId = "";
   @state() private tareaId = "";
   @state() private fecha = "";

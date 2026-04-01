@@ -1,14 +1,13 @@
 /* ═══ Oda v3.0 — Materia Stats View ═══ */
-import { SignalWatcher } from "@lit-labs/signals";
-import { effect } from "@preact/signals-core";
 import { LitElement, css, html, nothing } from "lit";
-import { customElement, state } from "lit/decorators.js";
-import type { EstadoTarea, Materia, Sesion, Tarea, FranjaDef, MateriaSlot } from "../../state/types.js";
+import { customElement } from "lit/decorators.js";
+import type { EstadoTarea, Sesion, Tarea, MateriaSlot } from "../../state/types.js";
 import {
   plannerData,
 } from "../../state/store.js";
 import { editingMateriaId, materiaReturnView, statsMateriaId, statsReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
+import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 
 /* ═══ Helpers ═══ */
 const DIA_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -56,31 +55,7 @@ const PRIO_ICON: Record<string, string> = { alta: "🔴", media: "🟡", baja: "
 
 /* ═══ Component ═══ */
 @customElement("materia-stats-view")
-export class MateriaStatsView extends SignalWatcher(LitElement) {
-  @state() private _mat: Materia | null = null;
-  @state() private _tareas: Tarea[] = [];
-  @state() private _sesiones: Sesion[] = [];
-  @state() private _franjas: FranjaDef[] = [];
-
-  private _dispose?: () => void;
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this._dispose = effect(() => {
-      const id = statsMateriaId.value;
-      const data = plannerData.value;
-      this._mat = data.materias.find((m) => m.id === id) ?? null;
-      this._tareas = id ? data.tareas.filter((t) => t.materiaId === id) : [];
-      this._sesiones = id ? data.sesiones.filter((s) => s.materiaId === id) : [];
-      this._franjas = data.franjas;
-      this.requestUpdate();
-    });
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._dispose?.();
-  }
+export class MateriaStatsView extends PreactSignalWatcher(LitElement) {
 
   static styles = css`
     :host {
@@ -264,7 +239,9 @@ export class MateriaStatsView extends SignalWatcher(LitElement) {
   }
 
   private _goEdit() {
-    editingMateriaId.value = this._mat!.id;
+    const id = statsMateriaId.value;
+    if (!id) return;
+    editingMateriaId.value = id;
     materiaReturnView.value = "materia-stats";
     this.dispatchEvent(
       new CustomEvent<ViewId>("view-change", {
@@ -276,13 +253,13 @@ export class MateriaStatsView extends SignalWatcher(LitElement) {
   }
 
   /* ── Computed stats ── */
-  private _weekSesiones(): { weekLabel: string; mins: number }[] {
+  private _weekSesiones(sesionesArr: Sesion[]): { weekLabel: string; mins: number }[] {
     const result: { weekLabel: string; mins: number }[] = [];
     for (let i = 5; i >= 0; i--) {
       const ws = weeksAgo(i);
       const we = new Date(ws);
       we.setDate(we.getDate() + 7);
-      const mins = this._sesiones
+      const mins = sesionesArr
         .filter((s) => { const d = new Date(s.inicio); return d >= ws && d < we; })
         .reduce((acc, s) => acc + s.minutos, 0);
       const label = i === 0 ? "Esta" : i === 1 ? "Ant." : `−${i}`;
@@ -291,38 +268,38 @@ export class MateriaStatsView extends SignalWatcher(LitElement) {
     return result;
   }
 
-  private _thisWeekMins(): number {
+  private _thisWeekMins(sesionesArr: Sesion[]): number {
     const ws = weekStart(new Date());
-    return this._sesiones
+    return sesionesArr
       .filter((s) => new Date(s.inicio) >= ws)
       .reduce((acc, s) => acc + s.minutos, 0);
   }
 
-  private _totalMins(): number {
-    return this._sesiones.reduce((acc, s) => acc + s.minutos, 0);
+  private _totalMins(sesionesArr: Sesion[]): number {
+    return sesionesArr.reduce((acc, s) => acc + s.minutos, 0);
   }
 
-  private _avgSessionMins(): number {
-    if (this._sesiones.length === 0) return 0;
-    return Math.round(this._totalMins() / this._sesiones.length);
+  private _avgSessionMins(sesionesArr: Sesion[]): number {
+    if (sesionesArr.length === 0) return 0;
+    return Math.round(this._totalMins(sesionesArr) / sesionesArr.length);
   }
 
-  private _tasksByEstado(): Record<EstadoKey, number> {
+  private _tasksByEstado(tareasArr: Tarea[]): Record<EstadoKey, number> {
     const counts: Record<EstadoKey, number> = { pendiente: 0, en_progreso: 0, completada: 0 };
-    for (const t of this._tareas) counts[t.estado]++;
+    for (const t of tareasArr) counts[t.estado]++;
     return counts;
   }
 
-  private _tasksByPrio(): Record<string, number> {
+  private _tasksByPrio(tareasArr: Tarea[]): Record<string, number> {
     const counts: Record<string, number> = { alta: 0, media: 0, baja: 0 };
-    for (const t of this._tareas) counts[t.prioridad] = (counts[t.prioridad] ?? 0) + 1;
+    for (const t of tareasArr) counts[t.prioridad] = (counts[t.prioridad] ?? 0) + 1;
     return counts;
   }
 
-  private _tasksByTipo(): { nombre: string; count: number }[] {
+  private _tasksByTipo(tareasArr: Tarea[]): { nombre: string; count: number }[] {
     const tipos = plannerData.value.tipos;
     const map = new Map<string, number>();
-    for (const t of this._tareas) {
+    for (const t of tareasArr) {
       map.set(t.tipo, (map.get(t.tipo) ?? 0) + 1);
     }
     return tipos
@@ -332,7 +309,13 @@ export class MateriaStatsView extends SignalWatcher(LitElement) {
 
   /* ── Render ── */
   render() {
-    const mat = this._mat;
+    const id = statsMateriaId.value;
+    const data = plannerData.value;
+    const mat = id ? data.materias.find((m) => m.id === id) ?? null : null;
+    const curTareas = id ? data.tareas.filter((t) => t.materiaId === id) : [];
+    const curSesiones = id ? data.sesiones.filter((s) => s.materiaId === id) : [];
+    const franjas = data.franjas;
+
     if (!mat) {
       return html`
         <div class="empty">
@@ -343,22 +326,21 @@ export class MateriaStatsView extends SignalWatcher(LitElement) {
       `;
     }
 
-    const totalMins = this._totalMins();
-    const thisWeekMins = this._thisWeekMins();
-    const avgSes = this._avgSessionMins();
-    const byEstado = this._tasksByEstado();
-    const byPrio = this._tasksByPrio();
-    const byTipo = this._tasksByTipo();
-    const weekData = this._weekSesiones();
+    const totalMins = this._totalMins(curSesiones);
+    const thisWeekMins = this._thisWeekMins(curSesiones);
+    const avgSes = this._avgSessionMins(curSesiones);
+    const byEstado = this._tasksByEstado(curTareas);
+    const byPrio = this._tasksByPrio(curTareas);
+    const byTipo = this._tasksByTipo(curTareas);
+    const weekData = this._weekSesiones(curSesiones);
     const maxWeekMins = Math.max(...weekData.map((w) => w.mins), 1);
     const objMins = (mat.horasSemanalesMin ?? 0) * 60;
     const pct = objMins > 0 ? Math.min(100, Math.round((thisWeekMins / objMins) * 100)) : 0;
-    const completionPct = this._tareas.length > 0
-      ? Math.round((byEstado.completada / this._tareas.length) * 100)
+    const completionPct = curTareas.length > 0
+      ? Math.round((byEstado.completada / curTareas.length) * 100)
       : 0;
-    const recentSesiones = [...this._sesiones].sort((a, b) => b.inicio.localeCompare(a.inicio)).slice(0, 10);
+    const recentSesiones = [...curSesiones].sort((a, b) => b.inicio.localeCompare(a.inicio)).slice(0, 10);
     const slots = mat.slots ?? [];
-    const franjas = this._franjas;
 
     return html`
       <!-- Header -->
@@ -381,7 +363,7 @@ export class MateriaStatsView extends SignalWatcher(LitElement) {
         <div class="stat-card">
           <span class="stat-label">Total estudiado</span>
           <span class="stat-value">${fmtDur(totalMins)}</span>
-          <span class="stat-sub">${this._sesiones.length} sesión${this._sesiones.length !== 1 ? "es" : ""}</span>
+          <span class="stat-sub">${curSesiones.length} sesión${curSesiones.length !== 1 ? "es" : ""}</span>
         </div>
         <div class="stat-card">
           <span class="stat-label">Esta semana</span>
@@ -394,7 +376,7 @@ export class MateriaStatsView extends SignalWatcher(LitElement) {
         </div>
         <div class="stat-card">
           <span class="stat-label">Tareas</span>
-          <span class="stat-value">${this._tareas.length}</span>
+          <span class="stat-value">${curTareas.length}</span>
           <span class="stat-sub">${completionPct}% completadas</span>
         </div>
       </div>
@@ -416,7 +398,7 @@ export class MateriaStatsView extends SignalWatcher(LitElement) {
       ` : nothing}
 
       <!-- Last 6 weeks chart -->
-      ${this._sesiones.length > 0 ? html`
+      ${curSesiones.length > 0 ? html`
         <div class="section">
           <div class="sec-title">📊 Horas por semana</div>
           <div class="chart-wrap">
@@ -440,7 +422,7 @@ export class MateriaStatsView extends SignalWatcher(LitElement) {
       ` : nothing}
 
       <!-- Tasks breakdown -->
-      ${this._tareas.length > 0 ? html`
+      ${curTareas.length > 0 ? html`
         <div class="section">
           <div class="sec-title">📋 Tareas</div>
           <div class="bk-grid">
@@ -506,7 +488,7 @@ export class MateriaStatsView extends SignalWatcher(LitElement) {
         ${recentSesiones.length > 0 ? html`
           <div class="ses-list">
             ${recentSesiones.map((s) => {
-              const tarea = this._tareas.find((t) => t.id === s.tareaId);
+              const tarea = curTareas.find((t) => t.id === s.tareaId);
               return html`
                 <div class="ses-row">
                   <span class="ses-date">${fmtDate(s.inicio)}</span>

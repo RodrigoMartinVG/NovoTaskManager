@@ -1,5 +1,3 @@
-import { SignalWatcher } from "@lit-labs/signals";
-import { effect } from "@preact/signals-core";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { EstadoTarea, Tarea } from "../../state/types.js";
@@ -12,6 +10,7 @@ import {
 import { editingTaskId, taskReturnView } from "../../state/navigation.js";
 import { computeAlertLevel, getAlertInfo } from "../../domain/alert-engine.js";
 import type { ViewId } from "../shell/nav-bar.js";
+import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 
 const ESTADO_LABEL: Record<EstadoTarea, string> = {
   pendiente: "Pendiente",
@@ -32,28 +31,11 @@ const PRIO_ICON: Record<string, string> = {
 };
 
 @customElement("backlog-view")
-export class BacklogView extends SignalWatcher(LitElement) {
+export class BacklogView extends PreactSignalWatcher(LitElement) {
   @state() private filterMateria = "";
   @state() private filterTipo = "";
   @state() private filterEstado = "";
   @state() private searchQuery = "";
-
-  private _dispose?: () => void;
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this._dispose = effect(() => {
-      filteredTareas.value;
-      materias.value;
-      plannerData.value;
-      this.requestUpdate();
-    });
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._dispose?.();
-  }
 
   static styles = css`
     :host {

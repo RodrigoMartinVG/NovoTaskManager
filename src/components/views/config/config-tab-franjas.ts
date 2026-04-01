@@ -1,4 +1,4 @@
-import { SignalWatcher } from "@lit-labs/signals";
+import { PreactSignalWatcher } from "../../shared/preact-signal-watcher.js";
 import { LitElement, css, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { plannerData, setFranjas } from "../../../state/store.js";
@@ -33,7 +33,7 @@ function buildTimeOptions(): number[] {
 }
 
 @customElement("config-tab-franjas")
-export class ConfigTabFranjas extends SignalWatcher(LitElement) {
+export class ConfigTabFranjas extends PreactSignalWatcher(LitElement) {
   @state() private localFranjas: FranjaDef[] = [];
   @state() private dirty = false;
 

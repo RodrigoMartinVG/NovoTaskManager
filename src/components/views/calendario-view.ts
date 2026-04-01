@@ -1,5 +1,3 @@
-import { SignalWatcher } from "@lit-labs/signals";
-import { effect } from "@preact/signals-core";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { Tarea } from "../../state/types.js";
@@ -11,6 +9,7 @@ import {
 } from "../../state/store.js";
 import { editingTaskId, taskReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
+import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 
 /* ═══ Helpers ═══ */
 const MES_NOMBRES = [
@@ -36,30 +35,13 @@ interface CalEntry {
 }
 
 @customElement("calendario-view")
-export class CalendarioView extends SignalWatcher(LitElement) {
+export class CalendarioView extends PreactSignalWatcher(LitElement) {
   @state() private viewYear = new Date().getFullYear();
   @state() private viewMonth = new Date().getMonth(); // 0-indexed
   @state() private selectedDate: string | null = null;
   @state() private dateFilter: DateFilterMode = "ambas";
   @state() private _popX = 0;
   @state() private _popY = 0;
-
-  private _dispose?: () => void;
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this._dispose = effect(() => {
-      tareas.value;
-      materias.value;
-      sesiones.value;
-      this.requestUpdate();
-    });
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._dispose?.();
-  }
 
   static styles = css`
     :host {

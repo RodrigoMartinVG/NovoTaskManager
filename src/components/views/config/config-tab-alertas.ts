@@ -1,10 +1,9 @@
 /* ═══ Oda v3.0 — Config Tab: Alertas ═══ */
-import { SignalWatcher } from "@lit-labs/signals";
-import { effect } from "@preact/signals-core";
 import { LitElement, css, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { AlertConfig } from "../../../state/types.js";
 import { alertConfig, DEFAULT_ALERTAS, setAlertConfig } from "../../../state/store.js";
+import { PreactSignalWatcher } from "../../shared/preact-signal-watcher.js";
 
 interface ThresholdDef {
   key: keyof AlertConfig;
@@ -23,29 +22,19 @@ const THRESHOLDS: ThresholdDef[] = [
 ];
 
 @customElement("config-tab-alertas")
-export class ConfigTabAlertas extends SignalWatcher(LitElement) {
+export class ConfigTabAlertas extends PreactSignalWatcher(LitElement) {
   @state() private _rojo = 2;
   @state() private _amarillo = 7;
   @state() private _verde = 14;
   @state() private _inicio = 2;
 
-  private _dispose?: () => void;
-
   override connectedCallback() {
     super.connectedCallback();
-    this._dispose = effect(() => {
-      const cfg = alertConfig.value;
-      this._rojo = cfg.rojo;
-      this._amarillo = cfg.amarillo;
-      this._verde = cfg.verde;
-      this._inicio = cfg.inicio;
-      this.requestUpdate();
-    });
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._dispose?.();
+    const cfg = alertConfig.value;
+    this._rojo = cfg.rojo;
+    this._amarillo = cfg.amarillo;
+    this._verde = cfg.verde;
+    this._inicio = cfg.inicio;
   }
 
   static styles = css`

@@ -1,5 +1,3 @@
-import { SignalWatcher } from "@lit-labs/signals";
-import { effect } from "@preact/signals-core";
 /* ═══ Oda v3.0 — Pomodoro Mini Widget ═══ */
 import { LitElement, css, html, nothing } from "lit";
 import { customElement } from "lit/decorators.js";
@@ -13,26 +11,10 @@ import {
   pomoToggleFocus,
 } from "../../state/pomo.js";
 import { pomoFocusMode } from "../../state/store.js";
+import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 
 @customElement("pomo-widget")
-export class PomoWidget extends SignalWatcher(LitElement) {
-  private _dispose?: () => void;
-
-  connectedCallback() {
-    super.connectedCallback();
-    this._dispose = effect(() => {
-      pomoActive.value;
-      pomoFocusMode.value;
-      pomoStudySecs.value;
-      pomoPaused.value;
-      this.requestUpdate();
-    });
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this._dispose?.();
-  }
+export class PomoWidget extends PreactSignalWatcher(LitElement) {
   static styles = css`
     :host {
       display: block;

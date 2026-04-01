@@ -1,11 +1,10 @@
-import { SignalWatcher } from "@lit-labs/signals";
-import { effect } from "@preact/signals-core";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { FranjaDef, Materia, MateriaSlot } from "../../state/types.js";
 import { filteredMaterias as materias, plannerData, filteredSesiones as sesiones, updateMateria } from "../../state/store.js";
 import { statsMateriaId, statsReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
+import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 
 /* ═══ Constants ═══ */
 const DIA_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -43,11 +42,10 @@ function sesMinutosSemana(): Map<string, number> {
 }
 
 @customElement("semana-view")
-export class SemanaView extends SignalWatcher(LitElement) {
+export class SemanaView extends PreactSignalWatcher(LitElement) {
   @state() private _dragOverCell = ""; // "dia,franjaId"
   @state() private _addCell = ""; // "dia,franjaId" for open add-dropdown
   private _dragging: { materiaId: string; dia: number; franjaId: string } | null = null;
-  private _dispose?: () => void;
   private _outsideClick = (e: MouseEvent) => {
     const path = e.composedPath();
     if (!path.some((el) => (el as HTMLElement).classList?.contains("add-drop"))) {
@@ -55,19 +53,8 @@ export class SemanaView extends SignalWatcher(LitElement) {
     }
   };
 
-  override connectedCallback() {
-    super.connectedCallback();
-    this._dispose = effect(() => {
-      materias.value;
-      plannerData.value;
-      sesiones.value;
-      this.requestUpdate();
-    });
-  }
-
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this._dispose?.();
     document.removeEventListener("click", this._outsideClick);
   }
 

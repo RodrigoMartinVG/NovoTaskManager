@@ -1,8 +1,7 @@
-import { SignalWatcher } from "@lit-labs/signals";
-import { effect } from "@preact/signals-core";
 import { LitElement, css, html } from "lit";
-import { customElement, property, state } from "lit/decorators.js";
-import { driveConnected, syncStatus, type SyncStatus } from "../../state/gdrive.js";
+import { customElement, property } from "lit/decorators.js";
+import { driveConnected, syncStatus } from "../../state/gdrive.js";
+import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 import "./global-filter.js";
 
 export type ViewId = "hoy" | "semana" | "materias" | "backlog" | "sesiones" | "kanban" | "calendario" | "config" | "datos" | "task" | "materia-edit" | "materia-stats" | "sesion-edit" | "ayuda";
@@ -24,26 +23,8 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 @customElement("nav-bar")
-export class NavBar extends SignalWatcher(LitElement) {
+export class NavBar extends PreactSignalWatcher(LitElement) {
   @property() activeView: ViewId = "hoy";
-  @state() private _connected = false;
-  @state() private _syncStatus: SyncStatus = "idle";
-
-  private _dispose?: () => void;
-
-  override connectedCallback() {
-    super.connectedCallback();
-    this._dispose = effect(() => {
-      this._connected = driveConnected.value;
-      this._syncStatus = syncStatus.value;
-      this.requestUpdate();
-    });
-  }
-
-  override disconnectedCallback() {
-    super.disconnectedCallback();
-    this._dispose?.();
-  }
 
   static styles = css`
     :host {
@@ -261,7 +242,7 @@ export class NavBar extends SignalWatcher(LitElement) {
         <div class="actions">
           <button class="ibtn" aria-label="Ayuda" title="Ayuda" ?data-active=${this.activeView === "ayuda"} @click=${() => this._onNavClick("ayuda")}>?</button>
           <button class="ibtn" aria-label="Configuración" title="Configuración" ?data-active=${this.activeView === "config"} @click=${() => this._onNavClick("config")}>⚙</button>
-          <button class="ibtn" aria-label="Datos" title="Datos" ?data-active=${this.activeView === "datos"} @click=${() => this._onNavClick("datos")}>💾${this._connected ? html`<span class="sync-dot" data-s=${this._syncStatus}></span>` : ""}</button>
+          <button class="ibtn" aria-label="Datos" title="Datos" ?data-active=${this.activeView === "datos"} @click=${() => this._onNavClick("datos")}>💾${driveConnected.value ? html`<span class="sync-dot" data-s=${syncStatus.value}></span>` : ""}</button>
         </div>
       </header>
     `;

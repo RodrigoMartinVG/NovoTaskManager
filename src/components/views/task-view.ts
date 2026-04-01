@@ -1,4 +1,4 @@
-import { SignalWatcher } from "@lit-labs/signals";
+import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { ChecklistItem, EstadoTarea, Prioridad, Tarea } from "../../state/types.js";
@@ -15,7 +15,7 @@ import type { ViewId } from "../shell/nav-bar.js";
 const uid = () => crypto.randomUUID();
 
 @customElement("task-view")
-export class TaskView extends SignalWatcher(LitElement) {
+export class TaskView extends PreactSignalWatcher(LitElement) {
   // ── Form state ──
   @state() private titulo = "";
   @state() private materiaId = "";

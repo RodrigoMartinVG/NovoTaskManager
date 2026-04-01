@@ -1,4 +1,4 @@
-import { SignalWatcher } from "@lit-labs/signals";
+import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { FranjaDef, Materia, MateriaSlot, Periodo } from "../../state/types.js";
@@ -48,7 +48,7 @@ function slotSummary(slots: MateriaSlot[], franjas: FranjaDef[]): string {
 
 /* ═══ Component ═══ */
 @customElement("materia-edit-view")
-export class MateriaEditView extends SignalWatcher(LitElement) {
+export class MateriaEditView extends PreactSignalWatcher(LitElement) {
   @state() private nombre = "";
   @state() private color = COLOR_PRESETS[0];
   @state() private codigo = "";

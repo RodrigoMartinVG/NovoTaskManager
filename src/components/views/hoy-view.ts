@@ -1,5 +1,3 @@
-import { SignalWatcher } from "@lit-labs/signals";
-import { effect } from "@preact/signals-core";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import type { FranjaDef, Materia, Sesion, Tarea } from "../../state/types.js";
@@ -12,6 +10,7 @@ import {
 import { editingTaskId, statsMateriaId, statsReturnView, taskReturnView } from "../../state/navigation.js";
 import { pomoActive, pomoStart } from "../../state/pomo.js";
 import type { ViewId } from "../shell/nav-bar.js";
+import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 
 /* ═══ Helpers ═══ */
 const DIA_NOMBRES = [
@@ -68,25 +67,16 @@ function fmtDur(mins: number): string {
 }
 
 @customElement("hoy-view")
-export class HoyView extends SignalWatcher(LitElement) {
+export class HoyView extends PreactSignalWatcher(LitElement) {
   @state() private _time = new Date();
   @state() private _showPomo = false;
   @state() private _pomoMatId = "";
   @state() private _pomoTareaId = "";
   @state() private _pomoTitulo = "";
-  private _dispose?: () => void;
   private _tick?: ReturnType<typeof setInterval>;
 
   override connectedCallback() {
     super.connectedCallback();
-    this._dispose = effect(() => {
-      tareas.value;
-      materias.value;
-      sesiones.value;
-      plannerData.value;
-      pomoActive.value;
-      this.requestUpdate();
-    });
     this._tick = setInterval(() => {
       this._time = new Date();
     }, 30_000);
@@ -94,7 +84,6 @@ export class HoyView extends SignalWatcher(LitElement) {
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this._dispose?.();
     if (this._tick) clearInterval(this._tick);
   }
 

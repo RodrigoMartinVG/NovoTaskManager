@@ -1,5 +1,5 @@
 /* ═══ Oda v3.0 — Onboarding Flow ═══ */
-import { SignalWatcher } from "@lit-labs/signals";
+import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 import { gsap } from "gsap";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
@@ -26,7 +26,7 @@ const STEPS: Step[] = ["estilo", "welcome", "dataset"];
 const STEP_LABELS = ["Estilo", "Bienvenida", "Arranque"];
 
 @customElement("onboarding-flow")
-export class OnboardingFlow extends SignalWatcher(LitElement) {
+export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
   @state() private step: Step = "splash";
   @state() private selectedTheme = "";
   @state() private selectedDensity = "";
