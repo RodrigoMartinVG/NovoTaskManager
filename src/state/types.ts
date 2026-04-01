@@ -19,6 +19,7 @@ export interface Materia {
   horasSemanalesMax?: number;
   slots?: MateriaSlot[];
   activa?: boolean;
+  tags?: string[];
 }
 
 // ── Tipo de tarea ──
@@ -53,6 +54,7 @@ export interface Tarea {
   descripcion?: string;
   link?: string;
   items: ChecklistItem[];
+  tags?: string[];
 }
 
 // ── Sesión de estudio ──
@@ -66,6 +68,7 @@ export interface Sesion {
   minutos: number;
   origen: OrigenSesion;
   titulo?: string;
+  tags?: string[];
 }
 
 // ── Franjas horarias ──
@@ -85,6 +88,13 @@ export interface AlertConfig {
   inicio: number;
 }
 
+// ── Tags ──
+export interface Tag {
+  id: string;
+  nombre: string;
+  color: string; // hex
+}
+
 // ── PlannerData (raíz) ──
 export interface PlannerData {
   materias: Materia[];
@@ -93,6 +103,7 @@ export interface PlannerData {
   sesiones: Sesion[];
   franjas: FranjaDef[];
   alertas: AlertConfig;
+  tags: Tag[];
   updatedAt?: string; // ISO 8601
 }
 

@@ -12,6 +12,7 @@ import {
 import { editingSesionId, sesionReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
 import { TIME_OPTIONS } from "../../utils/time-fmt.js";
+import "../shared/tag-picker.js";
 
 const uid = () => crypto.randomUUID();
 
@@ -27,6 +28,7 @@ export class SesionEditView extends PreactSignalWatcher(LitElement) {
   @state() private minutos = 25;
   @state() private origen: "timer" | "manual" = "manual";
   @state() private titulo = "";
+  @state() private tagIds: string[] = [];
 
   @state() private confirmDelete = false;
 
@@ -269,6 +271,7 @@ export class SesionEditView extends PreactSignalWatcher(LitElement) {
     this.titulo = ses.titulo ?? "";
     this.materiaId = ses.materiaId;
     this.tareaId = ses.tareaId ?? "";
+    this.tagIds = ses.tags ? [...ses.tags] : [];
   }
 
   /* ── Helpers ── */
@@ -311,6 +314,7 @@ export class SesionEditView extends PreactSignalWatcher(LitElement) {
       minutos: this.minutos,
       origen: this.origen,
       titulo: this.titulo || undefined,
+      tags: this.tagIds.length > 0 ? this.tagIds : undefined,
     };
 
     if (this._isNew) {
@@ -457,6 +461,15 @@ export class SesionEditView extends PreactSignalWatcher(LitElement) {
             <span class="origen-badge ${this.origen}">
               ${this.origen === "timer" ? "⏱ Pomodoro" : "✏️ Manual"}
             </span>
+          </div>
+
+          <!-- Tags -->
+          <div class="field">
+            <label class="field-label">Tags</label>
+            <tag-picker
+              .selected=${this.tagIds}
+              @tags-changed=${(e: CustomEvent<string[]>) => { this.tagIds = e.detail; }}
+            ></tag-picker>
           </div>
         </div>
       </div>

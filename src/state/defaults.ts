@@ -28,5 +28,6 @@ export function emptyData(): PlannerData {
     sesiones: [],
     franjas: DEFAULT_FRANJAS.map((f) => ({ ...f })),
     alertas: { ...DEFAULT_ALERTAS },
+    tags: [],
   };
 }

@@ -4,7 +4,7 @@ import { driveConnected, scheduleAutoSave } from "./gdrive.js";
 import { migrateSlots } from "../domain/slot-migration.js";
 import { DEFAULT_ALERTAS, DEFAULT_FRANJAS, emptyData } from "./defaults.js";
 import { buildDemoData } from "./demo-data.js";
-import type { AlertConfig, AppMode, FranjaDef, Materia, Periodo, PlannerData, Sesion, Tarea, TipoTarea } from "./types.js";
+import type { AlertConfig, AppMode, FranjaDef, Materia, Periodo, PlannerData, Sesion, Tag, Tarea, TipoTarea } from "./types.js";
 
 // Re-export for consumers that import from store
 export { DEFAULT_ALERTAS } from "./defaults.js";
@@ -206,6 +206,34 @@ export function updateTarea(id: string, patch: Partial<Tarea>) {
 export function deleteTarea(id: string) {
   const d = plannerData.value;
   setPlannerData({ ...d, tareas: d.tareas.filter((t) => t.id !== id) });
+}
+
+// ── Tag CRUD ──
+export function addTag(tag: Tag) {
+  const d = plannerData.value;
+  setPlannerData({ ...d, tags: [...(d.tags ?? []), tag] });
+}
+
+export function updateTag(id: string, patch: Partial<Tag>) {
+  const d = plannerData.value;
+  setPlannerData({
+    ...d,
+    tags: (d.tags ?? []).map((t) => (t.id === id ? { ...t, ...patch } : t)),
+  });
+}
+
+export function deleteTag(id: string) {
+  const d = plannerData.value;
+  // Remove tag definition and strip from all entities
+  const tags = (d.tags ?? []).filter((t) => t.id !== id);
+  const strip = (arr?: string[]) => arr?.filter((tid) => tid !== id);
+  setPlannerData({
+    ...d,
+    tags,
+    tareas: d.tareas.map((t) => ({ ...t, tags: strip(t.tags) })),
+    sesiones: d.sesiones.map((s) => ({ ...s, tags: strip(s.tags) })),
+    materias: d.materias.map((m) => ({ ...m, tags: strip(m.tags) })),
+  });
 }
 
 export function enterLocal() {

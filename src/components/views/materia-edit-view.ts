@@ -10,6 +10,7 @@ import {
 } from "../../state/store.js";
 import { editingMateriaId, materiaReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
+import "../shared/tag-picker.js";
 
 /* ═══ Constants ═══ */
 const COLOR_PRESETS = [
@@ -58,6 +59,7 @@ export class MateriaEditView extends PreactSignalWatcher(LitElement) {
   @state() private horasMax: string = "";
   @state() private slots: MateriaSlot[] = [];
   @state() private activa = true;
+  @state() private tagIds: string[] = [];
 
   @state() private confirmDelete = false;
 
@@ -308,6 +310,7 @@ export class MateriaEditView extends PreactSignalWatcher(LitElement) {
         this.horasMax = mat.horasSemanalesMax != null ? String(mat.horasSemanalesMax) : "";
         this.slots = mat.slots ? mat.slots.map((s) => ({ ...s })) : [];
         this.activa = mat.activa !== false;
+        this.tagIds = mat.tags ? [...mat.tags] : [];
       }
     }
   }
@@ -359,6 +362,7 @@ export class MateriaEditView extends PreactSignalWatcher(LitElement) {
       horasSemanalesMax: maxVal > 0 ? maxVal : undefined,
       slots: this.slots.length > 0 ? this.slots : undefined,
       activa: this.activa,
+      tags: this.tagIds.length > 0 ? this.tagIds : undefined,
     };
 
     if (this._isNew) {
@@ -559,6 +563,15 @@ export class MateriaEditView extends PreactSignalWatcher(LitElement) {
               @change=${(e: Event) => { this.activa = (e.target as HTMLInputElement).checked; }}
             />
             <span>Materia activa</span>
+          </div>
+
+          <!-- Tags -->
+          <div class="field">
+            <label>Tags</label>
+            <tag-picker
+              .selected=${this.tagIds}
+              @tags-changed=${(e: CustomEvent<string[]>) => { this.tagIds = e.detail; }}
+            ></tag-picker>
           </div>
 
           <!-- Info -->

@@ -84,6 +84,7 @@ function normalize(raw: unknown): PlannerData {
     alertas: typeof obj.alertas === "object" && obj.alertas !== null
       ? obj.alertas as PlannerData["alertas"]
       : { ...DEFAULT_ALERTAS },
+    tags: Array.isArray(obj.tags) ? obj.tags as PlannerData["tags"] : [],
   };
 }
 
@@ -621,6 +622,7 @@ export class DatosView extends PreactSignalWatcher(LitElement) {
       sesiones: [],
       franjas: DEFAULT_FRANJAS.map((f) => ({ ...f })),
       alertas: { ...DEFAULT_ALERTAS },
+      tags: [],
     });
     this.importSuccess = "";
     this.importError = "";

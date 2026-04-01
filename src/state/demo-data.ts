@@ -133,5 +133,6 @@ export function buildDemoData(): PlannerData {
     ],
     franjas: DEFAULT_FRANJAS.map((f) => ({ ...f })),
     alertas: { ...DEFAULT_ALERTAS },
+    tags: [],
   };
 }

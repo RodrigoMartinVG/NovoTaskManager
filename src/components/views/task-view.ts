@@ -12,6 +12,7 @@ import {
 import { editingTaskId, newTaskMateriaId, taskReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
 import { TIME_OPTIONS } from "../../utils/time-fmt.js";
+import "../shared/tag-picker.js";
 
 const uid = () => crypto.randomUUID();
 
@@ -30,6 +31,7 @@ export class TaskView extends PreactSignalWatcher(LitElement) {
   @state() private descripcion = "";
   @state() private link = "";
   @state() private items: ChecklistItem[] = [];
+  @state() private tagIds: string[] = [];
 
   @state() private confirmDelete = false;
   @state() private newCheckText = "";
@@ -371,6 +373,7 @@ export class TaskView extends PreactSignalWatcher(LitElement) {
         this.descripcion = tarea.descripcion ?? "";
         this.link = tarea.link ?? "";
         this.items = tarea.items.map((i) => ({ ...i }));
+        this.tagIds = tarea.tags ? [...tarea.tags] : [];
       }
     }
   }
@@ -408,6 +411,7 @@ export class TaskView extends PreactSignalWatcher(LitElement) {
       descripcion: this.descripcion.trim() || undefined,
       link: this.link.trim() || undefined,
       items: this.items,
+      tags: this.tagIds.length > 0 ? this.tagIds : undefined,
     };
 
     if (this._isNew) {
@@ -676,6 +680,14 @@ export class TaskView extends PreactSignalWatcher(LitElement) {
               </div>
             </div>
           </div>
+
+            <div class="field">
+              <label>Tags</label>
+              <tag-picker
+                .selected=${this.tagIds}
+                @tags-changed=${(e: CustomEvent<string[]>) => { this.tagIds = e.detail; }}
+              ></tag-picker>
+            </div>
         </div>
       </div>
     `;
