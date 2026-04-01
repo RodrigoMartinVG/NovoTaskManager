@@ -237,7 +237,7 @@ export class AyudaView extends LitElement {
       padding-right: var(--space-3);
     }
     .sidebar-group {
-      font-size: 0.5625rem;
+      font-size: 0.6875rem;
       font-weight: 700;
       color: var(--text3);
       letter-spacing: 0.1em;
@@ -257,7 +257,7 @@ export class AyudaView extends LitElement {
       color: var(--text1);
       cursor: pointer;
       font-family: inherit;
-      font-size: 0.75rem;
+      font-size: 0.875rem;
       transition: all 0.12s;
     }
     .sidebar-btn:hover {
@@ -296,7 +296,7 @@ export class AyudaView extends LitElement {
       color: var(--text0);
     }
     .sec-lead {
-      font-size: 0.75rem;
+      font-size: 0.9375rem;
       color: var(--text2);
       line-height: 1.7;
       margin-bottom: 1.375rem;
@@ -344,13 +344,13 @@ export class AyudaView extends LitElement {
       min-width: 0;
     }
     .item-title {
-      font-size: 0.75rem;
+      font-size: 0.875rem;
       font-weight: 700;
       color: var(--text0);
       margin-bottom: 0.3125rem;
     }
     .item-text {
-      font-size: 0.6875rem;
+      font-size: 0.875rem;
       color: var(--text1);
       line-height: 1.75;
     }
@@ -365,7 +365,7 @@ export class AyudaView extends LitElement {
       background: var(--warn-bg);
       border: 1px solid var(--warn-border);
       border-radius: 0.625rem;
-      font-size: 0.6875rem;
+      font-size: 0.875rem;
       color: var(--warn-text);
       line-height: 1.7;
     }
@@ -382,7 +382,7 @@ export class AyudaView extends LitElement {
       border-radius: 0.3125rem;
       background: var(--info-bg);
       color: var(--info-text);
-      font-size: 0.625rem;
+      font-size: 0.75rem;
       font-weight: 700;
       vertical-align: middle;
     }
@@ -409,7 +409,7 @@ export class AyudaView extends LitElement {
       }
       .sidebar-btn {
         padding: 0.375rem 0.5rem;
-        font-size: 0.6875rem;
+        font-size: 0.8125rem;
       }
     }
   `;

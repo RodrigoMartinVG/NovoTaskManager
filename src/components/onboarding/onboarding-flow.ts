@@ -162,7 +162,7 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
       margin-top: auto;
       padding-top: 1rem;
       text-align: center;
-      font-size: 0.5625rem;
+      font-size: 0.6875rem;
       color: #8a8278;
       z-index: 1;
       flex-shrink: 0;
@@ -241,7 +241,7 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
       display: flex;
       align-items: center;
       gap: 0.25rem;
-      font-size: 0.625rem;
+      font-size: 0.75rem;
       color: var(--text3);
       font-weight: 500;
     }
@@ -252,7 +252,7 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.5625rem;
+      font-size: 0.6875rem;
       font-weight: 700;
       border: 1px solid var(--border2);
       color: var(--text3);
@@ -310,7 +310,7 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
       line-height: 1.25;
     }
     .ob-desc {
-      font-size: 0.75rem;
+      font-size: 0.9375rem;
       color: var(--text2);
       line-height: 1.5;
       margin-bottom: 0.5rem;
@@ -323,7 +323,7 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
       gap: 0.5rem;
     }
     .ob-section-label {
-      font-size: 0.625rem;
+      font-size: 0.75rem;
       font-weight: 600;
       color: var(--text3);
       text-transform: uppercase;
@@ -347,7 +347,7 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
       background: transparent;
       cursor: pointer;
       font-family: inherit;
-      font-size: 0.5rem;
+      font-size: 0.625rem;
       color: var(--text2);
       transition: border-color .16s;
       flex: 1;
@@ -408,7 +408,7 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
     .ob-density-sample-lg { font-size: 1.125rem; }
     .ob-density-sample-xl { font-size: 1.375rem; }
     .ob-density-label {
-      font-size: 0.5rem;
+      font-size: 0.625rem;
       font-weight: 600;
       color: var(--text2);
       white-space: nowrap;
@@ -439,13 +439,13 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
       line-height: 1;
     }
     .ob-value-text h4 {
-      font-size: 0.625rem;
+      font-size: 0.75rem;
       font-weight: 600;
       color: var(--text0);
       margin-bottom: 0.125rem;
     }
     .ob-value-text p {
-      font-size: 0.5625rem;
+      font-size: 0.6875rem;
       color: var(--text2);
       line-height: 1.45;
     }
@@ -459,7 +459,7 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
       background: var(--bg0);
     }
     .ob-preview-title {
-      font-size: 0.5625rem;
+      font-size: 0.6875rem;
       font-weight: 600;
       color: var(--text3);
       text-transform: uppercase;
@@ -470,13 +470,13 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
       display: flex;
       justify-content: space-between;
       padding: 0.25rem 0;
-      font-size: 0.625rem;
+      font-size: 0.75rem;
     }
     .ob-preview-item + .ob-preview-item {
       border-top: 1px solid var(--border);
     }
     .ob-preview-left { color: var(--text1); }
-    .ob-preview-right { color: var(--text3); font-size: 0.5625rem; }
+    .ob-preview-right { color: var(--text3); font-size: 0.6875rem; }
     .ob-preview-bar {
       height: 0.1875rem;
       border-radius: 0.0625rem;
@@ -493,14 +493,14 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
     .ob-preview-footer {
       display: flex;
       justify-content: space-between;
-      font-size: 0.5625rem;
+      font-size: 0.6875rem;
       color: var(--text3);
       margin-top: 0.25rem;
     }
 
     /* ── Dataset options (step 3) ── */
     .ob-opts-label {
-      font-size: 0.625rem;
+      font-size: 0.75rem;
       font-weight: 600;
       color: var(--text3);
       text-transform: uppercase;
@@ -536,12 +536,12 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
     }
     .ob-opt-ico { font-size: 1rem; }
     .ob-opt-title {
-      font-size: 0.75rem;
+      font-size: 0.875rem;
       font-weight: 600;
       color: var(--text0);
     }
     .ob-opt-tag {
-      font-size: 0.5rem;
+      font-size: 0.625rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: .06em;
@@ -551,7 +551,7 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
       color: #fff;
     }
     .ob-opt-desc {
-      font-size: 0.625rem;
+      font-size: 0.8125rem;
       color: var(--text2);
       line-height: 1.5;
     }

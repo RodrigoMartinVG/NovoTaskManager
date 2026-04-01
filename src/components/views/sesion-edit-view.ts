@@ -200,22 +200,6 @@ export class SesionEditView extends PreactSignalWatcher(LitElement) {
       color: var(--text0);
     }
 
-    .mat-preview {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem;
-      background: var(--bg2);
-      border-radius: 0.375rem;
-    }
-    .mat-dot {
-      width: 0.75rem;
-      height: 0.75rem;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    .mat-name { font-size: var(--text-sm); color: var(--text1); }
-
     /* ── Actions ── */
     .actions {
       display: flex;
@@ -307,14 +291,6 @@ export class SesionEditView extends PreactSignalWatcher(LitElement) {
 
   private get _canSave() {
     return this.materiaId !== "" && this.fecha !== "" && this.minutos > 0;
-  }
-
-  private _matColor(id: string): string {
-    return materias.value.find((m) => m.id === id)?.color ?? "var(--text3)";
-  }
-
-  private _matName(id: string): string {
-    return materias.value.find((m) => m.id === id)?.nombre ?? "";
   }
 
   private _tareasForMateria() {
@@ -468,33 +444,22 @@ export class SesionEditView extends PreactSignalWatcher(LitElement) {
           <div class="field">
             <label class="field-label">Materia</label>
             <select class="field-input"
-              .value=${this.materiaId}
               @change=${(e: Event) => {
                 this.materiaId = (e.target as HTMLSelectElement).value;
                 this.tareaId = "";
               }}>
-              <option value="">— Seleccionar —</option>
-              ${allMats.map((m) => html`<option value=${m.id}>${m.nombre}</option>`)}
+              <option value="" ?selected=${this.materiaId === ""}>— Seleccionar —</option>
+              ${allMats.map((m) => html`<option value=${m.id} ?selected=${m.id === this.materiaId}>${m.nombre}</option>`)}
             </select>
           </div>
-
-          ${this.materiaId
-            ? html`
-              <div class="mat-preview">
-                <span class="mat-dot" style="background:${this._matColor(this.materiaId)}" aria-hidden="true"></span>
-                <span class="mat-name">${this._matName(this.materiaId)}</span>
-              </div>
-            `
-            : nothing}
 
           <!-- Tarea (optional) -->
           <div class="field">
             <label class="field-label">Tarea (opcional)</label>
             <select class="field-input"
-              .value=${this.tareaId}
               @change=${(e: Event) => { this.tareaId = (e.target as HTMLSelectElement).value; }}>
-              <option value="">— Sin tarea —</option>
-              ${tareasMateria.map((t) => html`<option value=${t.id}>${t.titulo}</option>`)}
+              <option value="" ?selected=${this.tareaId === ""}>— Sin tarea —</option>
+              ${tareasMateria.map((t) => html`<option value=${t.id} ?selected=${t.id === this.tareaId}>${t.titulo}</option>`)}
             </select>
           </div>
 
