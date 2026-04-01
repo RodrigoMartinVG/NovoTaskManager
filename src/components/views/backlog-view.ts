@@ -11,6 +11,7 @@ import { editingTaskId, taskReturnView } from "../../state/navigation.js";
 import { computeAlertLevel, getAlertInfo } from "../../domain/alert-engine.js";
 import type { ViewId } from "../shell/nav-bar.js";
 import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
+import "./bulk-task-importer.js";
 
 const ESTADO_LABEL: Record<EstadoTarea, string> = {
   pendiente: "Pendiente",
@@ -36,6 +37,7 @@ export class BacklogView extends PreactSignalWatcher(LitElement) {
   @state() private filterTipo = "";
   @state() private filterEstado = "";
   @state() private searchQuery = "";
+  @state() private showImporter = false;
 
   static styles = css`
     :host {
@@ -89,6 +91,22 @@ export class BacklogView extends PreactSignalWatcher(LitElement) {
       gap: 0.375rem;
     }
     .btn-new:hover { opacity: 0.9; }
+
+    .btn-import {
+      background: var(--bg1);
+      color: var(--text1);
+      border: 1px solid var(--border);
+      padding: 0.4375rem 1rem;
+      border-radius: 0.375rem;
+      font: inherit;
+      font-size: var(--text-sm);
+      cursor: pointer;
+      transition: all 0.16s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+    .btn-import:hover { background: var(--bg2); color: var(--text0); }
 
     /* ── Filters bar ── */
     .filters {
@@ -403,7 +421,10 @@ export class BacklogView extends PreactSignalWatcher(LitElement) {
           <div class="empty-icon">📋</div>
           <p class="empty-title">Tu backlog está vacío</p>
           <p class="empty-desc">Creá tu primera tarea para empezar a organizar tus entregas y pendientes.</p>
-          <button class="btn-new" @click=${this._newTask}>+ Nueva tarea</button>
+          <div style="display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;">
+            <button class="btn-new" @click=${this._newTask}>+ Nueva tarea</button>
+            <button class="btn-import" @click=${() => { this.showImporter = true; }}>📥 Importar JSON</button>
+          </div>
         </div>
       `;
     }
@@ -415,7 +436,10 @@ export class BacklogView extends PreactSignalWatcher(LitElement) {
           <h1 class="hdr-title">Backlog</h1>
           <span class="count">${filtered.length}${filtered.length !== allTareas.length ? ` / ${allTareas.length}` : ""}</span>
         </div>
-        <button class="btn-new" @click=${this._newTask}>+ Nueva tarea</button>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <button class="btn-import" @click=${() => { this.showImporter = true; }}>📥 Importar</button>
+          <button class="btn-new" @click=${this._newTask}>+ Nueva tarea</button>
+        </div>
       </div>
 
       <!-- Filters -->
@@ -508,6 +532,10 @@ export class BacklogView extends PreactSignalWatcher(LitElement) {
             </table>
           </div>
         `}
+
+      ${this.showImporter
+        ? html`<bulk-task-importer @close=${() => { this.showImporter = false; }}></bulk-task-importer>`
+        : nothing}
     `;
   }
 }
