@@ -13,6 +13,8 @@ import { editingTaskId, newTaskMateriaId, taskReturnView } from "../../state/nav
 import type { ViewId } from "../shell/nav-bar.js";
 import { TIME_OPTIONS } from "../../utils/time-fmt.js";
 import "../shared/tag-picker.js";
+import "./task-generator-dialog.js";
+import type { Tarea as TareaType } from "../../state/types.js";
 
 const uid = () => crypto.randomUUID();
 
@@ -35,6 +37,7 @@ export class TaskView extends PreactSignalWatcher(LitElement) {
 
   @state() private confirmDelete = false;
   @state() private newCheckText = "";
+  @state() private showGenerator = false;
 
   private _initialized = false;
 
@@ -555,6 +558,10 @@ export class TaskView extends PreactSignalWatcher(LitElement) {
             <button class="btn-secondary" @click=${this._goBack}>Cancelar</button>
 
             ${!this._isNew
+              ? html`<button class="btn-secondary" @click=${() => { this.showGenerator = true; }}>🔁 Generar serie</button>`
+              : nothing}
+
+            ${!this._isNew
               ? this.confirmDelete
                 ? html`
                   <div class="del-confirm">
@@ -566,6 +573,28 @@ export class TaskView extends PreactSignalWatcher(LitElement) {
                 : html`<button class="btn-danger" @click=${this._delete}>Eliminar</button>`
               : nothing}
           </div>
+
+          ${this.showGenerator ? html`
+            <task-generator-dialog
+              .base=${{ 
+                id: editingTaskId.value ?? "",
+                titulo: this.titulo,
+                materiaId: this.materiaId,
+                tipo: this.tipo,
+                estado: this.estado,
+                prioridad: this.prioridad,
+                fechaInicio: this.fechaInicio || undefined,
+                fechaLimite: this.fechaLimite || undefined,
+                horaLimite: this.horaLimite || undefined,
+                obligatorio: this.obligatorio,
+                descripcion: this.descripcion.trim() || undefined,
+                link: this.link.trim() || undefined,
+                items: this.items,
+                tags: this.tagIds.length > 0 ? this.tagIds : undefined,
+              } as TareaType}
+              @close=${() => { this.showGenerator = false; }}
+            ></task-generator-dialog>
+          ` : nothing}
         </div>
 
         <!-- Sidebar -->
