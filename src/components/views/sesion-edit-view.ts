@@ -11,21 +11,9 @@ import {
 } from "../../state/store.js";
 import { editingSesionId, sesionReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
+import { TIME_OPTIONS } from "../../utils/time-fmt.js";
 
 const uid = () => crypto.randomUUID();
-
-/** Generate time options (HH:MM) every 15 minutes */
-function timeOptions(): string[] {
-  const opts: string[] = [];
-  for (let h = 0; h < 24; h++) {
-    for (let m = 0; m < 60; m += 15) {
-      opts.push(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`);
-    }
-  }
-  return opts;
-}
-
-const TIME_OPTIONS = timeOptions();
 
 /** Duration presets (minutes) */
 const DUR_PRESETS = [15, 25, 30, 45, 60, 90, 120];

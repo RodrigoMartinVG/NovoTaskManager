@@ -3,6 +3,7 @@ import { LitElement, css, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { plannerData, setFranjas } from "../../../state/store.js";
 import type { FranjaDef } from "../../../state/types.js";
+import { fmtClock } from "../../../utils/time-fmt.js";
 
 // horaInicio/horaFin stored as minutes from midnight (e.g. 480 = 08:00, 750 = 12:30)
 const DEFAULT_3: FranjaDef[] = [
@@ -19,12 +20,6 @@ const DEFAULT_6: FranjaDef[] = [
   { id: "f-5", nombre: "Penumbra", emoji: "🌙", horaInicio: 1080, horaFin: 1260 },
   { id: "f-6", nombre: "Nocturno", emoji: "🦉", horaInicio: 1260, horaFin: 1440 },
 ];
-
-function timeLabel(minutes: number): string {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-}
 
 function buildTimeOptions(): number[] {
   const opts: number[] = [];
@@ -279,7 +274,7 @@ export class ConfigTabFranjas extends PreactSignalWatcher(LitElement) {
                 @change=${(e: Event) => this._updateFranja(i, { horaInicio: Number((e.target as HTMLSelectElement).value) })}
                 aria-label="Hora inicio franja ${i + 1}"
               >
-                ${timeOpts.map((m) => html`<option value=${m} ?selected=${m === f.horaInicio}>${timeLabel(m)}</option>`)}
+                ${timeOpts.map((m) => html`<option value=${m} ?selected=${m === f.horaInicio}>${fmtClock(m)}</option>`)}
               </select>
               <span>—</span>
               <select
@@ -287,7 +282,7 @@ export class ConfigTabFranjas extends PreactSignalWatcher(LitElement) {
                 @change=${(e: Event) => this._updateFranja(i, { horaFin: Number((e.target as HTMLSelectElement).value) })}
                 aria-label="Hora fin franja ${i + 1}"
               >
-                ${timeOpts.map((m) => html`<option value=${m} ?selected=${m === f.horaFin}>${timeLabel(m)}</option>`)}
+                ${timeOpts.map((m) => html`<option value=${m} ?selected=${m === f.horaFin}>${fmtClock(m)}</option>`)}
               </select>
             </div>
           </div>

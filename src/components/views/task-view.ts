@@ -11,6 +11,7 @@ import {
 } from "../../state/store.js";
 import { editingTaskId, newTaskMateriaId, taskReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
+import { TIME_OPTIONS } from "../../utils/time-fmt.js";
 
 const uid = () => crypto.randomUUID();
 
@@ -111,7 +112,6 @@ export class TaskView extends PreactSignalWatcher(LitElement) {
     .field input[type="text"],
     .field input[type="url"],
     .field input[type="date"],
-    .field input[type="time"],
     .field select,
     .field textarea {
       font: inherit;
@@ -655,12 +655,13 @@ export class TaskView extends PreactSignalWatcher(LitElement) {
             <div class="inline-row">
               <div class="field">
                 <label for="task-hora">Hora límite</label>
-                <input
+                <select
                   id="task-hora"
-                  type="time"
-                  .value=${this.horaLimite}
-                  @input=${(e: InputEvent) => { this.horaLimite = (e.target as HTMLInputElement).value; }}
-                />
+                  @change=${(e: Event) => { this.horaLimite = (e.target as HTMLSelectElement).value; }}
+                >
+                  <option value="" ?selected=${!this.horaLimite}>—</option>
+                  ${TIME_OPTIONS.map((t) => html`<option value=${t} ?selected=${t === this.horaLimite}>${t}</option>`)}
+                </select>
               </div>
               <div class="field" style="justify-content: flex-end;">
                 <div class="checkbox-row">

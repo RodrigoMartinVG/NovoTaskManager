@@ -8,16 +8,10 @@ import {
 import { editingMateriaId, materiaReturnView, statsMateriaId, statsReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
 import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
+import { fmtDur } from "../../utils/time-fmt.js";
 
 /* ═══ Helpers ═══ */
 const DIA_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-
-function fmtDur(mins: number): string {
-  if (mins < 60) return `${mins}m`;
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return m > 0 ? `${h}h ${m}m` : `${h}h`;
-}
 
 function fmtDate(iso: string): string {
   const d = new Date(iso);

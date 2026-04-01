@@ -11,6 +11,7 @@ import { editingTaskId, statsMateriaId, statsReturnView, taskReturnView } from "
 import { pomoActive, pomoStart } from "../../state/pomo.js";
 import type { ViewId } from "../shell/nav-bar.js";
 import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
+import { fmtClock, fmtDur } from "../../utils/time-fmt.js";
 
 /* ═══ Helpers ═══ */
 const DIA_NOMBRES = [
@@ -33,16 +34,6 @@ function getFranjaActual(franjas: FranjaDef[]): FranjaDef | null {
   return franjas.find((f) => mins >= f.horaInicio && mins < f.horaFin) ?? null;
 }
 
-function fmtTime(h: number, m: number): string {
-  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
-}
-
-function fmtMins(m: number): string {
-  const hh = Math.floor(m / 60);
-  const mm = m % 60;
-  return `${hh.toString().padStart(2, "0")}:${mm.toString().padStart(2, "0")}`;
-}
-
 function getWeekStart(): Date {
   const d = new Date();
   const day = d.getDay();
@@ -57,13 +48,6 @@ function sesMinsSemana(materiaId: string, allSesiones: Sesion[]): number {
     if (s.materiaId === materiaId && new Date(s.inicio) >= ws) total += s.minutos;
   }
   return total;
-}
-
-function fmtDur(mins: number): string {
-  if (mins < 60) return `${mins}m`;
-  const h = Math.floor(mins / 60);
-  const m = mins % 60;
-  return m > 0 ? `${h}h ${m}m` : `${h}h`;
 }
 
 @customElement("hoy-view")
@@ -502,11 +486,11 @@ export class HoyView extends PreactSignalWatcher(LitElement) {
     return html`
       <!-- Hero Clock -->
       <div class="hero">
-        <div class="hero-time">${fmtTime(h, m)}</div>
+        <div class="hero-time">${fmtClock(h * 60 + m)}</div>
         <div class="hero-date">${DIA_NOMBRES[now.getDay()]} ${now.getDate()} de ${MES_NOMBRES[now.getMonth()]}</div>
         ${franja
           ? html`<div class="hero-franja">${franja.emoji} ${franja.nombre}
-              <span style="opacity:0.7;font-size:var(--text-xs)">${fmtMins(franja.horaInicio)} – ${fmtMins(franja.horaFin)}</span>
+              <span style="opacity:0.7;font-size:var(--text-xs)">${fmtClock(franja.horaInicio)} – ${fmtClock(franja.horaFin)}</span>
             </div>`
           : nothing}
       </div>
@@ -586,7 +570,7 @@ export class HoyView extends PreactSignalWatcher(LitElement) {
                   <div class="tl-time">
                     <span class="tl-emoji">${f.emoji}</span>
                     <span class="tl-fname">${f.nombre}</span>
-                    <span class="tl-range">${fmtMins(f.horaInicio)} – ${fmtMins(f.horaFin)}</span>
+                    <span class="tl-range">${fmtClock(f.horaInicio)} – ${fmtClock(f.horaFin)}</span>
                     ${isNow ? html`<span class="tl-badge-now">AHORA</span>` : nothing}
                   </div>
                   <div class="tl-mats">

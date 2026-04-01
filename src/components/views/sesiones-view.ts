@@ -10,6 +10,7 @@ import { editingSesionId, sesionReturnView } from "../../state/navigation.js";
 import { pomoActive, pomoStart } from "../../state/pomo.js";
 import type { ViewId } from "../shell/nav-bar.js";
 import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
+import { fmtDur, fmtTimeIso } from "../../utils/time-fmt.js";
 
 const DIA_NOMBRES = ["dom", "lun", "mar", "mié", "jue", "vie", "sáb"];
 
@@ -17,18 +18,6 @@ function fmtDate(iso: string): string {
   const d = new Date(iso);
   const dia = DIA_NOMBRES[d.getDay()];
   return `${dia} ${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}`;
-}
-
-function fmtTime(iso: string): string {
-  const d = new Date(iso);
-  return `${d.getHours().toString().padStart(2, "0")}:${d.getMinutes().toString().padStart(2, "0")}`;
-}
-
-function fmtDuracion(min: number): string {
-  if (min < 60) return `${min}m`;
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  return m > 0 ? `${h}h ${m}m` : `${h}h`;
 }
 
 /** Get ISO week start (Monday) for a date */
@@ -521,11 +510,11 @@ export class SesionesView extends PreactSignalWatcher(LitElement) {
           <div class="stats">
             <div class="stat-card">
               <div class="stat-label">Total</div>
-              <div class="stat-value">${fmtDuracion(stats.totalMin)}</div>
+              <div class="stat-value">${fmtDur(stats.totalMin)}</div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Promedio diario</div>
-              <div class="stat-value">${fmtDuracion(stats.avgMin)}</div>
+              <div class="stat-value">${fmtDur(stats.avgMin)}</div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Sesiones</div>
@@ -597,13 +586,13 @@ export class SesionesView extends PreactSignalWatcher(LitElement) {
                 (s) => html`
                   <tr @click=${() => this._openEdit(s.id)}>
                     <td>${fmtDate(s.inicio)}</td>
-                    <td>${fmtTime(s.inicio)}</td>
+                    <td>${fmtTimeIso(s.inicio)}</td>
                     <td>
                       <span class="mat-dot" style="background:${this._matColor(s.materiaId)}" aria-hidden="true"></span>
                       ${this._matName(s.materiaId)}
                     </td>
                     <td class="col-hide-narrow titulo-cell">${s.titulo || this._tareaTitle(s.tareaId) || "—"}</td>
-                    <td>${fmtDuracion(s.minutos)}</td>
+                    <td>${fmtDur(s.minutos)}</td>
                     <td class="col-hide-narrow">
                       <span class="origen-badge ${s.origen}">${s.origen === "timer" ? "⏱ Pomo" : "✏️ Manual"}</span>
                     </td>

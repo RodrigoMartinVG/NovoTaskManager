@@ -5,16 +5,10 @@ import { filteredMaterias as materias, plannerData, filteredSesiones as sesiones
 import { statsMateriaId, statsReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
 import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
+import { fmtClock, fmtDur } from "../../utils/time-fmt.js";
 
 /* ═══ Constants ═══ */
 const DIA_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-
-/* ═══ Helpers ═══ */
-function fmtMins(m: number): string {
-  const h = Math.floor(m / 60);
-  const mm = m % 60;
-  return `${h.toString().padStart(2, "0")}:${mm.toString().padStart(2, "0")}`;
-}
 
 function getWeekStart(): Date {
   const d = new Date();
@@ -439,7 +433,7 @@ export class SemanaView extends PreactSignalWatcher(LitElement) {
         ${franjas.map((f) => html`
           <div class="franja-label">
             <span class="franja-name">${f.emoji} ${f.nombre}</span>
-            <span class="franja-time">${fmtMins(f.horaInicio)} – ${fmtMins(f.horaFin)}</span>
+            <span class="franja-time">${fmtClock(f.horaInicio)} – ${fmtClock(f.horaFin)}</span>
           </div>
           ${DIA_LABELS.map((_, di) => {
             const cellKey = `${di},${f.id}`;
@@ -500,7 +494,7 @@ export class SemanaView extends PreactSignalWatcher(LitElement) {
                 <div class="sum-info">
                   <div class="sum-name">${m.nombre}</div>
                   <div class="sum-detail">
-                    ${nSlots} slots · ${this._fmtH(sesMins)} / ${this._fmtH(slotMins)} plan
+                    ${nSlots} slots · ${fmtDur(sesMins)} / ${fmtDur(slotMins)} plan
                     ${minObj > 0 ? html` · obj ${minObj}h` : nothing}
                   </div>
                   <div class="sum-bar">
@@ -534,13 +528,6 @@ export class SemanaView extends PreactSignalWatcher(LitElement) {
       bubbles: true,
       composed: true,
     }));
-  }
-
-  private _fmtH(mins: number): string {
-    if (mins < 60) return `${mins}m`;
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    return m > 0 ? `${h}h${m}m` : `${h}h`;
   }
 
   /* ── Drag & Drop ── */

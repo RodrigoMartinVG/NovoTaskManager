@@ -13,6 +13,7 @@ import {
   type SyncStatus,
 } from "../../state/gdrive.js";
 import type { PlannerData } from "../../state/types.js";
+import { fmtDur } from "../../utils/time-fmt.js";
 import {
   materias,
   plannerData,
@@ -408,7 +409,7 @@ export class DatosView extends PreactSignalWatcher(LitElement) {
             <div class="stat-label">Sesiones</div>
           </div>
           <div class="stat">
-            <div class="stat-num">${this._fmtH(totalMins)}</div>
+            <div class="stat-num">${fmtDur(totalMins)}</div>
             <div class="stat-label">Horas estudio</div>
           </div>
         </div>
@@ -623,13 +624,6 @@ export class DatosView extends PreactSignalWatcher(LitElement) {
     });
     this.importSuccess = "";
     this.importError = "";
-  }
-
-  private _fmtH(mins: number): string {
-    if (mins < 60) return `${mins}m`;
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    return m > 0 ? `${h}h ${m}m` : `${h}h`;
   }
 }
 
