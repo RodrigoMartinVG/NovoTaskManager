@@ -63,6 +63,12 @@ export class GlobalFilter extends PreactSignalWatcher(LitElement) {
     .chip-icon {
       font-size: 0.65rem;
     }
+    .chip-label {
+      display: inline;
+    }
+    @media (max-width: 35em) {
+      .chip-label { display: none; }
+    }
 
     /* ── Backdrop ── */
     .backdrop {
@@ -183,7 +189,7 @@ export class GlobalFilter extends PreactSignalWatcher(LitElement) {
       <button class="chip ${this._hasFilter ? "active" : ""}"
         @click=${() => { this._open = !this._open; }}>
         <span class="chip-icon">📅</span>
-        ${this._chipLabel}
+        <span class="chip-label">${this._chipLabel}</span>
       </button>
 
       ${this._open ? html`
