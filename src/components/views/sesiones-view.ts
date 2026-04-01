@@ -35,6 +35,7 @@ type FilterPeriod = "semana" | "mes" | "todo";
 @customElement("sesiones-view")
 export class SesionesView extends PreactSignalWatcher(LitElement) {
   @state() private filterMateria = "";
+  @state() private filterTarea = "";
   @state() private filterOrigen: FilterOrigen = "";
   @state() private filterPeriod: FilterPeriod = "todo";
   @state() private showPomoPopup = false;
@@ -356,6 +357,11 @@ export class SesionesView extends PreactSignalWatcher(LitElement) {
       list = list.filter((s) => s.materiaId === this.filterMateria);
     }
 
+    // Filter by tarea
+    if (this.filterTarea) {
+      list = list.filter((s) => s.tareaId === this.filterTarea);
+    }
+
     // Filter by origen
     if (this.filterOrigen) {
       list = list.filter((s) => s.origen === this.filterOrigen);
@@ -386,6 +392,11 @@ export class SesionesView extends PreactSignalWatcher(LitElement) {
     const avgMin = days.size > 0 ? Math.round(totalMin / days.size) : 0;
 
     return { totalMin, count, timerCount, avgMin, days: days.size };
+  }
+
+  private _tareasForFilterMateria() {
+    if (!this.filterMateria) return [];
+    return plannerData.value.tareas.filter((t) => t.materiaId === this.filterMateria);
   }
 
   /* ── Events ── */
@@ -532,10 +543,21 @@ export class SesionesView extends PreactSignalWatcher(LitElement) {
       <div class="filters">
         <select class="filter-sel" aria-label="Filtrar por materia"
           .value=${this.filterMateria}
-          @change=${(e: Event) => { this.filterMateria = (e.target as HTMLSelectElement).value; }}>
+          @change=${(e: Event) => { this.filterMateria = (e.target as HTMLSelectElement).value; this.filterTarea = ""; }}>
           <option value="">Todas las materias</option>
           ${allMats.map((m) => html`<option value=${m.id}>${m.nombre}</option>`)}
         </select>
+
+        ${this.filterMateria
+          ? html`
+            <select class="filter-sel" aria-label="Filtrar por tarea"
+              .value=${this.filterTarea}
+              @change=${(e: Event) => { this.filterTarea = (e.target as HTMLSelectElement).value; }}>
+              <option value="">Todas las tareas</option>
+              ${this._tareasForFilterMateria().map((t) => html`<option value=${t.id}>${t.titulo}</option>`)}
+            </select>
+          `
+          : nothing}
 
         <select class="filter-sel" aria-label="Filtrar por origen"
           .value=${this.filterOrigen}
