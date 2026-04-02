@@ -113,8 +113,8 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
     .filter-select {
       font: inherit;
       font-size: 0.675rem;
-      background: transparent;
-      color: var(--text3);
+      background: var(--bg1);
+      color: var(--text2);
       border: 1px solid var(--border);
       border-radius: 1rem;
       padding: 0.15rem 0.5rem;
@@ -122,6 +122,10 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
       transition: all 0.16s;
       line-height: 1.3;
       max-width: 10rem;
+    }
+    .filter-select option {
+      background: var(--bg1);
+      color: var(--text1);
     }
     .filter-select:hover {
       background: var(--bg2);
