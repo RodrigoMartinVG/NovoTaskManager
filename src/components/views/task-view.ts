@@ -9,7 +9,7 @@ import {
   plannerData,
   updateTarea,
 } from "../../state/store.js";
-import { editingTaskId, newTaskMateriaId, taskReturnView } from "../../state/navigation.js";
+import { editingTaskId, newTaskDate, newTaskMateriaId, taskReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
 import { TIME_OPTIONS } from "../../utils/time-fmt.js";
 import "../shared/tag-picker.js";
@@ -361,7 +361,12 @@ export class TaskView extends PreactSignalWatcher(LitElement) {
     if (taskId === "new" && newTaskMateriaId.value) {
       this.materiaId = newTaskMateriaId.value;
       newTaskMateriaId.value = "";
-    } else if (taskId && taskId !== "new") {
+    }
+    if (taskId === "new" && newTaskDate.value) {
+      this.fechaLimite = newTaskDate.value;
+      newTaskDate.value = "";
+    }
+    if (taskId && taskId !== "new") {
       const tarea = plannerData.value.tareas.find((t) => t.id === taskId);
       if (tarea) {
         this.titulo = tarea.titulo;

@@ -1,13 +1,13 @@
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import type { Tarea } from "../../state/types.js";
+import type { EstadoTarea, Tarea } from "../../state/types.js";
 import {
   filteredMaterias as materias,
   filteredSesiones as sesiones,
   filteredTareas as tareas,
   updateTarea,
 } from "../../state/store.js";
-import { editingTaskId, taskReturnView } from "../../state/navigation.js";
+import { editingTaskId, newTaskDate, taskReturnView } from "../../state/navigation.js";
 import type { ViewId } from "../shell/nav-bar.js";
 import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 
@@ -28,6 +28,17 @@ function todayISO(): string {
 
 type DateFilterMode = "inicio" | "limite" | "ambas";
 
+const ESTADO_COLOR: Record<EstadoTarea, string> = {
+  pendiente: "#9ca3af",
+  en_progreso: "#3b82f6",
+  completada: "#10b981",
+};
+const ESTADO_LABEL: Record<EstadoTarea, string> = {
+  pendiente: "Pendiente",
+  en_progreso: "En progreso",
+  completada: "Completada",
+};
+
 /** Entry in the per-day map: tarea + which date placed it here */
 interface CalEntry {
   tarea: Tarea;
@@ -38,10 +49,10 @@ interface CalEntry {
 export class CalendarioView extends PreactSignalWatcher(LitElement) {
   @state() private viewYear = new Date().getFullYear();
   @state() private viewMonth = new Date().getMonth(); // 0-indexed
-  @state() private selectedDate: string | null = null;
   @state() private dateFilter: DateFilterMode = "ambas";
-  @state() private _popX = 0;
-  @state() private _popY = 0;
+  @state() private filterMateria = "";
+  @state() private _legendOpen = false;
+  @state() private _dateMenuOpen = false;
 
   static styles = css`
     :host {
@@ -91,59 +102,188 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
       text-align: center;
     }
 
-    /* ── Date-type filter ── */
+    /* ── Filter bar ── */
     .filter-bar {
       display: flex;
       align-items: center;
       gap: 0.375rem;
       margin-bottom: var(--space-3);
+      flex-wrap: wrap;
     }
-    .filter-label {
-      font-size: var(--text-xs);
+    .filter-select {
+      font: inherit;
+      font-size: 0.675rem;
+      background: transparent;
+      color: var(--text3);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 0.15rem 0.5rem;
+      cursor: pointer;
+      transition: all 0.16s;
+      line-height: 1.3;
+      max-width: 10rem;
+    }
+    .filter-select:hover {
+      background: var(--bg2);
+      border-color: var(--border2);
       color: var(--text2);
-      margin-right: 0.25rem;
     }
-    .filter-btn {
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .filter-select.has-value {
+      background: color-mix(in srgb, var(--accent) 8%, transparent);
+      border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+      color: var(--accent);
+    }
+
+    /* ── Color mode toggle ── */
+    .color-toggle { display: none; }
+    .info-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.25rem; height: 1.25rem;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text3);
+      font: inherit;
+      font-size: 0.625rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.14s;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .info-btn:hover { background: var(--bg2); color: var(--text1); }
+    .info-popup {
+      position: absolute;
+      top: calc(100% + 0.375rem);
+      right: -0.25rem;
+      z-index: 60;
       background: var(--bg1);
       border: 1px solid var(--border);
-      border-radius: 0.375rem;
-      padding: 0.25rem 0.625rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,.15);
+      padding: 0.5rem 0.75rem;
+      min-width: 9rem;
+      white-space: nowrap;
+    }
+    .info-popup-title {
+      font-size: 0.5625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text3);
+      margin-bottom: 0.375rem;
+    }
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.125rem 0;
+      font-size: var(--text-xs);
+      color: var(--text1);
+    }
+    .info-swatch {
+      width: 0.625rem; height: 0.625rem;
+      border-radius: 0.125rem;
+      flex-shrink: 0;
+    }
+    .info-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 55;
+    }
+
+    .filter-spacer { flex: 1; }
+    .date-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 0.15rem 0.6rem;
+      font: inherit;
+      font-size: 0.675rem;
+      color: var(--text3);
+      cursor: pointer;
+      transition: all 0.16s;
+      white-space: nowrap;
+      line-height: 1.3;
+      position: relative;
+    }
+    .date-chip:hover {
+      background: var(--bg2);
+      border-color: var(--border2);
+      color: var(--text2);
+    }
+    .date-chip.open,
+    .date-chip.active {
+      background: color-mix(in srgb, var(--accent) 8%, transparent);
+      border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+      color: var(--accent);
+    }
+    .date-chip-icon { font-size: 0.65rem; }
+    .date-menu {
+      position: absolute;
+      top: calc(100% + 0.25rem);
+      right: 0;
+      z-index: 60;
+      background: var(--bg1);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,.15);
+      padding: 0.25rem 0;
+      min-width: 7rem;
+    }
+    .date-menu-opt {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.375rem 0.75rem;
       font: inherit;
       font-size: var(--text-xs);
       color: var(--text1);
+      background: transparent;
+      border: none;
+      width: 100%;
       cursor: pointer;
-      transition: background 0.16s, border-color 0.16s;
+      transition: background 0.12s;
+      text-align: left;
     }
-    .filter-btn:hover { background: var(--bg2); }
-    .filter-btn.active {
-      background: var(--accent);
-      color: var(--bg0);
-      border-color: var(--accent);
+    .date-menu-opt:hover { background: var(--bg2); }
+    .date-menu-opt[data-selected] {
+      color: var(--accent);
+      font-weight: 600;
     }
-    .filter-legend {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
+    .date-menu-opt .chk {
+      font-size: 0.75rem;
       margin-left: auto;
-      font-size: var(--text-xs);
-      color: var(--text2);
     }
-    .legend-item {
-      display: flex;
+    .date-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 55;
+    }
+    .legend-inline {
+      display: inline-flex;
       align-items: center;
-      gap: 0.25rem;
+      gap: 0.375rem;
+      margin-left: 0.25rem;
+      font-size: 0.5625rem;
+      color: var(--text3);
     }
-    .legend-shape {
-      width: 0.875rem;
-      height: 0.625rem;
-      border: 1.5px solid var(--text2);
+    .legend-inline .lg-shape {
+      width: 0.625rem;
+      height: 0.4375rem;
+      border: 1.5px solid var(--text3);
     }
-    .legend-shape.shape-inicio {
-      border-radius: 0.25rem 0 0 0.25rem;
-    }
-    .legend-shape.shape-limite {
-      border-radius: 0 0.25rem 0.25rem 0;
-    }
+    .legend-inline .lg-shape.s-inicio { border-radius: 0.1875rem 0 0 0.1875rem; }
+    .legend-inline .lg-shape.s-limite { border-radius: 0 0.1875rem 0.1875rem 0; }
 
     /* ── Grid ── */
     .cal-grid {
@@ -170,10 +310,8 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
       border-right: 1px solid var(--border);
       min-height: 5rem;
       padding: 0.25rem;
-      cursor: pointer;
       transition: background 0.16s;
       position: relative;
-      overflow: hidden;
       min-width: 0;
     }
     .day-cell:nth-child(7n) { border-right: none; }
@@ -181,8 +319,10 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
     .day-cell.is-today {
       background: color-mix(in srgb, var(--accent) 8%, var(--bg0));
     }
-    .day-cell.selected {
-      box-shadow: inset 0 0 0 2px var(--accent);
+    .day-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
     .day-num {
       font-size: var(--text-xs);
@@ -193,6 +333,21 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
     .day-cell.is-today .day-num {
       color: var(--accent);
     }
+    .cell-add {
+      background: var(--bg2);
+      border: none;
+      color: var(--text3);
+      font-size: 0.5625rem;
+      line-height: 1;
+      padding: 0.125rem 0.375rem;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.14s, color 0.14s, background 0.14s;
+      white-space: nowrap;
+    }
+    .day-cell:hover .cell-add { opacity: 1; }
+    .cell-add:hover { color: var(--accent); background: var(--bg3); }
 
     /* ── Task cards in cells ── */
     .day-cards {
@@ -200,24 +355,120 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
       flex-direction: column;
       gap: 0.125rem;
       padding: 0 0.125rem;
-      overflow: hidden;
       min-width: 0;
     }
     .day-card {
       display: flex;
       align-items: center;
-      gap: 0.25rem;
+      gap: 0.3rem;
       padding: 0.125rem 0.375rem;
+      padding-left: 0.375rem;
       font-size: 0.6875rem;
       line-height: 1.3;
-      color: var(--bg0);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      color: var(--text1);
+      background: var(--bg1);
+      border-left: 3px solid var(--text3);
       cursor: pointer;
-      transition: opacity 0.12s;
+      transition: background 0.12s;
     }
-    .day-card:hover { opacity: 0.85; }
+    .day-card:hover { background: var(--bg2); }
+    .card-mat {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1rem;
+      height: 1rem;
+      min-width: 1rem;
+      border-radius: 50%;
+      font-size: 0.5rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+
+    /* ── Card tooltip ── */
+    .card-tip {
+      display: none;
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      margin-left: 0.75rem;
+      z-index: 200;
+      background: var(--bg0, #fff);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 0.625rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,.22), 0 2px 8px rgba(0,0,0,.1);
+      padding: 0.75rem 1rem;
+      min-width: 14rem;
+      max-width: 20rem;
+      white-space: normal;
+      pointer-events: none;
+    }
+    /* Flip to left side for right-edge columns */
+    .tip-flip .card-tip {
+      left: auto;
+      right: 100%;
+      margin-left: 0;
+      margin-right: 0.75rem;
+    }
+    .day-card:hover .card-tip { display: block; }
+
+    .tip-title {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--text0);
+      margin-bottom: 0.5rem;
+      line-height: 1.3;
+      word-break: break-word;
+    }
+    .tip-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0.375rem 0;
+    }
+    .tip-field {
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.6875rem;
+      color: var(--text1);
+      line-height: 1.5;
+    }
+    .tip-field + .tip-field { margin-top: 0.25rem; }
+    .tip-field-label {
+      color: var(--text3);
+      min-width: 4.5rem;
+      flex-shrink: 0;
+    }
+    .tip-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.625rem;
+      font-weight: 600;
+      padding: 0.125rem 0.5rem;
+      border-radius: 1rem;
+      background: var(--bg2);
+      color: var(--text1);
+    }
+    .tip-badge-dot {
+      width: 0.375rem;
+      height: 0.375rem;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .tip-oblig {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.125rem;
+      font-size: 0.625rem;
+      color: var(--warning, #f59e0b);
+      font-weight: 600;
+    }
     /* Rounded all when single mode */
     .day-card.shape-full {
       border-radius: 0.1875rem;
@@ -233,6 +484,8 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
     .card-label {
       overflow: hidden;
       text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
     }
     .day-ses {
       font-size: 0.5rem;
@@ -240,113 +493,14 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
       padding: 0 0.25rem;
     }
 
-    /* ── Detail popover ── */
+    /* ── Grid wrap ── */
     .grid-wrap {
       position: relative;
     }
-    .detail-backdrop {
-      position: fixed;
-      inset: 0;
-      z-index: 90;
-    }
-    .detail {
-      position: fixed;
-      z-index: 100;
-      width: 18rem;
-      background: var(--bg1);
-      border: 1px solid var(--border);
-      border-radius: 0.5rem;
-      padding: var(--space-3);
-      box-shadow: 0 8px 24px rgba(0,0,0,.18);
-      max-height: 16rem;
-      overflow-y: auto;
-    }
-    .detail-close {
-      position: absolute;
-      top: 0.375rem;
-      right: 0.375rem;
-      background: transparent;
-      border: none;
-      font-size: 0.875rem;
-      color: var(--text3);
-      cursor: pointer;
-      padding: 0.125rem 0.25rem;
-      line-height: 1;
-      border-radius: 0.25rem;
-    }
-    .detail-close:hover {
-      background: var(--bg2);
-      color: var(--text0);
-    }
-    .detail-title {
-      font-size: var(--text-sm);
-      font-weight: 700;
-      color: var(--text0);
-      margin-bottom: var(--space-2);
-    }
-    .detail-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.375rem 0.5rem;
-      border-radius: 0.25rem;
-      cursor: pointer;
-      font-size: var(--text-sm);
-      color: var(--text0);
-      transition: background 0.16s;
-    }
-    .detail-row:hover { background: var(--bg2); }
-    .detail-dot {
-      width: 0.5rem; height: 0.5rem;
-      flex-shrink: 0;
-    }
-    .detail-dot.shape-full { border-radius: 50%; }
-    .detail-dot.shape-inicio {
-      border-radius: 50% 0 0 50%;
-    }
-    .detail-dot.shape-limite {
-      border-radius: 0 50% 50% 0;
-    }
-    .detail-meta {
-      font-size: var(--text-xs);
-      color: var(--text3);
-      margin-left: auto;
-    }
-    .detail-type-tag {
-      font-size: 0.5625rem;
-      padding: 0.0625rem 0.3rem;
-      border-radius: 0.25rem;
-      background: var(--bg2);
-      color: var(--text2);
-    }
-    .detail-ses {
-      font-size: var(--text-xs);
-      color: var(--text3);
-      padding: 0.25rem 0.5rem;
-    }
-    .detail-empty {
-      font-size: var(--text-sm);
-      color: var(--text3);
-      text-align: center;
-      padding: var(--space-2);
-    }
 
-    /* ── Hover hint on cells with cards ── */
+    /* ── Hover hint on cells ── */
     .day-cell.has-entries {
-      cursor: pointer;
-    }
-    .day-cell.has-entries::after {
-      content: "•••";
-      position: absolute;
-      bottom: 0.125rem;
-      right: 0.25rem;
-      font-size: 0.5rem;
-      color: var(--text3);
-      opacity: 0;
-      transition: opacity 0.16s;
-    }
-    .day-cell.has-entries:hover::after {
-      opacity: 1;
+      cursor: default;
     }
 
     /* ── Drag highlight ── */
@@ -386,6 +540,7 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
     };
 
     for (const t of tareas.value) {
+      if (this.filterMateria && t.materiaId !== this.filterMateria) continue;
       if (showLimite && t.fechaLimite) {
         pushEntry(t.fechaLimite, t, "limite");
       }
@@ -414,34 +569,71 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
         </div>
       </div>
 
-      <!-- Date-type filter -->
+      <!-- Filters -->
       <div class="filter-bar">
-        <span class="filter-label">Mostrar por:</span>
-        ${(["inicio", "limite", "ambas"] as DateFilterMode[]).map((mode) => html`
-          <button class="filter-btn ${this.dateFilter === mode ? "active" : ""}"
-            @click=${() => { this.dateFilter = mode; }}>
-            ${mode === "inicio" ? "Inicio" : mode === "limite" ? "Límite" : "Ambas"}
-          </button>
-        `)}
-        ${isAmbas ? html`
-          <div class="filter-legend">
-            <div class="legend-item">
-              <div class="legend-shape shape-inicio"></div>
-              <span>Inicio</span>
+        <select class="filter-select ${this.filterMateria ? "has-value" : ""}"
+          @change=${(e: Event) => { this.filterMateria = (e.target as HTMLSelectElement).value; }}>
+          <option value="">Todas las materias</option>
+          ${materias.value.map((m) => html`
+            <option value=${m.id} ?selected=${m.id === this.filterMateria}>${m.nombre}</option>
+          `)}
+        </select>
+
+        <span class="info-btn" @click=${(e: Event) => { e.stopPropagation(); this._legendOpen = !this._legendOpen; }}>i
+          ${this._legendOpen ? html`
+            <div class="info-backdrop" @click=${(e: Event) => { e.stopPropagation(); this._legendOpen = false; }}></div>
+            <div class="info-popup">
+              <div class="info-popup-title">Borde izquierdo = Estado</div>
+              ${(["pendiente", "en_progreso", "completada"] as EstadoTarea[]).map((est) => html`
+                <div class="info-row">
+                  <span class="info-swatch" style="background:${ESTADO_COLOR[est]}"></span>
+                  ${ESTADO_LABEL[est]}
+                </div>
+              `)}
+              <div class="info-popup-title" style="margin-top:0.5rem">Círculo = Materia</div>
+              ${materias.value.map((m) => html`
+                <div class="info-row">
+                  <span class="info-swatch" style="background:${m.color}; border-radius:50%"></span>
+                  ${m.nombre}
+                </div>
+              `)}
             </div>
-            <div class="legend-item">
-              <div class="legend-shape shape-limite"></div>
-              <span>Límite</span>
+          ` : nothing}
+        </span>
+
+        <span class="filter-spacer"></span>
+
+        <span class="date-chip ${this._dateMenuOpen ? "open" : ""} ${this.dateFilter !== "ambas" ? "active" : ""}"
+          @click=${(e: Event) => { e.stopPropagation(); this._dateMenuOpen = !this._dateMenuOpen; }}>
+          <span class="date-chip-icon">📅</span>
+          ${this.dateFilter === "inicio" ? "Inicio" : this.dateFilter === "limite" ? "Límite" : "Ambas"}
+          ${this.dateFilter === "ambas" ? html`
+            <span class="legend-inline">
+              <span class="lg-shape s-inicio"></span>I
+              <span class="lg-shape s-limite"></span>L
+            </span>
+          ` : nothing}
+          ${this._dateMenuOpen ? html`
+            <div class="date-backdrop" @click=${() => { this._dateMenuOpen = false; }}></div>
+            <div class="date-menu">
+              ${(["ambas", "inicio", "limite"] as DateFilterMode[]).map((m) => html`
+                <button class="date-menu-opt" ?data-selected=${this.dateFilter === m}
+                  @click=${(ev: Event) => { ev.stopPropagation(); this.dateFilter = m; this._dateMenuOpen = false; }}>
+                  ${m === "ambas" ? "Ambas" : m === "inicio" ? "Inicio" : "Límite"}
+                  ${this.dateFilter === m ? html`<span class="chk">✓</span>` : nothing}
+                </button>
+              `)}
             </div>
-          </div>
-        ` : nothing}
+          ` : nothing}
+        </span>
       </div>
 
       <div class="grid-wrap">
       <div class="cal-grid">
         ${DIA_LABELS.map((d) => html`<div class="day-hdr">${d}</div>`)}
-        ${days.map((day) => {
+        ${days.map((day, idx) => {
           const iso = isoDate(day);
+          const colIdx = idx % 7;
           const isToday = iso === hoy;
           const entries = entryMap.get(iso) ?? [];
           const sesMins = sesMap.get(iso) ?? 0;
@@ -449,25 +641,53 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
             <div class="day-cell
               ${isToday ? "is-today" : ""}
               ${entries.length > 0 ? "has-entries" : ""}
-              ${this.selectedDate === iso ? "selected" : ""}"
-              @click=${(ev: MouseEvent) => this._onCellClick(iso, ev)}
+              ${colIdx >= 5 ? "tip-flip" : ""}"
               @dragover=${(ev: DragEvent) => { ev.preventDefault(); (ev.currentTarget as HTMLElement).classList.add("drag-over"); }}
               @dragleave=${(ev: DragEvent) => { (ev.currentTarget as HTMLElement).classList.remove("drag-over"); }}
               @drop=${(ev: DragEvent) => this._onDrop(ev, iso)}>
-              <div class="day-num">${day.getDate()}</div>
+              <div class="day-top">
+                <span class="day-num">${day.getDate()}</span>
+                <button class="cell-add" @click=${(ev: Event) => { ev.stopPropagation(); this._newTaskOnDate(iso); }} title="Nueva tarea">+ nueva task</button>
+              </div>
               ${entries.length > 0 ? html`
                 <div class="day-cards">
                   ${entries.map((e) => {
                     const mat = materias.value.find((m) => m.id === e.tarea.materiaId);
-                    const bg = mat?.color ?? "var(--text3)";
+                    const estadoColor = ESTADO_COLOR[e.tarea.estado];
+                    const matColor = mat?.color ?? "var(--text3)";
+                    const matInitial = mat?.nombre?.charAt(0) ?? "?";
                     const shape = isAmbas ? `shape-${e.dateType}` : "shape-full";
+                    const matName = mat?.nombre ?? "Sin materia";
                     return html`
                       <div class="day-card ${shape}"
-                        style="background:${bg}"
+                        style="border-left-color:${estadoColor}"
                         draggable="true"
                         @dragstart=${(ev: DragEvent) => { ev.dataTransfer!.setData("text/plain", JSON.stringify({ id: e.tarea.id, dateType: e.dateType })); ev.dataTransfer!.effectAllowed = "move"; }}
                         @click=${(ev: Event) => { ev.stopPropagation(); this._openTask(e.tarea.id); }}>
+                        <span class="card-mat" style="background:${matColor}">${matInitial}</span>
                         <span class="card-label">${e.tarea.titulo}</span>
+                        <div class="card-tip">
+                          <div class="tip-title">${e.tarea.titulo}</div>
+                          <div class="tip-divider"></div>
+                          <div class="tip-field">
+                            <span class="tip-field-label">Materia</span>
+                            <span style="color:${mat?.color ?? 'var(--text1)'}; font-weight:600">${matName}</span>
+                          </div>
+                          <div class="tip-field">
+                            <span class="tip-field-label">Estado</span>
+                            <span class="tip-badge"><span class="tip-badge-dot" style="background:${ESTADO_COLOR[e.tarea.estado]}"></span>${ESTADO_LABEL[e.tarea.estado]}</span>
+                          </div>
+                          ${e.tarea.obligatorio ? html`
+                          <div class="tip-field">
+                            <span class="tip-field-label"></span>
+                            <span class="tip-oblig">⚠️ Obligatoria</span>
+                          </div>` : nothing}
+                          ${isAmbas ? html`
+                          <div class="tip-field">
+                            <span class="tip-field-label">Tipo fecha</span>
+                            <span>${e.dateType === "inicio" ? "📍 Inicio" : "🏁 Límite"}</span>
+                          </div>` : nothing}
+                        </div>
                       </div>`;
                   })}
                 </div>
@@ -477,72 +697,6 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
           `;
         })}
       </div>
-
-      <!-- Detail popover for selected date -->
-      ${this.selectedDate ? html`
-        <div class="detail-backdrop" @click=${() => { this.selectedDate = null; }}></div>
-        ${this._renderDetail(this.selectedDate, entryMap, sesMap)}
-      ` : nothing}
-      </div>
-    `;
-  }
-
-  private _onCellClick(iso: string, ev: MouseEvent) {
-    if (this.selectedDate === iso) {
-      this.selectedDate = null;
-      return;
-    }
-    // Calculate popover position in viewport coords
-    const cell = ev.currentTarget as HTMLElement;
-    const cellRect = cell.getBoundingClientRect();
-    const popW = 288; // 18rem ≈ 288px
-    const popH = 256; // max-height 16rem ≈ 256px
-    // Try below cell, horizontally centered
-    let left = cellRect.left + cellRect.width / 2 - popW / 2;
-    let top = cellRect.bottom + 6;
-    // If it overflows bottom, place above
-    if (top + popH > window.innerHeight - 8) {
-      top = cellRect.top - popH - 6;
-    }
-    // Clamp horizontal
-    left = Math.max(8, Math.min(left, window.innerWidth - popW - 8));
-    // Clamp top
-    top = Math.max(8, top);
-    this._popX = left;
-    this._popY = top;
-    this.selectedDate = iso;
-  }
-
-  private _renderDetail(
-    iso: string,
-    entryMap: Map<string, CalEntry[]>,
-    sesMap: Map<string, number>,
-  ) {
-    const entries = entryMap.get(iso) ?? [];
-    const sesMins = sesMap.get(iso) ?? 0;
-    const d = new Date(iso + "T00:00:00");
-    const label = `${DIA_LABELS[(d.getDay() + 6) % 7]} ${d.getDate()} ${MES_NOMBRES[d.getMonth()]}`;
-    const isAmbas = this.dateFilter === "ambas";
-
-    return html`
-      <div class="detail" style="top:${this._popY}px;left:${this._popX}px">
-        <button class="detail-close" @click=${() => { this.selectedDate = null; }}>✕</button>
-        <div class="detail-title">${label}</div>
-        ${entries.length > 0
-          ? entries.map((e) => {
-              const mat = materias.value.find((m) => m.id === e.tarea.materiaId);
-              const dotShape = isAmbas ? `shape-${e.dateType}` : "shape-full";
-              return html`
-                <div class="detail-row" @click=${() => this._openTask(e.tarea.id)}>
-                  <div class="detail-dot ${dotShape}" style="background:${mat?.color ?? "var(--text3)"}"></div>
-                  <span>${e.tarea.titulo}</span>
-                  ${isAmbas ? html`<span class="detail-type-tag">${e.dateType === "inicio" ? "Inicio" : "Límite"}</span>` : nothing}
-                  <span class="detail-meta">${e.tarea.estado}</span>
-                </div>
-              `;
-            })
-          : html`<div class="detail-empty">Sin tareas</div>`}
-        ${sesMins > 0 ? html`<div class="detail-ses">📚 ${sesMins} min de estudio</div>` : nothing}
       </div>
     `;
   }
@@ -571,7 +725,6 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
     } else {
       this.viewMonth--;
     }
-    this.selectedDate = null;
   }
 
   private _nextMonth() {
@@ -581,7 +734,6 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
     } else {
       this.viewMonth++;
     }
-    this.selectedDate = null;
   }
 
   private _onDrop(ev: DragEvent, targetDate: string) {
@@ -600,6 +752,20 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
   private _openTask(id: string) {
     editingTaskId.value = id;
     taskReturnView.value = "calendario";
+    this.dispatchEvent(
+      new CustomEvent<ViewId>("view-change", {
+        detail: "task",
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  private _newTaskOnDate(iso: string) {
+    editingTaskId.value = "new";
+    taskReturnView.value = "calendario";
+    // Store the date so task-view can pre-fill fechaLimite
+    newTaskDate.value = iso;
     this.dispatchEvent(
       new CustomEvent<ViewId>("view-change", {
         detail: "task",

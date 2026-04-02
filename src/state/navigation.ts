@@ -7,6 +7,8 @@ export const editingTaskId = signal<string | null>(null);
 export const taskReturnView = signal<string>("backlog");
 /** Materia preseleccionada para una nueva tarea. */
 export const newTaskMateriaId = signal<string>("");
+/** Fecha preseleccionada para una nueva tarea (desde calendario). */
+export const newTaskDate = signal<string>("");
 
 // ── Materia ──
 /** ID de la materia en edición. "new" = creación, null = ninguna. */
