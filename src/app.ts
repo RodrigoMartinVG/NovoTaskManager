@@ -1,4 +1,4 @@
-/* ═══ Oda v3.0 — Entry Point ═══ */
+/* ═══ Tasker Cat v3.0 — Entry Point ═══ */
 
 // Global styles (tokens, themes, reset)
 import "./styles/tokens.css";

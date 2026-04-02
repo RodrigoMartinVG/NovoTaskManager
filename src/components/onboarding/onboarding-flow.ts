@@ -1,4 +1,4 @@
-/* ═══ Oda v3.0 — Onboarding Flow ═══ */
+/* ═══ Tasker Cat v3.0 — Onboarding Flow ═══ */
 import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 import { gsap } from "gsap";
 import { LitElement, css, html, nothing } from "lit";
@@ -75,9 +75,9 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
     }
 
     .splash-diamond {
-      font-size: 5rem;
-      line-height: 1;
-      color: #4e47b8;
+      width: 8rem;
+      height: auto;
+      border-radius: 1rem;
       filter: drop-shadow(0 0 2rem rgba(78,71,184,0.35));
       margin-bottom: 0.5rem;
     }
@@ -169,12 +169,12 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
     }
 
     @media (min-width: 40em) {
-      .splash-diamond { font-size: 6rem; }
+      .splash-diamond { width: 10rem; }
       .splash-logo { font-size: 4rem; }
       .splash-tagline { font-size: 1.5rem; }
     }
     @media (max-width: 30em) {
-      .splash-diamond { font-size: 3.5rem; }
+      .splash-diamond { width: 5rem; }
       .splash-logo { font-size: 2.5rem; }
       .splash-tagline { font-size: 1.0625rem; max-width: 18rem; }
       .splash-btn { padding: 0.625rem 2rem; font-size: 0.875rem; }
@@ -288,11 +288,11 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
       flex-shrink: 0;
     }
     .ob-logo-mark {
-      font-size: 2rem;
-      color: var(--accent);
-      line-height: 1;
       display: block;
-      margin-bottom: 0.25rem;
+      margin: 0 auto 0.25rem;
+      width: 3rem;
+      height: auto;
+      border-radius: 0.5rem;
     }
     .ob-logo-text {
       font-size: 1rem;
@@ -789,9 +789,9 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
     return html`
       <div class="splash">
         <div class="splash-inner">
-          <span class="splash-diamond">◈</span>
-          <span class="splash-logo">Oda</span>
-          <span class="splash-sub">Planner</span>
+          <span class="splash-diamond"><img src="/logo.jpeg" alt="Tasker Cat" style="width:100%;height:auto;border-radius:1rem" /></span>
+          <span class="splash-logo">Tasker Cat</span>
+          <span class="splash-sub">Tu organizador de estudio</span>
           <p class="splash-tagline">
             Cada hora de estudio cuenta.<br>Organizalas sin esfuerzo.
           </p>
@@ -800,7 +800,7 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
               Empezar
             </button>
             <button class="splash-skip" @click=${this._onEnterLocal}>
-              Ya tengo experiencia · Ir al planner →
+              Ya tengo experiencia · Ir a Tasker Cat →
             </button>
           </div>
         </div>
@@ -816,7 +816,7 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
     return html`
       ${this._renderProgress()}
       <div class="ob-card">
-        <h1 class="ob-title">Elegí cómo se ve Oda</h1>
+        <h1 class="ob-title">Elegí cómo se ve Tasker Cat</h1>
         <p class="ob-desc">
           Tema y tamaño de letra. Lo podés cambiar cuando quieras desde ⚙.
         </p>
@@ -875,8 +875,8 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
   private _renderWelcome() {
     return html`
       <div class="ob-hero">
-        <span class="ob-logo-mark">◈</span>
-        <span class="ob-logo-text">Oda Planner</span>
+        <img class="ob-logo-mark" src="/logo.jpeg" alt="Tasker Cat" />
+        <span class="ob-logo-text">Tasker Cat</span>
       </div>
       ${this._renderProgress()}
       <div class="ob-card">

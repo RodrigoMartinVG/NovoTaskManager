@@ -1,4 +1,4 @@
-/* ═══ Oda v3.0 — Vista Ayuda (Guía de uso) ═══ */
+/* ═══ Tasker Cat v3.0 — Vista Ayuda (Guía de uso) ═══ */
 import { LitElement, css, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
@@ -22,7 +22,7 @@ const SECTIONS: GuideSection[] = [
     label: "Primeros pasos",
     icon: "🚀",
     group: "Empezar",
-    lead: "La mejor forma de sacarle jugo a Oda Planner es pensarla como una cadena simple: primero definís tu mapa semanal, después cargás lo que tenés que hacer y finalmente registrás lo que realmente estudiás. La app hace el resto: ordenar, priorizar y mostrarte dónde estás parado.",
+    lead: "La mejor forma de sacarle jugo a Tasker Cat es pensarla como una cadena simple: primero definís tu mapa semanal, después cargás lo que tenés que hacer y finalmente registrás lo que realmente estudiás. La app hace el resto: ordenar, priorizar y mostrarte dónde estás parado.",
     content: [
       { title: "1. Elegí cómo querés arrancar", text: "Podés entrar con el planner vacío para configurarlo vos o cargar los datos de ejemplo para recorrer las vistas sin fricción. El modo local guarda todo en este navegador; después, si querés, podés exportar un respaldo o conectar Google Drive para sincronizar." },
       { title: "2. Creá tus materias primero", text: "Abrí ⚙ Config → Materias y cargá nombre, código, color y período. No es un detalle cosmético: cada materia se usa luego para agrupar tareas, registrar sesiones, colorear tarjetas y calcular el progreso semanal." },
@@ -421,7 +421,7 @@ export class AyudaView extends LitElement {
       <div class="hdr">
         <div class="hdr-icon">?</div>
         <div>
-          <h2 class="hdr-title">Guía de uso — Oda Planner</h2>
+          <h2 class="hdr-title">Guía de uso — Tasker Cat</h2>
           <div class="hdr-sub">Documentación completa de todas las funciones</div>
         </div>
       </div>

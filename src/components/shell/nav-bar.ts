@@ -76,16 +76,25 @@ export class NavBar extends PreactSignalWatcher(LitElement) {
     /* ── Logo ── */
     .logo {
       flex: 0 0 auto;
-      font-size: 0.9375rem;
-      font-weight: 700;
-      color: var(--text0);
-      letter-spacing: .05em;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
       white-space: nowrap;
       margin-right: 0.25rem;
     }
-    .logo-glyph { color: var(--accent); margin-right: 0.25rem; }
-    .logo-full { display: inline; }
-    .logo-short { display: none; }
+    .logo-img {
+      height: 1.75rem;
+      width: auto;
+      border-radius: 0.25rem;
+      object-fit: contain;
+    }
+    .logo-full {
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: var(--text0);
+      letter-spacing: .04em;
+    }
+    .logo-short { display: none; font-size: 0.9375rem; font-weight: 700; color: var(--text0); }
     @media (max-width: 60em) { .logo-full { display: none; } .logo-short { display: inline; } }
     @media (max-width: 30em) { .logo-short { display: none; } }
 
@@ -461,7 +470,7 @@ export class NavBar extends PreactSignalWatcher(LitElement) {
   render() {
     return html`
       <header class="hdr">
-        <span class="logo"><span class="logo-glyph">◈</span><span class="logo-full">Oda Planner</span><span class="logo-short">Oda</span></span>
+        <span class="logo"><img class="logo-img" src="/icon.png" alt="Tasker Cat" /><span class="logo-full">Tasker Cat</span><span class="logo-short">TC</span></span>
 
         <global-filter></global-filter>
 
