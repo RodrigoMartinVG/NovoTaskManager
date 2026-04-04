@@ -363,19 +363,25 @@ export class BacklogView extends PreactSignalWatcher(LitElement) {
       list = list.filter((t) => t.titulo.toLowerCase().includes(q));
     }
 
-    // Sort: pendiente first, then en_progreso, then completada. Within each group: alta > media > baja, then by fechaLimite ascending.
-    const estadoOrder: Record<string, number> = { pendiente: 0, en_progreso: 1, completada: 2 };
-    const prioOrder: Record<string, number> = { alta: 0, media: 1, baja: 2 };
+    // Sort: 1) completadas always last, 2) fechaLimite ascending, 3) fechaInicio ascending
+    const estadoOrder: Record<string, number> = { pendiente: 0, en_progreso: 0, completada: 1 };
     return [...list].sort((a, b) => {
-      const eA = estadoOrder[a.estado] ?? 1;
-      const eB = estadoOrder[b.estado] ?? 1;
+      const eA = estadoOrder[a.estado] ?? 0;
+      const eB = estadoOrder[b.estado] ?? 0;
       if (eA !== eB) return eA - eB;
-      const pA = prioOrder[a.prioridad] ?? 1;
-      const pB = prioOrder[b.prioridad] ?? 1;
-      if (pA !== pB) return pA - pB;
-      if (a.fechaLimite && b.fechaLimite) return a.fechaLimite.localeCompare(b.fechaLimite);
-      if (a.fechaLimite) return -1;
-      if (b.fechaLimite) return 1;
+      // fechaLimite ascending (tasks without date go last)
+      if (a.fechaLimite || b.fechaLimite) {
+        if (!a.fechaLimite) return 1;
+        if (!b.fechaLimite) return -1;
+        const cmp = a.fechaLimite.localeCompare(b.fechaLimite);
+        if (cmp !== 0) return cmp;
+      }
+      // fechaInicio ascending
+      if (a.fechaInicio || b.fechaInicio) {
+        if (!a.fechaInicio) return 1;
+        if (!b.fechaInicio) return -1;
+        return a.fechaInicio.localeCompare(b.fechaInicio);
+      }
       return 0;
     });
   }
