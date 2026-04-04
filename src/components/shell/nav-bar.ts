@@ -470,7 +470,7 @@ export class NavBar extends PreactSignalWatcher(LitElement) {
   render() {
     return html`
       <header class="hdr">
-        <span class="logo"><img class="logo-img" src="/icon.png" alt="Tasker Cat" /><span class="logo-full">Tasker Cat</span><span class="logo-short">TC</span></span>
+        <span class="logo"><img class="logo-img" src="${import.meta.env.BASE_URL}icon.png" alt="Tasker Cat" /><span class="logo-full">Tasker Cat</span><span class="logo-short">TC</span></span>
 
         <global-filter></global-filter>
 

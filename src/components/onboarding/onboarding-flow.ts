@@ -789,7 +789,7 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
     return html`
       <div class="splash">
         <div class="splash-inner">
-          <span class="splash-diamond"><img src="/logo.jpeg" alt="Tasker Cat" style="width:100%;height:auto;border-radius:1rem" /></span>
+          <span class="splash-diamond"><img src="${import.meta.env.BASE_URL}logo.jpeg" alt="Tasker Cat" style="width:100%;height:auto;border-radius:1rem" /></span>
           <span class="splash-logo">Tasker Cat</span>
           <span class="splash-sub">Tu organizador de estudio</span>
           <p class="splash-tagline">
@@ -875,7 +875,7 @@ export class OnboardingFlow extends PreactSignalWatcher(LitElement) {
   private _renderWelcome() {
     return html`
       <div class="ob-hero">
-        <img class="ob-logo-mark" src="/logo.jpeg" alt="Tasker Cat" />
+        <img class="ob-logo-mark" src="${import.meta.env.BASE_URL}logo.jpeg" alt="Tasker Cat" />
         <span class="ob-logo-text">Tasker Cat</span>
       </div>
       ${this._renderProgress()}
