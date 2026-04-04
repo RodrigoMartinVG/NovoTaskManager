@@ -166,7 +166,7 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
     .info-popup {
       position: absolute;
       top: calc(100% + 0.375rem);
-      right: -0.25rem;
+      left: 0;
       z-index: 60;
       background: var(--bg1);
       border: 1px solid var(--border);
@@ -174,7 +174,7 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
       box-shadow: 0 6px 20px rgba(0,0,0,.15);
       padding: 0.5rem 0.75rem;
       min-width: 9rem;
-      white-space: nowrap;
+      max-width: 18rem;
     }
     .info-popup-title {
       font-size: 0.5625rem;
