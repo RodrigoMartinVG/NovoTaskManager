@@ -5,6 +5,7 @@ import {
   filteredMaterias as materias,
   filteredSesiones as sesiones,
   filteredTareas as tareas,
+  plannerData,
   updateTarea,
 } from "../../state/store.js";
 import { editingTaskId, newTaskDate, taskReturnView } from "../../state/navigation.js";
@@ -680,6 +681,10 @@ export class CalendarioView extends PreactSignalWatcher(LitElement) {
                           <div class="tip-field">
                             <span class="tip-field-label">Estado</span>
                             <span class="tip-badge"><span class="tip-badge-dot" style="background:${ESTADO_COLOR[e.tarea.estado]}"></span>${ESTADO_LABEL[e.tarea.estado]}</span>
+                          </div>
+                          <div class="tip-field">
+                            <span class="tip-field-label">Tipo</span>
+                            <span>${(() => { const t = plannerData.value.tipos.find(t => t.id === e.tarea.tipo); return t ? `${t.icono} ${t.nombre}` : e.tarea.tipo; })()}</span>
                           </div>
                           ${e.tarea.obligatorio ? html`
                           <div class="tip-field">
