@@ -8,6 +8,12 @@ export interface MateriaSlot {
 
 export type Periodo = "C1" | "C2" | "anual";
 
+export interface Profesor {
+  nombre: string;
+  email: string;
+  descripcion: string;
+}
+
 export interface Materia {
   id: string;
   nombre: string;
@@ -20,6 +26,8 @@ export interface Materia {
   slots?: MateriaSlot[];
   activa?: boolean;
   tags?: string[];
+  comision?: string;
+  profesores?: Profesor[];
 }
 
 // ── Tipo de tarea ──

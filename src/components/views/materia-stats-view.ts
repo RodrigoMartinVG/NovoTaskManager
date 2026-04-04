@@ -1,7 +1,7 @@
 /* ═══ Oda v3.0 — Materia Stats View ═══ */
 import { LitElement, css, html, nothing } from "lit";
 import { customElement } from "lit/decorators.js";
-import type { EstadoTarea, Sesion, Tarea, MateriaSlot } from "../../state/types.js";
+import type { EstadoTarea, Sesion, Tarea, MateriaSlot, Profesor } from "../../state/types.js";
 import {
   plannerData,
 } from "../../state/store.js";
@@ -213,6 +213,47 @@ export class MateriaStatsView extends PreactSignalWatcher(LitElement) {
     .slot-dot-on { opacity: 0.85; }
     .slot-dot-off { background: var(--bg3); }
 
+    /* ── Info card ── */
+    .info-card {
+      background: var(--bg1); border: 1px solid var(--border); border-radius: 0.625rem;
+      padding: var(--space-4, 1rem); margin-bottom: var(--space-5, 1.5rem);
+    }
+    .info-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+      gap: var(--space-3, 0.75rem) var(--space-5, 1.5rem);
+    }
+    .info-field { display: flex; flex-direction: column; gap: 0.125rem; }
+    .info-label {
+      font-size: var(--text-xs); color: var(--text3); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .info-value { font-size: var(--text-sm); color: var(--text0); }
+    .info-tags { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-top: 0.125rem; }
+    .info-tag {
+      font-size: var(--text-xs); background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 0.375rem; padding: 0.125rem 0.5rem; color: var(--text1);
+    }
+
+    /* ── Profesores table ── */
+    .prof-card {
+      background: var(--bg1); border: 1px solid var(--border); border-radius: 0.625rem;
+      overflow: hidden; margin-bottom: var(--space-5, 1.5rem);
+    }
+    .prof-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    .prof-table th {
+      text-align: left; padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+      font-size: var(--text-xs); font-weight: 600; color: var(--text3);
+      text-transform: uppercase; letter-spacing: 0.04em;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+    }
+    .prof-table td {
+      padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+      color: var(--text1); vertical-align: top;
+    }
+    .prof-table tr + tr td { border-top: 1px solid var(--border); }
+    .prof-email { color: var(--accent); }
+    .prof-empty-row td { text-align: center; color: var(--text3); font-style: italic; }
+
     /* ── Empty ── */
     .empty {
       text-align: center; padding: var(--space-8, 3rem) var(--space-4, 1rem); color: var(--text2);
@@ -351,6 +392,84 @@ export class MateriaStatsView extends PreactSignalWatcher(LitElement) {
         </div>
         <button class="btn-edit" @click=${this._goEdit}>✏️ Editar</button>
       </div>
+
+      <!-- Materia info -->
+      <div class="section">
+        <div class="sec-title">📝 Datos de la materia</div>
+        <div class="info-card">
+          <div class="info-grid">
+            ${mat.codigo ? html`
+              <div class="info-field">
+                <span class="info-label">Código</span>
+                <span class="info-value">${mat.codigo}</span>
+              </div>
+            ` : nothing}
+            ${mat.anio ? html`
+              <div class="info-field">
+                <span class="info-label">Año</span>
+                <span class="info-value">${mat.anio}</span>
+              </div>
+            ` : nothing}
+            ${mat.periodo ? html`
+              <div class="info-field">
+                <span class="info-label">Período</span>
+                <span class="info-value">${mat.periodo === "anual" ? "Anual" : mat.periodo === "C1" ? "Cuatrimestre 1" : "Cuatrimestre 2"}</span>
+              </div>
+            ` : nothing}
+            ${mat.comision ? html`
+              <div class="info-field">
+                <span class="info-label">Comisión</span>
+                <span class="info-value">${mat.comision}</span>
+              </div>
+            ` : nothing}
+            ${(mat.horasSemanalesMin || mat.horasSemanalesMax) ? html`
+              <div class="info-field">
+                <span class="info-label">Horas semanales</span>
+                <span class="info-value">
+                  ${mat.horasSemanalesMin ?? "–"}${mat.horasSemanalesMax ? ` – ${mat.horasSemanalesMax}` : ""} hs
+                </span>
+              </div>
+            ` : nothing}
+            ${mat.activa !== undefined ? html`
+              <div class="info-field">
+                <span class="info-label">Estado</span>
+                <span class="info-value">${mat.activa !== false ? "✅ Activa" : "⏸️ Inactiva"}</span>
+              </div>
+            ` : nothing}
+          </div>
+          ${(mat.tags?.length ?? 0) > 0 ? html`
+            <div class="info-field" style="margin-top:var(--space-3,0.75rem)">
+              <span class="info-label">Tags</span>
+              <div class="info-tags">
+                ${mat.tags!.map((t) => html`<span class="info-tag">${t}</span>`)}
+              </div>
+            </div>
+          ` : nothing}
+        </div>
+      </div>
+
+      <!-- Profesores -->
+      ${(mat.profesores?.length ?? 0) > 0 ? html`
+        <div class="section">
+          <div class="sec-title">👨‍🏫 Profesores</div>
+          <div class="prof-card">
+            <table class="prof-table">
+              <thead>
+                <tr><th>Nombre</th><th>Email</th><th>Descripción</th></tr>
+              </thead>
+              <tbody>
+                ${mat.profesores!.map((p: Profesor) => html`
+                  <tr>
+                    <td>${p.nombre || "–"}</td>
+                    <td class="prof-email">${p.email || "–"}</td>
+                    <td>${p.descripcion || "–"}</td>
+                  </tr>
+                `)}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ` : nothing}
 
       <!-- Overview stats -->
       <div class="stat-row">

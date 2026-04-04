@@ -1,7 +1,7 @@
 import { PreactSignalWatcher } from "../shared/preact-signal-watcher.js";
 import { LitElement, css, html, nothing } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import type { FranjaDef, Materia, MateriaSlot, Periodo } from "../../state/types.js";
+import type { FranjaDef, Materia, MateriaSlot, Periodo, Profesor } from "../../state/types.js";
 import {
   addMateria,
   deleteMateria,
@@ -60,6 +60,8 @@ export class MateriaEditView extends PreactSignalWatcher(LitElement) {
   @state() private slots: MateriaSlot[] = [];
   @state() private activa = true;
   @state() private tagIds: string[] = [];
+  @state() private comision = "";
+  @state() private profesores: Profesor[] = [];
 
   @state() private confirmDelete = false;
 
@@ -252,6 +254,50 @@ export class MateriaEditView extends PreactSignalWatcher(LitElement) {
       color: var(--accent); cursor: pointer; text-decoration: underline;
     }
 
+    /* ── Professors grid ── */
+    .prof-grid {
+      display: flex; flex-direction: column; gap: 0.5rem;
+    }
+    .prof-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.2fr auto;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .prof-row input {
+      font: inherit; font-size: var(--text-sm);
+      background: var(--bg0); color: var(--text0);
+      border: 1px solid var(--border); border-radius: 0.375rem;
+      padding: 0.375rem 0.5rem;
+      transition: border-color 0.16s;
+      min-width: 0;
+    }
+    .prof-row input:focus { outline: none; border-color: var(--accent); }
+    .prof-row input::placeholder { color: var(--text3); }
+    .prof-hdr {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.2fr auto;
+      gap: 0.5rem;
+      font-size: var(--text-xs); font-weight: 600; color: var(--text3);
+      text-transform: uppercase; letter-spacing: 0.04em;
+      padding-bottom: 0.125rem;
+    }
+    .prof-del {
+      background: transparent; border: none; color: var(--text3);
+      cursor: pointer; font-size: 1rem; padding: 0.25rem;
+      border-radius: 0.25rem; transition: color 0.14s;
+      line-height: 1;
+    }
+    .prof-del:hover { color: var(--err-text, #ef4444); }
+    .prof-add {
+      background: transparent; border: 1px dashed var(--border);
+      color: var(--text3); cursor: pointer; font: inherit;
+      font-size: var(--text-xs); padding: 0.375rem 0.75rem;
+      border-radius: 0.375rem; transition: all 0.14s;
+      align-self: start;
+    }
+    .prof-add:hover { border-color: var(--accent); color: var(--accent); }
+
     /* ── Actions bar ── */
     .actions {
       display: flex; gap: var(--space-3, 0.75rem);
@@ -311,6 +357,8 @@ export class MateriaEditView extends PreactSignalWatcher(LitElement) {
         this.slots = mat.slots ? mat.slots.map((s) => ({ ...s })) : [];
         this.activa = mat.activa !== false;
         this.tagIds = mat.tags ? [...mat.tags] : [];
+        this.comision = mat.comision ?? "";
+        this.profesores = mat.profesores ? mat.profesores.map((p) => ({ ...p })) : [];
       }
     }
   }
@@ -363,6 +411,8 @@ export class MateriaEditView extends PreactSignalWatcher(LitElement) {
       slots: this.slots.length > 0 ? this.slots : undefined,
       activa: this.activa,
       tags: this.tagIds.length > 0 ? this.tagIds : undefined,
+      comision: this.comision.trim() || undefined,
+      profesores: this.profesores.length > 0 ? this.profesores.filter((p) => p.nombre.trim()) : undefined,
     };
 
     if (this._isNew) {
@@ -392,6 +442,19 @@ export class MateriaEditView extends PreactSignalWatcher(LitElement) {
   /* ── Slot toggle ── */
   private _toggleSlot(dia: number, franjaId: string) {
     this.slots = toggleSlot(this.slots, dia, franjaId);
+  }
+
+  /* ── Profesor helpers ── */
+  private _addProf() {
+    this.profesores = [...this.profesores, { nombre: "", email: "", descripcion: "" }];
+  }
+
+  private _removeProf(idx: number) {
+    this.profesores = this.profesores.filter((_, i) => i !== idx);
+  }
+
+  private _updateProf(idx: number, field: keyof Profesor, value: string) {
+    this.profesores = this.profesores.map((p, i) => i === idx ? { ...p, [field]: value } : p);
   }
 
   /* ── Render ── */
@@ -449,6 +512,41 @@ export class MateriaEditView extends PreactSignalWatcher(LitElement) {
                 <option value="anual">Anual</option>
               </select>
             </div>
+          </div>
+
+          <!-- Comisión -->
+          <div class="field">
+            <label for="mat-comision">Comisión</label>
+            <input id="mat-comision" type="text"
+              placeholder="ej: Com 2A - Turno Noche"
+              .value=${this.comision}
+              @input=${(e: Event) => { this.comision = (e.target as HTMLInputElement).value; }}
+            />
+          </div>
+
+          <!-- Profesores -->
+          <h3 class="section-title">Profesores</h3>
+          <div class="prof-grid">
+            ${this.profesores.length > 0 ? html`
+              <div class="prof-hdr">
+                <span>Nombre</span><span>Email</span><span>Descripción</span><span></span>
+              </div>
+            ` : nothing}
+            ${this.profesores.map((p, i) => html`
+              <div class="prof-row">
+                <input type="text" placeholder="Nombre"
+                  .value=${p.nombre}
+                  @input=${(e: Event) => { this._updateProf(i, "nombre", (e.target as HTMLInputElement).value); }} />
+                <input type="text" placeholder="email@ejemplo.com"
+                  .value=${p.email}
+                  @input=${(e: Event) => { this._updateProf(i, "email", (e.target as HTMLInputElement).value); }} />
+                <input type="text" placeholder="ej: Titular, Adjunto..."
+                  .value=${p.descripcion}
+                  @input=${(e: Event) => { this._updateProf(i, "descripcion", (e.target as HTMLInputElement).value); }} />
+                <button class="prof-del" @click=${() => this._removeProf(i)} title="Eliminar">✕</button>
+              </div>
+            `)}
+            <button class="prof-add" @click=${this._addProf}>+ Agregar profesor</button>
           </div>
 
           <!-- Objectives -->
